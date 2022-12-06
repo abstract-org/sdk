@@ -30,9 +30,7 @@ jobs:
                   node-version: 18
                   registry-url: https://registry.npmjs.org/
             - run: yarn install --frozen-lockfile
-              working-directory: ./packages/sdk
             - run: yarn publish
-              working-directory: ./packages/sdk
               env:
                   NODE_AUTH_TOKEN: ${{secrets.npm_token}}
                   GITHUB_TOKEN: ${{secrets.gh_token}}
