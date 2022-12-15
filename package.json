@@ -1,8 +1,6 @@
 {
     "name": "@abstract-org/sdk",
     "version": "1.0.1",
-    "main": "dist/index",
-    "types": "dist/index",
     "license": "private",
     "scripts": {
         "test": "jest --passWithNoTests",
@@ -22,6 +20,7 @@
         "@types/node": "^18.11.9",
         "@typescript-eslint/eslint-plugin": "^5.44.0",
         "@typescript-eslint/parser": "^5.44.0",
+        "dotenv-webpack": "^8.0.1",
         "eslint": "^8.28.0",
         "eslint-config-prettier": "^8.5.0",
         "hardhat": "^2.12.2",
@@ -30,8 +29,11 @@
         "prettier": "^2.8.0",
         "semantic-release": "^19.0.5",
         "ts-jest": "^29.0.3",
+        "ts-loader": "^9.4.2",
         "ts-node-dev": "^2.0.0",
-        "typescript": "^4.9.3"
+        "typescript": "^4.9.3",
+        "webpack": "^5.75.0",
+        "webpack-cli": "^5.0.1"
     },
     "repository": {
         "type": "git",
