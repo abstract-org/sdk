@@ -1,15 +1,25 @@
-import APIAdapter from './api/APIAdapter'
 import SimAPI from './api/sim/SimAPI'
 import Web3API from './api/web3/Web3API'
+import {IAPI} from "./api/interfaces";
 
-const simAPI = new SimAPI()
-const web3API = new Web3API()
-
-let api
-if (process.env.API_TYPE === 'sim') {
-    api = new APIAdapter(simAPI)
-} else {
-    api = new APIAdapter(web3API)
+export interface ConstructorSimConfig {
+    dbUrl: string;
+    accessToken: string;
 }
 
-export default api
+export interface ConstructorWeb3Config {
+    rpcUrl: string
+}
+
+export class SimSdk {
+    static init(adapter:string = 'sim', config: ConstructorSimConfig | ConstructorWeb3Config): IAPI {
+        switch (adapter) {
+            case 'sim':
+                return new SimAPI(config as ConstructorSimConfig)
+            case 'web3':
+                return new Web3API(config as ConstructorWeb3Config)
+        }
+    }
+}
+
+export default SimSdk

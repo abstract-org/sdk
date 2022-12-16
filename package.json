@@ -1,5 +1,10 @@
 {
     "name": "@abstract-org/sdk",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "/dist"
+    ],
     "version": "1.0.1",
     "license": "private",
     "scripts": {
