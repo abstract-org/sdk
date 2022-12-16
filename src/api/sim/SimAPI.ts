@@ -1,4 +1,4 @@
-import IAPI from '../IAPI'
+import {IAPI} from '../interfaces'
 
 export default class SimAPI implements IAPI {
     createQuest(name: string, description: string): boolean {
@@ -11,7 +11,7 @@ export default class SimAPI implements IAPI {
         return true
     }
 
-    citeQuest(questId: string, userId: string): boolean {
+    citeQuest(questId: number, userId: string): boolean {
         // implementation details
         return true
     }

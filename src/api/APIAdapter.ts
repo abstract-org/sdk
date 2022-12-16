@@ -1,4 +1,4 @@
-import IAPI from './IAPI'
+import {IAPI} from './interfaces'
 
 export default class APIAdapter implements IAPI {
     constructor(private target: any) {}
@@ -11,15 +11,7 @@ export default class APIAdapter implements IAPI {
         return this.target.createPool(name, description)
     }
 
-    citeQuest(questId: string, userId: string): boolean {
+    citeQuest(questId: number, userId: string): boolean {
         return this.target.citeQuest(questId, userId)
-    }
-
-    buy(userId: string, itemId: string): boolean {
-        return this.target.buy(userId, itemId)
-    }
-
-    sell(userId: string, itemId: string): boolean {
-        return this.target.sell(userId, itemId)
     }
 }
