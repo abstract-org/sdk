@@ -21,6 +21,6 @@
         "module": "es2022",
         "target": "es2022"
     },
-    "include": ["src"],
+    "include": ["src", "src/api/sim/config.global.json"],
     "exclude": ["dist", "**/node_modules"]
 }

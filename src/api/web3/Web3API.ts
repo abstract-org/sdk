@@ -1,4 +1,4 @@
-import {IAPI} from '../interfaces'
+import {IAPI} from '../../interfaces'
 import {ConstructorWeb3Config} from "../../index";
 
 export default class Web3API implements IAPI {

@@ -1,6 +1,6 @@
 import SimAPI from './api/sim/SimAPI'
 import Web3API from './api/web3/Web3API'
-import {IAPI} from "./api/interfaces";
+import {IAPI} from "./interfaces";
 
 export interface ConstructorSimConfig {
     dbUrl: string;

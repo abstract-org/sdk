@@ -1,4 +1,4 @@
-import {IAPI} from './interfaces'
+import {IAPI} from '../interfaces'
 
 export default class APIAdapter implements IAPI {
     constructor(private target: any) {}

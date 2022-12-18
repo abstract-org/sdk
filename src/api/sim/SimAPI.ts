@@ -1,4 +1,4 @@
-import {IAPI} from '../interfaces'
+import {IAPI} from '../../interfaces'
 import {ConstructorSimConfig} from "../../index";
 
 export default class SimAPI implements IAPI {
