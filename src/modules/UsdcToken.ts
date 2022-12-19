@@ -1,4 +1,4 @@
-export default class UsdcToken {
+export class UsdcToken {
     static _instance: any;
     name
     pools = []

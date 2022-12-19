@@ -1,4 +1,5 @@
 import {ISwap, ILog, IPool, IQuest, IPosition, ISnapshot} from "./index";
+import {Investor} from "../modules";
 
 export interface IAPI {
     // Snapshot API
@@ -34,4 +35,5 @@ export interface IAPI {
     openPosition?(poolId: number, position: IPosition): void
     updateInvestorBalances?(): void
     updateInvestorNavs?(config: {investorId: number, day: number, usdcNav: number, tokenNav: number}): void
+    createInvestor?(type: string, name: string, initialBalance: number, isDefault?: boolean): Investor
 }

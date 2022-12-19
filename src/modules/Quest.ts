@@ -1,13 +1,39 @@
 import sha256 from 'crypto-js/sha256'
 import HashMap from 'hashmap'
 
-import Pool from './Pool'
-import { pp2p } from '../../../utils/logicUtils'
-import globalConfig from '../config.global.json'
-// make it a hash map
-import UsdcToken from './UsdcToken'
+import {Pool} from './Pool'
+import {UsdcToken} from './UsdcToken'
 
-export default class Token {
+const TEMP_CONFIG = {
+    INITIAL_LIQUIDITY: [
+        {
+            "priceMin": 1,
+            "priceMax": 1000000,
+            "tokenA": 0,
+            "tokenB": 5000
+        },
+        {
+            "priceMin": 20,
+            "priceMax": 1000000,
+            "tokenA": 0,
+            "tokenB": 5000
+        },
+        {
+            "priceMin": 50,
+            "priceMax": 1000000,
+            "tokenA": 0,
+            "tokenB": 5000
+        },
+        {
+            "priceMin": 200,
+            "priceMax": 1000000,
+            "tokenA": 0,
+            "tokenB": 5000
+        }
+    ]
+}
+
+export class Quest {
     id // make uuid
     hash
     name
@@ -22,7 +48,7 @@ export default class Token {
      * @returns {Token}
      */
     static create(name) {
-        const thisToken = new Token()
+        const thisToken = new Quest()
         thisToken.name = name
         thisToken.hash = '0x' + sha256(name)
 
@@ -60,7 +86,7 @@ export default class Token {
     }
 
     initializePoolPositions(pool, initialPositions) {
-        const initial = initialPositions || globalConfig.INITIAL_LIQUIDITY
+        const initial = initialPositions || TEMP_CONFIG.INITIAL_LIQUIDITY
         initial.forEach((position) => {
             pool.openPosition(
                 position.priceMin,

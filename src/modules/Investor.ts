@@ -1,11 +1,11 @@
 import sha256 from 'crypto-js/sha256'
 import HashMap from 'hashmap'
 
-import Pool from './Pool'
-import Token from './Quest'
-import { isE10Zero, p2pp } from '../../../utils/logicUtils'
+import {Pool} from './Pool'
+import {Quest} from './Quest'
+import { isE10Zero, p2pp } from '../utils/logicUtils'
 
-export default class Investor {
+export class Investor {
     hash = null
     type = null
     name = null
@@ -23,23 +23,23 @@ export default class Investor {
      * @param {string} type
      * @param {string} name
      * @param {number} usdcBalance
-     * @param _default
+     * @param {boolean} isDefault
      * @returns {Investor}
      */
-    static create(type, name, usdcBalance = 10000, _default = false) {
+    static create(type, name, usdcBalance = 10000, isDefault = false) {
         const thisInvestor = new Investor()
         thisInvestor.hash = '0x' + sha256(`${name} + ${type}`)
         thisInvestor.balances.USDC = parseFloat(`${usdcBalance}`)
         thisInvestor.initialBalance = parseFloat(`${usdcBalance}`)
         thisInvestor.type = type
         thisInvestor.name = name
-        thisInvestor.default = _default
+        thisInvestor.default = isDefault
 
         return thisInvestor
     }
 
     createQuest(name) {
-        const quest = Token.create(name)
+        const quest = Quest.create(name)
         this.questsCreated.push(quest.name)
         return quest
     }

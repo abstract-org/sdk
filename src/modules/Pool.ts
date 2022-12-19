@@ -1,9 +1,15 @@
 import sha256 from 'crypto-js/sha256'
-// make it a hash map
 import HashMap from 'hashmap'
+import {isE10Zero, isNearZero, isZero, p2pp, pp2p} from '../utils/logicUtils'
+import {Quest} from "./Quest";
 
-import {isE10Zero, isNearZero, isZero, p2pp, pp2p} from '../../../utils/logicUtils'
-import globalConfig from '../config.global.json'
+const TEMP_CONFIG = {
+    PRICE_MIN: 0,
+    PRICE_MAX: 1000000.00001,
+    JOURNAL: false,
+    JOURNAL_BUY: false,
+    JOURNAL_SELL: false
+}
 
 interface Position {
     liquidity?: number,
@@ -12,7 +18,7 @@ interface Position {
     right?: number
 }
 
-export default class Pool {
+export class Pool {
     id: string
     name
 
@@ -21,8 +27,8 @@ export default class Pool {
     tokenLeft
     tokenRight
 
-    curLeft = p2pp(globalConfig.PRICE_MIN)
-    curRight = p2pp(globalConfig.PRICE_MAX)
+    curLeft = p2pp(TEMP_CONFIG.PRICE_MIN)
+    curRight = p2pp(TEMP_CONFIG.PRICE_MAX)
     curPrice = 0
     curPP = Math.log2(1)
     curLiq = 0
@@ -48,9 +54,10 @@ export default class Pool {
      * @description Instantiates new Pool with params
      * @param {Object} tokenLeft
      * @param {Object} tokenRight
+     * @param startingPrice
      * @returns {Pool}
      */
-    static create(tokenLeft, tokenRight, startingPrice) {
+    static create(tokenLeft: Quest, tokenRight: Quest, startingPrice) {
         const thisPool = new Pool()
         if (typeof tokenLeft !== 'object' || typeof tokenRight !== 'object')
             throw new Error('Tokens must be an instance of a Token')
@@ -78,27 +85,27 @@ export default class Pool {
 
     initializePoolBoundaries() {
         // Define default price boundaries
-        this.pos.set(p2pp(globalConfig.PRICE_MIN), {
+        this.pos.set(p2pp(TEMP_CONFIG.PRICE_MIN), {
             // starts with PRICE_MIN
             liquidity: 0,
-            left: p2pp(globalConfig.PRICE_MIN),
-            pp: p2pp(globalConfig.PRICE_MIN),
+            left: p2pp(TEMP_CONFIG.PRICE_MIN),
+            pp: p2pp(TEMP_CONFIG.PRICE_MIN),
             right: this.curPP
         })
 
         this.pos.set(this.curPP, {
             // starts with PRICE_MIN
             liquidity: 0,
-            left: p2pp(globalConfig.PRICE_MIN),
+            left: p2pp(TEMP_CONFIG.PRICE_MIN),
             pp: this.curPP,
-            right: p2pp(globalConfig.PRICE_MAX)
+            right: p2pp(TEMP_CONFIG.PRICE_MAX)
         })
 
-        this.pos.set(p2pp(globalConfig.PRICE_MAX), {
+        this.pos.set(p2pp(TEMP_CONFIG.PRICE_MAX), {
             liquidity: 0,
             left: this.curPP,
-            pp: p2pp(globalConfig.PRICE_MAX),
-            right: p2pp(globalConfig.PRICE_MAX)
+            pp: p2pp(TEMP_CONFIG.PRICE_MAX),
+            right: p2pp(TEMP_CONFIG.PRICE_MAX)
         })
     }
 
@@ -567,10 +574,10 @@ export default class Pool {
         } while (
             amount > 0 &&
             arrivedAtSqrtPrice === Math.sqrt(pp2p(nextPricePoint)) &&
-            this.curRight < p2pp(globalConfig.PRICE_MAX)
+            this.curRight < p2pp(TEMP_CONFIG.PRICE_MAX)
             )
 
-        if (globalConfig.JOURNAL && globalConfig.JOURNAL_BUY) {
+        if (TEMP_CONFIG.JOURNAL && TEMP_CONFIG.JOURNAL_BUY) {
             journal.forEach((iteration) => {
                 console.log(iteration.join('\n'))
             })
@@ -603,7 +610,7 @@ export default class Pool {
         while (
             amount > 0 &&
             arrivedAtSqrtPrice === Math.sqrt(pp2p(nextPricePoint)) &&
-            this.curPP > p2pp(globalConfig.PRICE_MIN)
+            this.curPP > p2pp(TEMP_CONFIG.PRICE_MIN)
             ) {
             journal[i] = []
 
@@ -753,7 +760,7 @@ export default class Pool {
             i += 1
         }
 
-        if (globalConfig.JOURNAL && globalConfig.JOURNAL_SELL) {
+        if (TEMP_CONFIG.JOURNAL && TEMP_CONFIG.JOURNAL_SELL) {
             journal.forEach((iteration) => {
                 console.log(iteration.join('\n'))
             })

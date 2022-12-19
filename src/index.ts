@@ -22,4 +22,6 @@ export class SimSdk {
     }
 }
 
-export default SimSdk
+export * as LogicUtils from './utils/logicUtils'
+
+export * as Modules from './modules'
