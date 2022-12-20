@@ -14,13 +14,8 @@
         "semantic-release": "semantic-release --branches main"
     },
     "dependencies": {
-        "@metamask/detect-provider": "^2.0.0",
-        "@uniswap/v3-sdk": "^3.9.0",
         "crypto-js": "^4.1.1",
-        "ethers": "^5.7.2",
-        "hashmap": "^2.4.0",
-        "ipfs-http-client": "^59.0.0",
-        "pubsub-js": "^1.9.4"
+        "hashmap": "^2.4.0"
     },
     "devDependencies": {
         "@types/jest": "^29.2.3",
