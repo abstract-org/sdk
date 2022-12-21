@@ -1,3 +1,4 @@
+import { Hash } from 'crypto'
 import HashMap from 'hashmap'
 
 export const pp2p = (pricePoint) => {
@@ -109,15 +110,15 @@ export const overrideState = (stateObj, newData = {}, initialState = {}) => {
 
 const _resetObjProps =
     (propsToReset, resetValue = '') =>
-        (obj) => {
-            return Object.entries(obj).reduce(
-                (resultObj, [k, v]) => ({
-                    ...resultObj,
-                    [k]: propsToReset.includes(k) ? resetValue : v
-                }),
-                {}
-            )
-        }
+    (obj) => {
+        return Object.entries(obj).reduce(
+            (resultObj, [k, v]) => ({
+                ...resultObj,
+                [k]: propsToReset.includes(k) ? resetValue : v
+            }),
+            {}
+        )
+    }
 
 export const sanitizeRemoteScenario = (loadedObj) => ({
     ...loadedObj,
@@ -223,13 +224,29 @@ export const isZero = (num) => num === 0 || isE10Zero(num) || isNearZero(num)
  * @param {string} linkingValue - field name for mapping value
  * @returns {HashMap}
  */
-export const createHashMappings = (arr, linkingKey, linkingValue) => {
+export function createHashMappings<T>(
+    arr: Array<T>,
+    linkingKey: string,
+    linkingValue: any
+): HashMap<any, any> {
     const mappingsArray = arr.map((item) => [
         item[linkingKey],
         item[linkingValue]
     ])
 
     return new HashMap(mappingsArray)
+}
+
+export function convertArrayToHashMapByKey<T>(
+    arr: Array<T>,
+    key: string
+): HashMap<unknown, unknown> {
+    const resultHashMap = new HashMap()
+    for (const item of arr) {
+        if (item[key] != null) resultHashMap.set(item[key], item)
+    }
+
+    return resultHashMap
 }
 
 export const addStringToArrayUniq = (arr, str) => {

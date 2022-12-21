@@ -44,7 +44,7 @@ export class Pool {
     soldToken0 = 0
     soldToken1 = 0
 
-    pos = new HashMap()
+    pos = new HashMap<any,any>()
     posOwners = []
 
     type = 'VALUE_LINK'
