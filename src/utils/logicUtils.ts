@@ -16,7 +16,7 @@ export const formSwapData = (
     totalAmountOut,
     paths,
     day,
-    opName
+    opName?: string
 ) => {
     return {
         pool: pool ? pool.name : '',
