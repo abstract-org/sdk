@@ -3,13 +3,13 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
-        "/dist"
+        "dist"
     ],
     "version": "1.0.1",
     "license": "UNLICENSED",
     "scripts": {
         "test": "jest --passWithNoTests",
-        "compile": "tsc --build --force tsconfig.json",
+        "build": "tsc --build --force tsconfig.json",
         "test:watch": "yarn jest --watch",
         "semantic-release": "semantic-release --branches main"
     },
