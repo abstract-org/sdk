@@ -1,5 +1,8 @@
 import {IAPI} from '../../interfaces'
-import {ConstructorWeb3Config} from "../../index";
+
+export interface ConstructorWeb3Config {
+    rpcUrl: string
+}
 
 export default class Web3API implements IAPI {
     constructor(config: ConstructorWeb3Config) {

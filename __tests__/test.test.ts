@@ -1,7 +1,7 @@
-import SimAPI from '../api/sim/SimAPI'
+import SimAPI from '../src/api/sim/SimAPI'
 
 describe('Test of tests', () => {
-    const simAPI = new SimAPI({dbUrl: '', accessToken: ''})
+    const simAPI = new SimAPI({dbUrl: 'anyUrl', accessToken: 'jwtAny'})
 
     // console.log('test', api.citeQuest('test', 'test'))
 

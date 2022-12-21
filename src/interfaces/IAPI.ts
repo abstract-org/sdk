@@ -1,5 +1,7 @@
-import {ISwap, ILog, IPool, IQuest, IPosition, ISnapshot} from "./index";
-import {Investor} from "../modules";
+import {Investor, Pool, Quest} from "../modules";
+import HashMap from 'hashmap'
+
+import { ILog, IPool, IPosition, IQuest, ISnapshot, ISwap } from './index'
 
 export interface IAPI {
     // Snapshot API
@@ -36,4 +38,30 @@ export interface IAPI {
     updateInvestorBalances?(): void
     updateInvestorNavs?(config: {investorId: number, day: number, usdcNav: number, tokenNav: number}): void
     createInvestor?(type: string, name: string, initialBalance: number, isDefault?: boolean): Investor
+
+    // Supabase API
+
+    saveQuests?(
+        quests: Array<Quest>,
+        humanQuests: Array<string> | null,
+        questNamesToInvestorIds: HashMap<string, number>,
+        snapshotId: number
+    ): Promise<HashMap<string, number>>
+
+    saveInvestors?(
+        investors: Array<Investor>,
+        snapshotId: number
+    ): Promise<HashMap<string, number>>
+
+    savePools?(
+        pools: Array<Pool>,
+        questNameToQuestId: HashMap<string, number>,
+        snapshotId: number
+    ): Promise<HashMap<string, number>>
+
+    createSnapshotDataRelation?(
+        relationType,
+        snapshotId: number,
+        entities: Array<{ id: number; name: string }>
+    ): Promise<void>
 }
