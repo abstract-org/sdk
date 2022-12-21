@@ -1,6 +1,10 @@
-import IAPI from '../IAPI'
+import {IAPI} from '../../interfaces'
+import {ConstructorWeb3Config} from "../../index";
 
 export default class Web3API implements IAPI {
+    constructor(config: ConstructorWeb3Config) {
+
+    }
     createQuest(name: string, description: string): boolean {
         // alternate implementation details
         return true
@@ -11,17 +15,7 @@ export default class Web3API implements IAPI {
         return true
     }
 
-    citeQuest(questId: string, userId: string): boolean {
-        // alternate implementation details
-        return true
-    }
-
-    buy(userId: string, itemId: string): boolean {
-        // alternate implementation details
-        return true
-    }
-
-    sell(userId: string, itemId: string): boolean {
+    citeQuest(questId: number, userId: string): boolean {
         // alternate implementation details
         return true
     }

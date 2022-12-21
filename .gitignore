@@ -1,3 +1,4 @@
+.idea
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
