@@ -9,7 +9,8 @@
     "license": "UNLICENSED",
     "scripts": {
         "test": "jest --passWithNoTests",
-        "build": "tsc --build --force tsconfig.json",
+        "compile": "tsc --build --force tsconfig.json",
+        "prepublishOnly": "tsc --build --force tsconfig.json",
         "test:watch": "yarn jest --watch",
         "semantic-release": "semantic-release --branches main"
     },
