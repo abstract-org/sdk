@@ -51,9 +51,11 @@ export class Router {
      * @param {string} token0
      * @param {string} token1
      * @param {number} amountIn
+     * @param {number} smartRouteDepth
+     * @param {number} forcedPath
      * @returns {*[]|number[]}
      */
-    smartSwap(token0, token1, amountIn, smartRouteDepth, forcedPath = null) {
+    smartSwap(token0, token1, amountIn, smartRouteDepth = 1, forcedPath?: any) {
         if (this._DEBUG) {
             console.log(
                 `\n--- SMART ROUTE ${token0}/${token1}/${amountIn}---\n`
@@ -510,7 +512,7 @@ export class Router {
      * @param {number} depth
      * @returns {[]|*[]}
      */
-    findPoolsFor(tokenName, maxDepth, depth = 1) {
+    findPoolsFor(tokenName, maxDepth?: number, depth = 1) {
         let results = this._processTokenForPath(tokenName)
 
         if (depth >= maxDepth && this._shouldScanPaths) {
@@ -542,7 +544,7 @@ export class Router {
      * @param {number} smartRouteDepth
      * @returns Graph instance
      */
-    graphPools(poolList, smartRouteDepth) {
+    graphPools(poolList, smartRouteDepth?: number) {
         const graph = new Graph(smartRouteDepth)
         poolList.forEach((pool) => {
             if (!graph.adjList.has(pool.tokenLeft)) {

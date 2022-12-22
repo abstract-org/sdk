@@ -9,11 +9,13 @@
     "license": "UNLICENSED",
     "scripts": {
         "test": "jest --passWithNoTests",
-        "build": "tsc --build --force tsconfig.json",
+        "compile": "tsc --build --force tsconfig.json",
+        "build": "tsc --build --force tsconfig.build.json",
         "test:watch": "yarn jest --watch",
         "semantic-release": "semantic-release --branches main"
     },
     "dependencies": {
+        "@faker-js/faker": "^7.6.0",
         "@supabase/supabase-js": "^2.2.1",
         "crypto-js": "^4.1.1",
         "hashmap": "^2.4.0"
@@ -43,6 +45,8 @@
         "url": "https://github.com/abstract-org/sdk.git"
     },
     "release": {
-        "branches": ["main"]
+        "branches": [
+            "main"
+        ]
     }
 }

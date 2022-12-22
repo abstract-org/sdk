@@ -138,6 +138,7 @@ export class Investor {
      * @param {number} priceMax
      * @param {number} token0Amt
      * @param {number} token1Amt
+     * @param {boolean} native
      * @returns {*[]}
      */
     citeQuest(
@@ -146,7 +147,7 @@ export class Investor {
         priceMax = 10,
         token0Amt = 0,
         token1Amt = 0,
-        native
+        native = false
     ) {
         // Open "position" for value link pool
         const [totalIn, totalOut] = crossPool.openPosition(

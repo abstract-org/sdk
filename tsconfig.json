@@ -21,6 +21,6 @@
         "module": "es2022",
         "target": "es2022"
     },
-    "include": ["src"],
+    "include": ["src", "src/index.ts"],
     "exclude": ["dist", "**/node_modules"]
 }
