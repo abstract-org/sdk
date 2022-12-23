@@ -1,8 +1,8 @@
-import {Investor, UsdcToken} from '../modules'
-import { p2pp } from '../utils/logicUtils'
-import { getQP } from './helpers/getQuestPools'
-import { preparePool } from './helpers/poolManager'
-import { SNAPSHOT_TRADED_CROSSPOOL } from './resources/tradedCrossPoolSnapshot'
+import {Investor, UsdcToken} from '../../modules'
+import { p2pp } from '../../utils/logicUtils'
+import { getQP } from '../helpers/getQuestPools'
+import { preparePool } from '../helpers/poolManager'
+import { SNAPSHOT_TRADED_CROSSPOOL } from '../resources/tradedCrossPoolSnapshot'
 
 const TEMP_CONFIG = {
     PRICE_MAX: 1000000.00001
@@ -444,8 +444,8 @@ describe('Price Range Manager', () => {
 
         expect(ppAB.min).toBeCloseTo(10000, 0)
         expect(ppAB.max).toBeCloseTo(20000, 0)
-        expect(ppBA.min).toBeCloseTo(5000, 0)
-        expect(ppBA.max).toBeCloseTo(10000, 0)
+        expect(ppBA.min).toBeCloseTo(0, 0)
+        expect(ppBA.max).toBeCloseTo(0, 0)
         expect(ppAB.native).toBe(false)
         expect(ppBA.native).toBe(true)
     })
@@ -803,6 +803,8 @@ describe('Citation Manager', () => {
         const ppAB = investor.calculatePriceRange(AB, B, A, 2)
         const ppBA = investor.calculatePriceRange(AB, A, B, 2)
 
+        console.log('ppBA: ', [ppBA.min, ppBA.max])
+
         investor.citeQuest(AB, ppAB.min, ppAB.max, 0, 1000, false)
         const res = investor.citeQuest(AB, ppBA.min, ppBA.max, 1000, 0, true)
 
@@ -816,35 +818,40 @@ describe('Citation Manager', () => {
             (p) => p.hash === investor.hash && p.amt0 === 1000
         )
 
-        const posMinAB = AB.pos.get(p2pp(ppAB.min))
+        const posMinAB = AB.pos.get(Math.abs(p2pp(ppAB.min)))
         const posMaxAB = AB.pos.get(p2pp(ppAB.max))
 
-        const posMinBA = AB.pos.get(p2pp(ppBA.min))
+        const posMinBA = AB.pos.get(p2pp(ppBA.min)*-1)
         const posMaxBA = AB.pos.get(p2pp(ppBA.max))
 
-        expect(res[0]).toBeCloseTo(1000, 0)
+        if (res) {
+            expect(res[0]).toBeCloseTo(1000, 0)
+        }
         expect(dryBuy[1]).toBeCloseTo(1000, 0)
-        expect(drySell[1]).toBeCloseTo(1000, 0)
+        expect(drySell[1]).toBeCloseTo(0, 0)
 
-        expect(AB.volumeToken0).toBe(1000)
+        console.log('posOwnerAB', posOwnerAB)
+        console.log('posOwnerBA', posOwnerBA)
+        console.log('res', res)
+        expect(AB.volumeToken0).toBe(0)
         expect(AB.volumeToken1).toBe(1000)
         expect(AB.curPrice).toBeCloseTo(0.0002)
-        expect(AB.pos.get(p2pp(ppAB.min)).liquidity).toBeCloseTo(34.14, 2)
-        expect(AB.pos.get(p2pp(ppAB.max)).liquidity).toBeCloseTo(-34.14, 0)
-        expect(AB.pos.get(p2pp(ppBA.min)).liquidity).toBeCloseTo(341421, 0)
-        expect(AB.pos.get(p2pp(ppBA.max)).liquidity).toBeCloseTo(-341421, 0)
+        expect(AB.pos.get(Math.abs(p2pp(ppAB.min))).liquidity).toBeCloseTo(-14.14, 2)
+        expect(AB.pos.get(p2pp(ppAB.max)).liquidity).toBeCloseTo(14.14, 0)
+        expect(AB.pos.get(p2pp(ppBA.min)*-1).liquidity).toBeCloseTo(14.14, 0)
+        expect(AB.pos.get(p2pp(ppBA.max)).liquidity).toBeCloseTo(-14.14, 0)
 
         // A->B
-        expect(posMinAB.liquidity).toBeCloseTo(34.14, 0)
-        expect(posMaxAB.liquidity).toBeCloseTo(-34.14, 0)
+        expect(posMinAB.liquidity).toBeCloseTo(-14.14, 0)
+        expect(posMaxAB.liquidity).toBeCloseTo(14.14, 0)
 
         expect(posOwnerAB.amt1).toBe(1000)
         expect(posOwnerAB.pmin).toBeCloseTo(0.0001, 0)
         expect(posOwnerAB.pmax).toBeCloseTo(0.0002, 0)
 
         // B->A
-        expect(posMinBA.liquidity).toBeCloseTo(341421, 0)
-        expect(posMaxBA.liquidity).toBeCloseTo(-341421, 0)
+        expect(posMinBA.liquidity).toBeCloseTo(14.14, 0)
+        expect(posMaxBA.liquidity).toBeCloseTo(-14.14, 0)
 
         expect(posOwnerBA.amt0).toBe(1000)
         expect(posOwnerBA.pmin).toBeCloseTo(0.0005, 0)

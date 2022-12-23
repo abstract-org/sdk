@@ -124,7 +124,7 @@ export class Investor {
         return amounts
     }
 
-    createPool(citedToken, citingToken, startingPrice) {
+    createPool(citedToken, citingToken, startingPrice): Pool {
         if (!citedToken || !citingToken) {
             throw new Error('You must provide both tokens to create cross pool')
         }
@@ -158,6 +158,8 @@ export class Investor {
             native
         )
 
+        console.log('totalIn, totalOut: ', [totalIn, totalOut])
+        console.log('token0Amt, token1Amt: ', [token0Amt, token1Amt])
         if (
             typeof token0Amt === 'undefined' ||
             typeof token1Amt === 'undefined' ||
@@ -185,6 +187,8 @@ export class Investor {
             native
         })
         this.positions.set(crossPool.name, crossPool.pos.values())
+
+        console.log('here')
 
         return [totalIn, totalOut]
     }
