@@ -1,4 +1,4 @@
-import {Investor, UsdcToken} from '../../modules'
+import { Investor, UsdcToken } from '../../modules'
 import { p2pp } from '../../utils/logicUtils'
 import { getQP } from '../helpers/getQuestPools'
 import { preparePool } from '../helpers/poolManager'
@@ -821,7 +821,7 @@ describe('Citation Manager', () => {
         const posMinAB = AB.pos.get(Math.abs(p2pp(ppAB.min)))
         const posMaxAB = AB.pos.get(p2pp(ppAB.max))
 
-        const posMinBA = AB.pos.get(p2pp(ppBA.min)*-1)
+        const posMinBA = AB.pos.get(p2pp(ppBA.min) * -1)
         const posMaxBA = AB.pos.get(p2pp(ppBA.max))
 
         if (res) {
@@ -836,9 +836,12 @@ describe('Citation Manager', () => {
         expect(AB.volumeToken0).toBe(0)
         expect(AB.volumeToken1).toBe(1000)
         expect(AB.curPrice).toBeCloseTo(0.0002)
-        expect(AB.pos.get(Math.abs(p2pp(ppAB.min))).liquidity).toBeCloseTo(-14.14, 2)
+        expect(AB.pos.get(Math.abs(p2pp(ppAB.min))).liquidity).toBeCloseTo(
+            -14.14,
+            2
+        )
         expect(AB.pos.get(p2pp(ppAB.max)).liquidity).toBeCloseTo(14.14, 0)
-        expect(AB.pos.get(p2pp(ppBA.min)*-1).liquidity).toBeCloseTo(14.14, 0)
+        expect(AB.pos.get(p2pp(ppBA.min) * -1).liquidity).toBeCloseTo(14.14, 0)
         expect(AB.pos.get(p2pp(ppBA.max)).liquidity).toBeCloseTo(-14.14, 0)
 
         // A->B

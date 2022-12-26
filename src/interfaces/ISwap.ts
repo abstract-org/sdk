@@ -1,3 +1,1 @@
-export interface ISwap {
-
-}
+export interface ISwap {}

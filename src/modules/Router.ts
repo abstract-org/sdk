@@ -1,10 +1,7 @@
 import HashMap from 'hashmap'
 
-import {
-    getPathActions,
-    isZero
-} from '../utils/logicUtils'
-import {Graph} from './Graph'
+import { getPathActions, isZero } from '../utils/logicUtils'
+import { Graph } from './Graph'
 import {
     buySameLiqGiveT0GetT1,
     buySameLiqGiveT1GetT0,
@@ -130,7 +127,7 @@ export class Router {
             this._PRICED_PATHS.length &&
             !isZero(amountIn) &&
             !isZero(properAmountIn)
-            )
+        )
 
         return totalInOut
     }
@@ -236,8 +233,16 @@ export class Router {
             if (idx === 0) {
                 step.pool.getNearestActiveLiq(zeroForOne)
                 newAmount = zeroForOne
-                    ? buySameLiqGiveT1GetT0(activeCurLiq[0],activeCurLiq[1], step.t1fort0)
-                    : sellSameLiqGiveT0GetT1(activeCurLiq[0],activeCurLiq[1], step.t0fort1)
+                    ? buySameLiqGiveT1GetT0(
+                          activeCurLiq[0],
+                          activeCurLiq[1],
+                          step.t1fort0
+                      )
+                    : sellSameLiqGiveT0GetT1(
+                          activeCurLiq[0],
+                          activeCurLiq[1],
+                          step.t0fort1
+                      )
                 carryOver = newAmount
                 // ###DEBUG
                 this._PROTO_SWAPS.push({
@@ -257,8 +262,16 @@ export class Router {
 
             if (idx === reversedPath.length - 1) {
                 newAmount = zeroForOne
-                    ? buySameLiqGiveT1GetT0(activeCurLiq[0],activeCurLiq[1], carryOver)
-                    : sellSameLiqGiveT0GetT1(activeCurLiq[0],activeCurLiq[1], carryOver)
+                    ? buySameLiqGiveT1GetT0(
+                          activeCurLiq[0],
+                          activeCurLiq[1],
+                          carryOver
+                      )
+                    : sellSameLiqGiveT0GetT1(
+                          activeCurLiq[0],
+                          activeCurLiq[1],
+                          carryOver
+                      )
 
                 // ###DEBUG
                 this._PROTO_SWAPS.push({
@@ -272,20 +285,44 @@ export class Router {
             } else {
                 // previous step capped amountIn
                 let prevT = prevZeroForOne
-                    ? buySameLiqGiveT1GetT0(activePrevLiq[0], activePrevLiq[1], prev.t1fort0)
-                    : sellSameLiqGiveT0GetT1(activePrevLiq[0], activePrevLiq[1], prev.t0fort1)
+                    ? buySameLiqGiveT1GetT0(
+                          activePrevLiq[0],
+                          activePrevLiq[1],
+                          prev.t1fort0
+                      )
+                    : sellSameLiqGiveT0GetT1(
+                          activePrevLiq[0],
+                          activePrevLiq[1],
+                          prev.t0fort1
+                      )
 
                 // current step capped amountOut
                 let curT = zeroForOne
-                    ? buySameLiqGiveT0GetT1(activeCurLiq[0],activeCurLiq[1], step.t0fort1)
-                    : sellSameLiqGiveT1GetT0(activeCurLiq[0],activeCurLiq[1], step.t1fort0)
+                    ? buySameLiqGiveT0GetT1(
+                          activeCurLiq[0],
+                          activeCurLiq[1],
+                          step.t0fort1
+                      )
+                    : sellSameLiqGiveT1GetT0(
+                          activeCurLiq[0],
+                          activeCurLiq[1],
+                          step.t1fort0
+                      )
 
                 curT = Math.min(prevT, curT)
 
                 // current step capped amountIn
                 let newT = zeroForOne
-                    ? buySameLiqGiveT1GetT0(activeCurLiq[0],activeCurLiq[1], curT)
-                    : sellSameLiqGiveT0GetT1(activeCurLiq[0],activeCurLiq[1], curT)
+                    ? buySameLiqGiveT1GetT0(
+                          activeCurLiq[0],
+                          activeCurLiq[1],
+                          curT
+                      )
+                    : sellSameLiqGiveT0GetT1(
+                          activeCurLiq[0],
+                          activeCurLiq[1],
+                          curT
+                      )
 
                 // ###DEBUG
                 this._PROTO_SWAPS.push({
@@ -337,7 +374,7 @@ export class Router {
         let amountSwap = amountIn
 
         for (const [id, pact] of pathActions.entries()) {
-            const {action, pool} = pact
+            const { action, pool } = pact
             const zeroForOne = action === 'buy'
             const poolSums = pool[action](amountSwap)
 
@@ -462,7 +499,7 @@ export class Router {
         const pathActions = getPathActions(path, this)
 
         for (const pact of pathActions) {
-            const {action, pool} = pact
+            const { action, pool } = pact
             const zeroForOne = action === 'buy'
 
             const hasNextToken = zeroForOne

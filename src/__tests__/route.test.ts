@@ -304,7 +304,7 @@ describe('Routing', () => {
 
         expect(acc).toBeCloseTo(acc2)
         expect(results1[0]).toBeCloseTo(-999.999)
-        expect(results1[1]).toBeCloseTo(227.510)
+        expect(results1[1]).toBeCloseTo(227.51)
     })
 
     it('Smart route with single pool', () => {

@@ -21,7 +21,6 @@ export default class QuestDto {
         this.initial_balance_b = data.initial_balance_b
         this.pools = pools
         this.created_at = data.created_at
-
     }
 
     toName() {

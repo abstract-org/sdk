@@ -1,13 +1,11 @@
-import {IAPI} from '../../interfaces'
+import { IAPI } from '../../interfaces'
 
 export interface ConstructorWeb3Config {
     rpcUrl: string
 }
 
 export default class Web3API implements IAPI {
-    constructor(config: ConstructorWeb3Config) {
-
-    }
+    constructor(config: ConstructorWeb3Config) {}
     createQuest(name: string, description: string): boolean {
         // alternate implementation details
         return true

@@ -1,7 +1,7 @@
 import sha256 from 'crypto-js/sha256'
 import HashMap from 'hashmap'
-import {isE10Zero, isNearZero, isZero, p2pp, pp2p} from '../utils/logicUtils'
-import {Quest} from "./Quest";
+import { isE10Zero, isNearZero, isZero, p2pp, pp2p } from '../utils/logicUtils'
+import { Quest } from './Quest'
 
 const TEMP_CONFIG = {
     PRICE_MIN: 0,
@@ -12,9 +12,9 @@ const TEMP_CONFIG = {
 }
 
 interface Position {
-    liquidity?: number,
-    left?: number,
-    pp?: number,
+    liquidity?: number
+    left?: number
+    pp?: number
     right?: number
 }
 
@@ -44,7 +44,7 @@ export class Pool {
     soldToken0 = 0
     soldToken1 = 0
 
-    pos = new HashMap<any,any>()
+    pos = new HashMap<any, any>()
     posOwners = []
 
     type = 'VALUE_LINK'
@@ -320,7 +320,7 @@ export class Pool {
             this.pos.get(localPP) &&
             this.pos.get(localPP)[dir] !== 'undefined' &&
             localPP !== this.pos.get(localPP)[dir]
-            ) {
+        ) {
             if (!native && this.pos.get(localPP).liquidity > 0) {
                 return this.pos.get(localPP)
             } else if (native && this.pos.get(localPP).liquidity < 0) {
@@ -575,7 +575,7 @@ export class Pool {
             amount > 0 &&
             arrivedAtSqrtPrice === Math.sqrt(pp2p(nextPricePoint)) &&
             this.curRight < p2pp(TEMP_CONFIG.PRICE_MAX)
-            )
+        )
 
         if (TEMP_CONFIG.JOURNAL && TEMP_CONFIG.JOURNAL_BUY) {
             journal.forEach((iteration) => {
@@ -611,7 +611,7 @@ export class Pool {
             amount > 0 &&
             arrivedAtSqrtPrice === Math.sqrt(pp2p(nextPricePoint)) &&
             this.curPP > p2pp(TEMP_CONFIG.PRICE_MIN)
-            ) {
+        ) {
             journal[i] = []
 
             nextPricePoint = this.curPP

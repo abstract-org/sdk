@@ -19,10 +19,16 @@ describe('Smart route math works', () => {
 
     const createRouter = (questObj, poolsObj, isDbg = shouldDebugRouter) => {
         const poolsHashMap = new HashMap(
-            Object.entries(pools as Array<Pool>).map(([, obj]) => [obj.name, obj])
+            Object.entries(pools as Array<Pool>).map(([, obj]) => [
+                obj.name,
+                obj
+            ])
         )
         const questsHashMap = new HashMap(
-            Object.entries(quests as Array<Quest>).map(([, obj]) => [obj.name, obj])
+            Object.entries(quests as Array<Quest>).map(([, obj]) => [
+                obj.name,
+                obj
+            ])
         )
 
         return new Router(questsHashMap, poolsHashMap, isDbg)
@@ -341,41 +347,25 @@ describe.skip('Basic math works', () => {
         expect(res[1]).toBeCloseTo(71.417, 2)
     })
 
-    it('Doesnt buy anything at the end of the quest pool', () => {
-    })
-    it('Doesnt buy anything at the end of the cross pool with price 1:1 pool', () => {
-    })
-    it('Doesnt buy anything at the end of the cross pool with cited higher than citing pool', () => {
-    })
-    it('Doesnt buy anything at the end of the cross pool with citing higher than cited pool', () => {
-    })
+    it('Doesnt buy anything at the end of the quest pool', () => {})
+    it('Doesnt buy anything at the end of the cross pool with price 1:1 pool', () => {})
+    it('Doesnt buy anything at the end of the cross pool with cited higher than citing pool', () => {})
+    it('Doesnt buy anything at the end of the cross pool with citing higher than cited pool', () => {})
 
-    it('Doesnt sell anything at the end of the quest pool', () => {
-    })
-    it('Doesnt sell anything at the end of the cross pool with price 1:1 pool', () => {
-    })
-    it('Doesnt sell anything at the end of the cross pool with cited higher than citing pool', () => {
-    })
-    it('Doesnt sell anything at the end of the cross pool with citing higher than cited pool', () => {
-    })
+    it('Doesnt sell anything at the end of the quest pool', () => {})
+    it('Doesnt sell anything at the end of the cross pool with price 1:1 pool', () => {})
+    it('Doesnt sell anything at the end of the cross pool with cited higher than citing pool', () => {})
+    it('Doesnt sell anything at the end of the cross pool with citing higher than cited pool', () => {})
 
-    it('Doesnt buy anything at the end of the quest pool via smart route', () => {
-    })
-    it('Doesnt buy anything at the end of the cross pool with price 1:1 pool via smart route', () => {
-    })
-    it('Doesnt buy anything at the end of the cross pool with cited higher than citing pool via smart route', () => {
-    })
-    it('Doesnt buy anything at the end of the cross pool with citing higher than cited pool via smart route', () => {
-    })
+    it('Doesnt buy anything at the end of the quest pool via smart route', () => {})
+    it('Doesnt buy anything at the end of the cross pool with price 1:1 pool via smart route', () => {})
+    it('Doesnt buy anything at the end of the cross pool with cited higher than citing pool via smart route', () => {})
+    it('Doesnt buy anything at the end of the cross pool with citing higher than cited pool via smart route', () => {})
 
-    it('Doesnt sell anything at the end of the quest pool via smart route', () => {
-    })
-    it('Doesnt sell anything at the end of the cross pool with price 1:1 pool via smart route', () => {
-    })
-    it('Doesnt sell anything at the end of the cross pool with cited higher than citing pool via smart route', () => {
-    })
-    it('Doesnt sell anything at the end of the cross pool with citing higher than cited pool via smart route', () => {
-    })
+    it('Doesnt sell anything at the end of the quest pool via smart route', () => {})
+    it('Doesnt sell anything at the end of the cross pool with price 1:1 pool via smart route', () => {})
+    it('Doesnt sell anything at the end of the cross pool with cited higher than citing pool via smart route', () => {})
+    it('Doesnt sell anything at the end of the cross pool with citing higher than cited pool via smart route', () => {})
 
     it('Buys out the entire cross pool with price 1:1 via smart route', () => {
         const { quest: qAGORA, pool: AGORA } = getQP('AGORA')
@@ -489,8 +479,7 @@ describe.skip('Basic math works', () => {
         console.log(router.smartSwap('USDC', qTST5.name, 2000))
     })
 
-    it('After opening a position on drained cross pool it opens with correct price range', () => {
-    })
+    it('After opening a position on drained cross pool it opens with correct price range', () => {})
 
     it('When selling out drained pool it correctly sets active position', () => {
         expect(0).toBe(1)

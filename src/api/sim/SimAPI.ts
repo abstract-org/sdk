@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import HashMap from 'hashmap'
 
 import { IAPI } from '../../interfaces'
-import { Investor, Pool, Quest } from "../../modules";
+import { Investor, Pool, Quest } from '../../modules'
 import { createHashMappings } from '../../utils/logicUtils'
 import { RELATION_TYPE, TABLE } from './constants'
 import InvestorUploadDto from './dtos/InvestorUploadDto'
@@ -41,7 +41,12 @@ export default class SimAPI implements IAPI {
         return true
     }
 
-    createInvestor(type: string, name: string, initialBalance: number, isDefault?: boolean): Investor {
+    createInvestor(
+        type: string,
+        name: string,
+        initialBalance: number,
+        isDefault?: boolean
+    ): Investor {
         return Investor.create(type, name, initialBalance, isDefault)
     }
 
@@ -140,8 +145,8 @@ export default class SimAPI implements IAPI {
 
             console.log('savePools(): Pools inserted')
 
-            const preparedPoolDataList = pools.map((pool) =>
-                new PoolDataUploadDto(pool, poolNameToPoolId)
+            const preparedPoolDataList = pools.map(
+                (pool) => new PoolDataUploadDto(pool, poolNameToPoolId)
             )
 
             await Promise.all([

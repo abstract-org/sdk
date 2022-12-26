@@ -1,34 +1,34 @@
 import sha256 from 'crypto-js/sha256'
 import HashMap from 'hashmap'
 
-import {Pool} from './Pool'
-import {UsdcToken} from './UsdcToken'
+import { Pool } from './Pool'
+import { UsdcToken } from './UsdcToken'
 
 const TEMP_CONFIG = {
     INITIAL_LIQUIDITY: [
         {
-            "priceMin": 1,
-            "priceMax": 1000000,
-            "tokenA": 0,
-            "tokenB": 5000
+            priceMin: 1,
+            priceMax: 1000000,
+            tokenA: 0,
+            tokenB: 5000
         },
         {
-            "priceMin": 20,
-            "priceMax": 1000000,
-            "tokenA": 0,
-            "tokenB": 5000
+            priceMin: 20,
+            priceMax: 1000000,
+            tokenA: 0,
+            tokenB: 5000
         },
         {
-            "priceMin": 50,
-            "priceMax": 1000000,
-            "tokenA": 0,
-            "tokenB": 5000
+            priceMin: 50,
+            priceMax: 1000000,
+            tokenA: 0,
+            tokenB: 5000
         },
         {
-            "priceMin": 200,
-            "priceMax": 1000000,
-            "tokenA": 0,
-            "tokenB": 5000
+            priceMin: 200,
+            priceMax: 1000000,
+            tokenA: 0,
+            tokenB: 5000
         }
     ]
 }
@@ -56,10 +56,10 @@ export class Quest {
     }
 
     createPool({
-                   tokenLeft = null,
-                   startingPrice = null,
-                   initialPositions = null
-               } = {}) {
+        tokenLeft = null,
+        startingPrice = null,
+        initialPositions = null
+    } = {}) {
         const tokenLeftInstance = tokenLeft || new UsdcToken()
         const pool = Pool.create(tokenLeftInstance, this, startingPrice)
 

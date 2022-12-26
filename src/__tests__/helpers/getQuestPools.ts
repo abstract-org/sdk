@@ -1,4 +1,4 @@
-import {Investor, UsdcToken} from '../../modules'
+import { Investor, UsdcToken } from '../../modules'
 
 export const getQP = (name, priceMax = 10000) => {
     const investor = Investor.create('INV', 'INV', 10000)

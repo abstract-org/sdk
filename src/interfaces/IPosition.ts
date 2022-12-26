@@ -1,3 +1,1 @@
-export interface IPosition {
-
-}
+export interface IPosition {}

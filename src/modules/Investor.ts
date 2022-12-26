@@ -1,8 +1,8 @@
 import sha256 from 'crypto-js/sha256'
 import HashMap from 'hashmap'
 
-import {Pool} from './Pool'
-import {Quest} from './Quest'
+import { Pool } from './Pool'
+import { Quest } from './Quest'
 import { isE10Zero, p2pp } from '../utils/logicUtils'
 
 export class Investor {
@@ -94,7 +94,13 @@ export class Investor {
         )
     }
 
-    private modifyPosition(pool, priceMin, priceMax, amountLeft = 0, amountRight = 0) {
+    private modifyPosition(
+        pool,
+        priceMin,
+        priceMax,
+        amountLeft = 0,
+        amountRight = 0
+    ) {
         const liquidity = pool.getLiquidityForAmounts(
             amountLeft,
             amountRight,
