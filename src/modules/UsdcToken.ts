@@ -1,5 +1,5 @@
 export class UsdcToken {
-    static _instance: any;
+    static _instance: any
     name
     pools = []
 

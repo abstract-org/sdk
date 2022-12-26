@@ -63,26 +63,6 @@ export const getCombinedSwaps = (smSwaps, pools) => {
 
 export const byName = (name) => (item) => item.name === name
 
-export const updateStateInvestorConfig = (arr, newItem) =>
-    arr.map((item) =>
-        item.invGenAlias === newItem.invGenAlias ? newItem : item
-    )
-
-export const updateStateQuestConfig = (arr, newItem) =>
-    arr.map((item) =>
-        item.questGenAlias === newItem.questGenAlias ? newItem : item
-    )
-
-export const deleteStateInvestorConfig = (arr, invGenAlias) =>
-    arr.filter((item) => item.invGenAlias !== invGenAlias)
-
-export const deleteStateQuestConfig = (arr, questGenAlias) =>
-    arr.filter((item) => item.questGenAlias !== questGenAlias)
-
-export const toBase64 = (str) => window.btoa(encodeURIComponent(str))
-
-export const fromBase64 = (b64) => decodeURIComponent(window.atob(b64))
-
 export const formatBytes = (bytes, decimals = 2) => {
     if (!+bytes) return '0 Bytes'
 
@@ -93,19 +73,6 @@ export const formatBytes = (bytes, decimals = 2) => {
     const i = Math.floor(Math.log(bytes) / Math.log(k))
 
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
-}
-
-export const overrideState = (stateObj, newData = {}, initialState = {}) => {
-    let newState = initialState
-    if (newData) {
-        Object.entries(newData).forEach(([key, newValue]) => {
-            if (stateObj.hasOwnProperty(key) && newData[key]) {
-                newState[key] = newValue
-            }
-        })
-    }
-
-    return newState
 }
 
 const _resetObjProps =
@@ -133,30 +100,6 @@ export const sanitizeRemoteScenario = (loadedObj) => ({
     }
 })
 
-export const getMissingQuestNames = (scenario) => {
-    const quests = new Set()
-
-    if (typeof scenario !== 'object') return
-
-    scenario.invConfigs.forEach((conf) => {
-        if (conf.excludeSingleName.length) {
-            quests.add(conf.excludeSingleName)
-        }
-
-        if (conf.includeSingleName.length) {
-            quests.add(conf.includeSingleName)
-        }
-    })
-
-    scenario.questConfigs.forEach((conf) => {
-        if (conf.citeSingleName.length) {
-            quests.add(conf.citeSingleName)
-        }
-    })
-
-    return Array.from(quests)
-}
-
 export const isE10Zero = (amount) => {
     return Math.abs(amount) < 1e-10
 }
@@ -173,8 +116,6 @@ export const isNearZero = (amount) => {
 export const calcGrowthRate = (curr, prev) => {
     return ((curr - prev) / prev) * 100
 }
-
-export const isNumericString = (str) => parseFloat(str) === Number(str)
 
 export const priceDiff = (price1, price2) => {
     return ((price1 - price2) / price2) * 100

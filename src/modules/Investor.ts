@@ -1,8 +1,8 @@
 import sha256 from 'crypto-js/sha256'
 import HashMap from 'hashmap'
 
-import {Pool} from './Pool'
-import {Quest} from './Quest'
+import { Pool } from './Pool'
+import { Quest } from './Quest'
 import { isE10Zero, p2pp } from '../utils/logicUtils'
 
 export class Investor {
@@ -94,7 +94,13 @@ export class Investor {
         )
     }
 
-    private modifyPosition(pool, priceMin, priceMax, amountLeft = 0, amountRight = 0) {
+    private modifyPosition(
+        pool,
+        priceMin,
+        priceMax,
+        amountLeft = 0,
+        amountRight = 0
+    ) {
         const liquidity = pool.getLiquidityForAmounts(
             amountLeft,
             amountRight,
@@ -124,7 +130,7 @@ export class Investor {
         return amounts
     }
 
-    createPool(citedToken, citingToken, startingPrice) {
+    createPool(citedToken, citingToken, startingPrice): Pool {
         if (!citedToken || !citingToken) {
             throw new Error('You must provide both tokens to create cross pool')
         }
@@ -138,6 +144,7 @@ export class Investor {
      * @param {number} priceMax
      * @param {number} token0Amt
      * @param {number} token1Amt
+     * @param {boolean} native
      * @returns {*[]}
      */
     citeQuest(
@@ -146,7 +153,7 @@ export class Investor {
         priceMax = 10,
         token0Amt = 0,
         token1Amt = 0,
-        native
+        native = false
     ) {
         // Open "position" for value link pool
         const [totalIn, totalOut] = crossPool.openPosition(
@@ -157,6 +164,8 @@ export class Investor {
             native
         )
 
+        console.log('totalIn, totalOut: ', [totalIn, totalOut])
+        console.log('token0Amt, token1Amt: ', [token0Amt, token1Amt])
         if (
             typeof token0Amt === 'undefined' ||
             typeof token1Amt === 'undefined' ||
@@ -184,6 +193,8 @@ export class Investor {
             native
         })
         this.positions.set(crossPool.name, crossPool.pos.values())
+
+        console.log('here')
 
         return [totalIn, totalOut]
     }

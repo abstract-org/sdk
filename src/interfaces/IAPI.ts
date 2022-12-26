@@ -1,4 +1,4 @@
-import {Investor, Pool, Quest} from "../modules";
+import { Investor, Pool, Quest } from '../modules'
 import HashMap from 'hashmap'
 
 import { ILog, IPool, IPosition, IQuest, ISnapshot, ISwap } from './index'
@@ -36,8 +36,18 @@ export interface IAPI {
     // Investor API
     openPosition?(poolId: number, position: IPosition): void
     updateInvestorBalances?(): void
-    updateInvestorNavs?(config: {investorId: number, day: number, usdcNav: number, tokenNav: number}): void
-    createInvestor?(type: string, name: string, initialBalance: number, isDefault?: boolean): Investor
+    updateInvestorNavs?(config: {
+        investorId: number
+        day: number
+        usdcNav: number
+        tokenNav: number
+    }): void
+    createInvestor?(
+        type: string,
+        name: string,
+        initialBalance: number,
+        isDefault?: boolean
+    ): Investor
 
     // Supabase API
 

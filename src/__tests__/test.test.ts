@@ -1,4 +1,4 @@
-import SimAPI from '../src/api/sim/SimAPI'
+import SimAPI from '../api/sim/SimAPI'
 
 describe('Test of tests', () => {
     // const simAPI = new SimAPI({dbUrl: '', accessToken: ''})

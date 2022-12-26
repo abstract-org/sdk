@@ -1,3 +1,1 @@
-export interface IPool {
-
-}
+export interface IPool {}
