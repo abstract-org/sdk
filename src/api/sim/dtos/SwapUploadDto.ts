@@ -26,22 +26,4 @@ export default class SwapUploadDto {
         this.tvl = data.tvl
         this.op_name = data.opName
     }
-
-    // @TODO: delete this
-    // toObj() {
-    //     return {
-    //         action: this.action,
-    //         amount_in: this.amount_in,
-    //         amount_out: this.amount_out,
-    //         day: this.day,
-    //         block: this.block,
-    //         path: this.path,
-    //         investor_id: this.investor_id,
-    //         pool_id: this.pool_id,
-    //         price: this.price,
-    //         mcap: this.mcap,
-    //         tvl: this.tvl,
-    //         op_name: this.op_name
-    //     }
-    // }
 }

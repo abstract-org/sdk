@@ -10,14 +10,4 @@ export default class SnapshotUploadDto {
         this.current_day = data.currentDay
         this.creator_id = data.creatorId
     }
-
-    // @TODO: delete if not used
-    // toObj() {
-    //     return {
-    //         seed: this.seed,
-    //         scenario_id: this.scenario_id,
-    //         creator_id: this.creator_id,
-    //         current_day: this.current_day
-    //     }
-    // }
 }

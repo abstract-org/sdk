@@ -74,4 +74,60 @@ export interface IAPI {
         snapshotId: number,
         entities: Array<{ id: number; name: string }>
     ): Promise<void>
+
+    saveScenario?(
+        scenarioName: string,
+        investorConfigs: Record<string, any>,
+        questConfigs: Record<string, any>
+    ): Promise<number>
+
+    saveSwaps?(
+        swapsArray: object[],
+        poolMappings: HashMap<string, number>,
+        investorMappings: HashMap<string, number>
+    ): Promise<void>
+
+    saveLogs?(
+        logsArray: object[],
+        poolMappings: HashMap<string, number>,
+        investorMappings: HashMap<string, number>
+    ): Promise<void>
+
+    savePositionsData?(
+        pools: Pool[],
+        poolMappings: HashMap<string, number>,
+        investorMappings: HashMap<string, number>
+    ): Promise<boolean>
+
+    saveInvestorBalances?(
+        investorBalancesByDay: Array<[number, Record<string, object[]>]>,
+        investorHashToInvestorId: HashMap<string, number>,
+        questNameToQuestId: HashMap<string, number>
+    ): Promise<void>
+
+    saveInvestorNavs?(
+        investorNavsByDay: Array<[number, Record<string, number>]>,
+        investorHashToInvestorId: HashMap<string, number>
+    ): Promise<void>
+
+    saveSnapshotTotals?(
+        snapshotId: number,
+        {
+            quests,
+            pools,
+            investors
+        }: { quests: Quest[]; pools: Pool[]; investors: Investor[] }
+    ): Promise<any>
+
+    saveSnapshot?({
+        scenarioId,
+        seed,
+        creatorId,
+        currentDay
+    }: {
+        scenarioId?: number
+        seed: string
+        creatorId: string
+        currentDay: number
+    }): Promise<number>
 }
