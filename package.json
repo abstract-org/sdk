@@ -10,6 +10,9 @@
     "scripts": {
         "test": "jest --passWithNoTests",
         "compile": "tsc --build --force tsconfig.json",
+        "compile:watch": "yarn compile && tsc --watch",
+        "clean": "rimraf dist",
+        "prebuild": "yarn clean",
         "build": "tsc --build --force tsconfig.build.json",
         "test:watch": "yarn jest --watch",
         "semantic-release": "semantic-release --branches main"
