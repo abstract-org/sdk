@@ -21,7 +21,8 @@
         "@faker-js/faker": "^7.6.0",
         "@supabase/supabase-js": "^2.2.1",
         "crypto-js": "^4.1.1",
-        "hashmap": "^2.4.0"
+        "hashmap": "^2.4.0",
+        "lodash.set": "^4.3.2"
     },
     "devDependencies": {
         "@types/hashmap": "^2.3.1",
