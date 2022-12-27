@@ -1,4 +1,4 @@
-export default class SnapshotTotalsUploadDto {
+export class SnapshotTotalsUploadDto {
     snapshot_id: number
     quests: number
     cross_pools: number

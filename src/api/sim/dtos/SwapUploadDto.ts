@@ -1,4 +1,4 @@
-export default class SwapUploadDto {
+export class SwapUploadDto {
     action: string
     amount_in: number
     amount_out: number

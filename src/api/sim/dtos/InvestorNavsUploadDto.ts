@@ -1,4 +1,4 @@
-export default class InvestorNavsUploadDto {
+export class InvestorNavsUploadDto {
     investor_id: number
     usdc_nav: number
     token_nav: number

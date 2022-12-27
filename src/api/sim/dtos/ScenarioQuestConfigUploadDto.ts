@@ -1,4 +1,4 @@
-export default class ScenarioQuestConfigUploadDto {
+export class ScenarioQuestConfigUploadDto {
     quest_gen_alias: string
     quest_gen_name: string
     initial_author_invest: number

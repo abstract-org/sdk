@@ -1,4 +1,4 @@
-export default class QuestUploadDto {
+export class QuestUploadDto {
     author_id: number
     name: string
     hash: string

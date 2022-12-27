@@ -1,4 +1,4 @@
-export default class LogUploadDto {
+export class LogUploadDto {
     pool_id: number
     investor_id: number
     action: string

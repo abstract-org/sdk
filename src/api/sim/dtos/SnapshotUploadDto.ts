@@ -1,4 +1,4 @@
-export default class SnapshotUploadDto {
+export class SnapshotUploadDto {
     seed: string
     scenario_id: number
     current_day: number

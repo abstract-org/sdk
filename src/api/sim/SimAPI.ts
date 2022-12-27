@@ -5,25 +5,25 @@ import { IAPI, IState, ITotalsList } from '../../interfaces'
 import { Investor, Pool, Quest } from '../../modules'
 import { createHashMappings } from '../../utils/logicUtils'
 import { getQuerySnapshotById, RELATION_TYPE, TABLE } from './constants'
-import InvestorUploadDto from './dtos/InvestorUploadDto'
-import PoolUploadDto from './dtos/PoolUploadDto'
-import QuestUploadDto from './dtos/QuestUploadDto'
-import PoolDataUploadDto from './dtos/PoolDataUploadDto'
-import ScenarioUploadDto from './dtos/ScenarioUploadDto'
-import { ScenarioInvestorConfigUploadDto } from './dtos/ScenarioInvestorConfigUploadDto'
-import ScenarioQuestConfigUploadDto from './dtos/ScenarioQuestConfigUploadDto'
-import SwapUploadDto from './dtos/SwapUploadDto'
-import LogUploadDto from './dtos/LogUploadDto'
-import PositionUploadDto from './dtos/PositionUploadDto'
-import PosOwnersUploadDto from './dtos/PosOwnersUploadDto'
-import InvestorBalancesUploadDto from './dtos/InvestorBalancesUploadDto'
-import InvestorNavsUploadDto from './dtos/InvestorNavsUploadDto'
-import SnapshotTotalsUploadDto from './dtos/SnapshotTotalsUploadDto'
-import PostgrestFilterBuilder from '@supabase/postgrest-js/dist/module/PostgrestFilterBuilder'
-import { Schema } from 'inspector'
-import SnapshotUploadDto from './dtos/SnapshotUploadDto'
-import SnapshotWithTotalsDto from './dtos/SnapshotWithTotalsDto'
-import { gatherStateFromSnapshot } from './downloadHellpers'
+import {
+    InvestorUploadDto,
+    PoolUploadDto,
+    QuestUploadDto,
+    PoolDataUploadDto,
+    ScenarioUploadDto,
+    ScenarioInvestorConfigUploadDto,
+    ScenarioQuestConfigUploadDto,
+    SwapUploadDto,
+    LogUploadDto,
+    PositionUploadDto,
+    PosOwnersUploadDto,
+    InvestorBalancesUploadDto,
+    InvestorNavsUploadDto,
+    SnapshotTotalsUploadDto,
+    SnapshotUploadDto,
+    SnapshotWithTotalsDto
+} from './dtos'
+import { gatherStateFromSnapshot } from './downloadHelpers'
 
 export interface ConstructorSimConfig {
     dbUrl: string

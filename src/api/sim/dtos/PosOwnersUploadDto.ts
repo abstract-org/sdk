@@ -1,4 +1,4 @@
-export default class PosOwnersUploadDto {
+export class PosOwnersUploadDto {
     amt0: number
     amt1: number
     hash: string

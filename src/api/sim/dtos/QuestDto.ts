@@ -1,6 +1,6 @@
 import { Quest, UsdcToken } from '../../../modules'
 
-export default class QuestDto {
+export class QuestDto {
     id: number
     author_id: number
     name: string

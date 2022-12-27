@@ -1,6 +1,6 @@
 import { convertNumToFloat8 } from '../../../utils/logicUtils'
 
-export default class PositionUploadDto {
+export class PositionUploadDto {
     pool_id: number
     liquidity: number
     left_point: number

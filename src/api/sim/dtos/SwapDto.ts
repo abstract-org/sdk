@@ -1,4 +1,4 @@
-export default class SwapDto {
+export class SwapDto {
     id: number
     price: number
     pool_id: number

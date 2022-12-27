@@ -1,4 +1,4 @@
-export default class PosOwnersDto {
+export class PosOwnersDto {
     id: number
     amt0: number
     amt1: number

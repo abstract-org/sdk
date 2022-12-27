@@ -1,18 +1,21 @@
 import HashMap from 'hashmap'
 import setInto from 'lodash/set'
 import { IState, TInvestorHash, TPoolName } from '../../interfaces'
-import { ScenarioInvestorConfigDto } from './dtos/ScenarioInvestorConfigDto'
-import { ScenarioQuestConfigDto } from './dtos/ScenarioQuestConfigDto'
-import InvestorDto from './dtos/InvestorDto'
+import {
+    ScenarioInvestorConfigDto,
+    ScenarioQuestConfigDto,
+    InvestorDto,
+    PoolDto,
+    SwapDto,
+    LogDto,
+    QuestDto
+} from './dtos/'
 import {
     addStringToArrayUniq,
     convertArrayToHashMapByKey,
     createHashMappings
 } from '../../utils/logicUtils'
-import { PoolDto } from './dtos/PoolDto'
-import SwapDto from './dtos/SwapDto'
-import LogDto from './dtos/LogDto'
-import QuestDto from './dtos/QuestDto'
+
 import { Investor, Pool } from '../../modules'
 
 export function gatherStateFromSnapshot(data): IState {

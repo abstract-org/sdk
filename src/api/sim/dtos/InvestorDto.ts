@@ -17,7 +17,7 @@ export type TInvestorNav = {
     token_nav: number
 }
 
-export default class InvestorDto {
+export class InvestorDto {
     id: number
     name: string
     type: string

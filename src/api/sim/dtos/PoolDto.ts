@@ -1,8 +1,8 @@
 import { convertArrayToHashMapByKey } from '../../../utils/logicUtils'
 import { Pool } from '../../../modules'
-import PoolDataDto from './PoolDataDto'
-import PositionDto from './PositionDto'
-import PosOwnersDto from './PosOwnersDto'
+import { PoolDataDto } from './PoolDataDto'
+import { PositionDto } from './PositionDto'
+import { PosOwnersDto } from './PosOwnersDto'
 
 export class PoolDto {
     id: number

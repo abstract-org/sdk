@@ -1,4 +1,4 @@
-export default class InvestorBalancesUploadDto {
+export class InvestorBalancesUploadDto {
     investor_id: number
     quest_id: number
     balance: number

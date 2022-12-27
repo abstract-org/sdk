@@ -1,6 +1,6 @@
 import { SnapshotDto } from './SnapshotDto'
 
-export default class SnapshotWithTotalsDto extends SnapshotDto {
+export class SnapshotWithTotalsDto extends SnapshotDto {
     quests: number
     cross_pools: number
     investors: number

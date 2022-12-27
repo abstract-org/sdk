@@ -1,4 +1,4 @@
-export default class InvestorUploadDto {
+export class InvestorUploadDto {
     name: string
     type: string
     hash: boolean
