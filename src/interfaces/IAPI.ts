@@ -143,4 +143,6 @@ export interface IAPI {
     fetchTotalsList?(): Promise<ITotalsList>
 
     fetchSnapshotById?(snapshotId: number): Promise<IState>
+
+    auth?()
 }

@@ -529,4 +529,8 @@ export default class SimAPI implements IAPI {
             return null
         }
     }
+
+    get auth() {
+        return this._dbClient.auth
+    }
 }
