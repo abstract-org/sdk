@@ -1,4 +1,4 @@
-export default class LogDto {
+export class LogDto {
     id: number
     pool_id: number
     pool_name: string

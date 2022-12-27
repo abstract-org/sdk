@@ -77,44 +77,4 @@ export class ScenarioInvestorConfigUploadDto {
         this.swap_dec_sum_amount = investorConfig.swapDecSumAmount
         this.value_sell_perc = investorConfig.valueSellPerc
     }
-
-    toObj() {
-        return {
-            dailySpawnProbability: this.daily_spawn_probability,
-            invGenAlias: this.inv_gen_alias,
-            invGenName: this.inv_gen_name,
-            initialBalance: this.initial_balance,
-            buySellPeriodDays: this.buy_sell_period_days,
-            buySinglePerc: this.buy_single_perc,
-            includeSingleName: this.include_single_name,
-            buySumPerc: this.buy_sum_perc,
-            buyQuestPerc: this.buy_quest_perc,
-            buyGainerPerc: this.buy_gainer_perc,
-            buyGainersFrequency: this.buy_gainers_frequency,
-            excludeSingleName: this.exclude_single_name,
-            swapIncFrequency: this.swap_inc_frequency,
-            swapIncDir: this.swap_inc_dir,
-            swapIncSumPerc: this.swap_inc_sum_perc,
-            swapIncByPerc: this.swap_inc_by_perc,
-            swapDecFrequency: this.swap_dec_frequency,
-            swapDecDir: this.swap_dec_dir,
-            swapDecSumPerc: this.swap_dec_sum_perc,
-            swapDecByPerc: this.swap_dec_by_perc,
-            createQuest: this.create_quest,
-            keepCreatingQuests: this.keep_creating_quests,
-            keepCreatingPeriodDays: this.keep_creating_period_days,
-            keepCitingProbability: this.keep_citing_probability,
-            keepCitingSumPercentage: this.keep_citing_sum_percentage,
-            keepCitingPriceHigherThan: this.keep_citing_price_higher_than,
-            keepCitingPosMultiplier: this.keep_citing_pos_multiplier,
-            valueSellPeriodDays: this.value_sell_period_days,
-            valueSellAmount: this.value_sell_amount,
-            smartRouteDepth: this.smart_route_depth,
-            buySingleAmount: this.buy_single_amount,
-            buySumAmount: this.buy_sum_amount,
-            swapIncSumAmount: this.swap_inc_sum_amount,
-            swapDecSumAmount: this.swap_dec_sum_amount,
-            valueSellPerc: this.value_sell_perc
-        }
-    }
 }

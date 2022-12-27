@@ -178,10 +178,10 @@ export function createHashMappings<T>(
     return new HashMap(mappingsArray)
 }
 
-export function convertArrayToHashMapByKey<T>(
-    arr: Array<T>,
+export function convertArrayToHashMapByKey(
+    arr: Array<any>,
     key: string
-): HashMap<unknown, unknown> {
+): HashMap<any, any> {
     const resultHashMap = new HashMap()
     for (const item of arr) {
         if (item[key] != null) resultHashMap.set(item[key], item)

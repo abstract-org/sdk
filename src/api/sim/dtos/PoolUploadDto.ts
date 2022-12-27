@@ -1,4 +1,4 @@
-export default class PoolUploadDto {
+export class PoolUploadDto {
     name: string
     token0: string
     token1: string

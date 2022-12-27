@@ -25,3 +25,42 @@ export const TABLE = {
     scenario_investor_config: 'scenario_investor_config',
     scenario_quest_config: 'scenario_quest_config'
 }
+
+export const getQuerySnapshotById = ({ T } = { T: TABLE }) => `*,
+        creator: creator_id ( email ),
+        scenario (
+            ${T.scenario_investor_config}(*),
+            ${T.scenario_quest_config}(*)
+        ),
+        ${T.investor}(
+            *,
+            ${T.investor_balances}(
+                ${T.quest}(name),
+                balance,
+                day
+            ),
+            ${T.investor_navs}(*),
+            quests:${T.quest}(name)
+        ),
+        ${T.pool} (
+            *,
+            left:token0(name),
+            right:token1(name),
+            ${T.pool_data}(*),
+            ${T.position}(*),
+            ${T.position_owner}(*),
+            ${T.log}(
+                *, 
+                pool (name),
+                investor (hash)
+            ),
+            ${T.swap}(*)
+        ),
+        ${T.quest}(
+            *,
+            investor (
+                name,
+                hash
+            )
+        )
+        `

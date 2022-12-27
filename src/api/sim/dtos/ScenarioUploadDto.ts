@@ -1,4 +1,4 @@
-export default class ScenarioUploadDto {
+export class ScenarioUploadDto {
     name: string
 
     constructor(data) {

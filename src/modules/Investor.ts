@@ -194,8 +194,6 @@ export class Investor {
         })
         this.positions.set(crossPool.name, crossPool.pos.values())
 
-        console.log('here')
-
         return [totalIn, totalOut]
     }
 

@@ -1,6 +1,6 @@
 import { convertNumToFloat8 } from '../../../utils/logicUtils'
 
-export default class PositionUploadDto {
+export class PositionUploadDto {
     pool_id: number
     liquidity: number
     left_point: number
@@ -15,16 +15,5 @@ export default class PositionUploadDto {
         this.right_point = convertNumToFloat8(data.right)
         this.price_point = convertNumToFloat8(data.pp)
         this.created_at = data.created_at || new Date()
-    }
-
-    toObj() {
-        return {
-            pool_id: this.pool_id,
-            liquidity: this.liquidity,
-            left_point: this.left_point,
-            right_point: this.right_point,
-            price_point: this.price_point,
-            created_at: this.created_at
-        }
     }
 }

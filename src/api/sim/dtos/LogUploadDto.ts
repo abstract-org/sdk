@@ -1,4 +1,4 @@
-export default class LogUploadDto {
+export class LogUploadDto {
     pool_id: number
     investor_id: number
     action: string
@@ -23,22 +23,5 @@ export default class LogUploadDto {
         this.price = data.price
         this.total_amount_in = data.totalAmountIn
         this.total_amount_out = data.totalAmountOut
-    }
-
-    /** @deprecated */
-    toObj() {
-        return {
-            blk: this.blk,
-            pool_id: this.pool_id,
-            investor_id: this.investor_id,
-            action: this.action,
-            day: this.day,
-            mcap: this.mcap,
-            tvl: this.tvl,
-            op_name: this.op_name,
-            price: this.price,
-            total_amount_in: this.total_amount_in,
-            total_amount_out: this.total_amount_out
-        }
     }
 }

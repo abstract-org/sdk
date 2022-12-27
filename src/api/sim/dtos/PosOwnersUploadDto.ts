@@ -1,4 +1,4 @@
-export default class PosOwnersUploadDto {
+export class PosOwnersUploadDto {
     amt0: number
     amt1: number
     hash: string
@@ -19,19 +19,5 @@ export default class PosOwnersUploadDto {
         this.type = data.type
         this.pool_id = poolId
         this.investor_id = investorId
-    }
-
-    toObj() {
-        return {
-            amt0: this.amt0,
-            amt1: this.amt1,
-            hash: this.hash,
-            native: this.native,
-            pmax: this.pmax,
-            pmin: this.pmin,
-            type: this.type,
-            pool_id: this.pool_id,
-            investor_id: this.investor_id
-        }
     }
 }

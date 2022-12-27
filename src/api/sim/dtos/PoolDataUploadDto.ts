@@ -1,6 +1,6 @@
 import { convertNumToFloat8 } from '../../../utils/logicUtils'
 
-export default class PoolDataUploadDto {
+export class PoolDataUploadDto {
     swap_id: number
     pool_id: number
     current_liquidity: number
