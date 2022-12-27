@@ -1,7 +1,16 @@
 import { Investor, Pool, Quest } from '../modules'
 import HashMap from 'hashmap'
 
-import { ILog, IPool, IPosition, IQuest, ISnapshot, ISwap } from './index'
+import {
+    ILog,
+    IPool,
+    IPosition,
+    IQuest,
+    ISnapshot,
+    IState,
+    ISwap,
+    ITotalsList
+} from './index'
 
 export interface IAPI {
     // Snapshot API
@@ -130,4 +139,8 @@ export interface IAPI {
         creatorId: string
         currentDay: number
     }): Promise<number>
+
+    fetchTotalsList?(): Promise<ITotalsList>
+
+    fetchSnapshotById?(snapshotId: number): Promise<IState>
 }

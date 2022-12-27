@@ -1,10 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import HashMap from 'hashmap'
 
-import { IAPI } from '../../interfaces'
+import { IAPI, IState, ITotalsList } from '../../interfaces'
 import { Investor, Pool, Quest } from '../../modules'
 import { createHashMappings } from '../../utils/logicUtils'
-import { RELATION_TYPE, TABLE } from './constants'
+import { getQuerySnapshotById, RELATION_TYPE, TABLE } from './constants'
 import InvestorUploadDto from './dtos/InvestorUploadDto'
 import PoolUploadDto from './dtos/PoolUploadDto'
 import QuestUploadDto from './dtos/QuestUploadDto'
@@ -22,6 +22,8 @@ import SnapshotTotalsUploadDto from './dtos/SnapshotTotalsUploadDto'
 import PostgrestFilterBuilder from '@supabase/postgrest-js/dist/module/PostgrestFilterBuilder'
 import { Schema } from 'inspector'
 import SnapshotUploadDto from './dtos/SnapshotUploadDto'
+import SnapshotWithTotalsDto from './dtos/SnapshotWithTotalsDto'
+import { gatherStateFromSnapshot } from './downloadHellpers'
 
 export interface ConstructorSimConfig {
     dbUrl: string
@@ -481,5 +483,50 @@ export default class SimAPI implements IAPI {
             .single()
 
         return snapshotDbResponse.data.id
+    }
+
+    async fetchTotalsList(): Promise<ITotalsList> {
+        const { data, error } = await this._dbClient.from(TABLE.snapshot)
+            .select(`
+            *, 
+            ${TABLE.snapshot_totals}(*),
+            scenario:scenario_id ( name ),
+            creator: creator_id ( email )
+            `)
+        const creatorsResponse = await this._dbClient
+            .from(TABLE.user)
+            .select('email')
+
+        if (error || creatorsResponse.error) {
+            console.error('fetchTotalsList().error:', error)
+        }
+
+        return {
+            snapshots: data.map((snapshotData) =>
+                new SnapshotWithTotalsDto(snapshotData).toObj()
+            ),
+            creators: creatorsResponse.data
+        }
+    }
+
+    async fetchSnapshotById(snapshotId: number): Promise<IState> {
+        try {
+            const snapshotResponse = await this._dbClient
+                .from(TABLE.snapshot)
+                .select(getQuerySnapshotById())
+                .eq('id', snapshotId)
+                .limit(1)
+                .single()
+
+            if (snapshotResponse.error) {
+                console.error(snapshotResponse.error.message)
+                return null
+            }
+
+            return gatherStateFromSnapshot(snapshotResponse.data)
+        } catch (err) {
+            console.error('ERR: fetchTotalsById()', err)
+            return null
+        }
     }
 }
