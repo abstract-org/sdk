@@ -1,3 +1,5 @@
+import { QuestKind } from '../../../modules'
+
 export class QuestUploadDto {
     author_id: number
     name: string
@@ -5,6 +7,8 @@ export class QuestUploadDto {
     is_human: boolean
     initial_balance_a: number
     initial_balance_b: number
+    kind?: QuestKind
+    content?: string
     created_at: Date
 
     constructor(data, investorMappings) {
@@ -15,6 +19,8 @@ export class QuestUploadDto {
         this.is_human = !!data.isHuman
         this.initial_balance_a = data.initialBalanceA || 0
         this.initial_balance_b = data.initialBalanceB || 0
+        this.kind = data.kind
+        this.content = data.content
         this.created_at = data.created_at || new Date()
     }
 

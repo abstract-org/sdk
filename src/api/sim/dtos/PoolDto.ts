@@ -1,5 +1,5 @@
 import { convertArrayToHashMapByKey } from '../../../utils/logicUtils'
-import { Pool } from '../../../modules'
+import { Pool, PoolType } from '../../../modules'
 import { PoolDataDto } from './PoolDataDto'
 import { PositionDto } from './PositionDto'
 import { PosOwnersDto } from './PosOwnersDto'
@@ -9,7 +9,7 @@ export class PoolDto {
     name: string
     token0: string
     token1: string
-    type: string
+    type: PoolType
     hash: string
     created_at: Date
     pool_data: PoolDataDto

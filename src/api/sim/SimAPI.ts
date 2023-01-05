@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import HashMap from 'hashmap'
-
-import { IAPI, IState, ITotalsList } from '../../interfaces'
+import { IAPI, IState, ITotalsList, TPoolName } from '../../interfaces'
 import { Investor, Pool, Quest } from '../../modules'
 import { createHashMappings } from '../../utils/logicUtils'
 import { getQuerySnapshotById, RELATION_TYPE, TABLE } from './constants'
@@ -21,7 +20,8 @@ import {
     InvestorNavsUploadDto,
     SnapshotTotalsUploadDto,
     SnapshotUploadDto,
-    SnapshotWithTotalsDto
+    SnapshotWithTotalsDto,
+    QuestDto
 } from './dtos'
 import { gatherStateFromSnapshot } from './downloadHelpers'
 
@@ -41,9 +41,46 @@ export default class SimAPI implements IAPI {
         this.RELATION_TYPE = RELATION_TYPE
     }
 
-    createQuest(name: string, description: string): boolean {
-        // implementation details
-        return true
+    async createQuest(
+        snapshotId: number,
+        investorId: number,
+        questData: Partial<Omit<Quest, 'id'>>,
+        followingId?: string
+    ): Promise<Quest> {
+        const quest = Quest.create(questData.name)
+        try {
+            const questNamesToId = await this.saveQuests(
+                [quest],
+                [quest.name],
+                new HashMap([[quest.name, investorId]]),
+                snapshotId
+            )
+
+            let pool
+            if (followingId) {
+                const tokenLeft = await this.fetchQuest(followingId)
+                questNamesToId.set(tokenLeft.name, tokenLeft.id)
+                pool = quest.createPool({ tokenLeft })
+            } else {
+                // TODO: define if we need USDC pool for each quest
+                // pool = quest.createPool()
+            }
+
+            const poolResponse =
+                pool &&
+                (await this.savePools([pool], questNamesToId, snapshotId))
+
+            if (!poolResponse) {
+                // rollback quest creation
+                // await this.deleteQuest(questNamesToId.get(ques.name))
+                // return null
+            }
+
+            return quest
+        } catch (err) {
+            console.log(err)
+            return null
+        }
     }
 
     createPool(name: string, description: string): boolean {
@@ -528,6 +565,45 @@ export default class SimAPI implements IAPI {
             console.error('ERR: fetchTotalsById()', err)
             return null
         }
+    }
+
+    async fetchQuest(questId: string): Promise<Quest> {
+        let quest: Quest
+        try {
+            const { data } = await this._dbClient
+                .from(TABLE.quest)
+                .select('*, pools')
+                .eq('id', Number(questId))
+                .maybeSingle()
+            const questPools = await this.fetchQuestPools(questId)
+            if (data) {
+                quest = new QuestDto(data, questPools).toQuest() as Quest
+            }
+        } catch (err) {
+            console.error('ERR: fetchQuests()', err)
+        }
+
+        return quest
+    }
+
+    async fetchQuestPools(questId: string): Promise<TPoolName[]> {
+        let result = []
+        try {
+            const { data } = await this._dbClient
+                .from(TABLE.pool)
+                .select(
+                    `id,
+                    name,
+                    leftId:token1(id),
+                    rightId:token1(id)`
+                )
+                .or(`leftId.eq.${questId},rightId.eq.${questId}`)
+            result = data && data.map((pool) => pool.name)
+        } catch (err) {
+            console.error('ERR: fetchQuests()', err)
+        }
+
+        return result
     }
 
     get auth() {

@@ -32,6 +32,21 @@ const TEMP_CONFIG = {
         }
     ]
 }
+export declare type QuestKind =
+    | 'INDEX'
+    | 'TITLE'
+    | 'DOI'
+    | 'ABSTRACT'
+    | 'PDF'
+    | 'BODY'
+    | 'IMAGE'
+    | 'EMBED_CODE'
+    | 'USDC'
+    | 'AUTHOR'
+    | 'CATEGORY'
+    | 'LANGUAGE'
+    | 'PUBLICATION_DATE'
+    | 'JOURNAL_NAME'
 
 export class Quest {
     id // make uuid
@@ -41,6 +56,8 @@ export class Quest {
     initialBalanceA = 0
     initialBalanceB = 0
     positions = new HashMap()
+    kind?: QuestKind
+    content?: string
 
     /**
      * @description Instantiates new Token with name

@@ -24,7 +24,12 @@ export interface IAPI {
     updatePool?(): void
 
     // Quests API
-    createQuest(name: string, description: string): boolean
+    createQuest(
+        snapshotId: number,
+        investorId: number,
+        quest: Partial<Omit<Quest, 'id'>>,
+        followingId: string | null
+    ): Promise<Quest>
     citeQuest(questId: number, userId: string): boolean
     getQuestsBySnapshot?(snapshotId: number, day?: number): Array<IQuest>
     getQuestDependants?(questId: number): Array<IQuest>
@@ -143,6 +148,8 @@ export interface IAPI {
     fetchTotalsList?(): Promise<ITotalsList>
 
     fetchSnapshotById?(snapshotId: number): Promise<IState>
+
+    fetchQuest(questId: string): Promise<Quest>
 
     auth?()
 }

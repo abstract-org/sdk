@@ -17,6 +17,7 @@ interface Position {
     pp?: number
     right?: number
 }
+export declare type PoolType = 'QUEST' | 'VALUE_LINK' | 'BLOCK'
 
 export class Pool {
     id: string
@@ -47,7 +48,7 @@ export class Pool {
     pos = new HashMap<any, any>()
     posOwners = []
 
-    type = 'VALUE_LINK'
+    type: PoolType = 'VALUE_LINK'
     private dryState = {}
 
     /**

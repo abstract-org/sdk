@@ -1,4 +1,4 @@
-import { Quest, UsdcToken } from '../../../modules'
+import { Quest, QuestKind, UsdcToken } from '../../../modules'
 
 export class QuestDto {
     id: number
@@ -9,6 +9,8 @@ export class QuestDto {
     pools: string[]
     initial_balance_a: number
     initial_balance_b: number
+    kind?: QuestKind
+    content?: string
     created_at: Date
 
     constructor(data, pools) {
@@ -18,6 +20,9 @@ export class QuestDto {
         this.hash = data.hash
         this.is_human = data.is_human
         this.initial_balance_a = data.initial_balance_a
+        this.initial_balance_b = data.initial_balance_b
+        this.kind = data.kind
+        this.content = data.content
         this.initial_balance_b = data.initial_balance_b
         this.pools = pools
         this.created_at = data.created_at
@@ -49,6 +54,8 @@ export class QuestDto {
         token.hash = this.hash
         token.initialBalanceA = this.initial_balance_a
         token.initialBalanceB = this.initial_balance_b
+        token.kind = this.kind
+        token.content = this.content
 
         return token
     }
