@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import HashMap from 'hashmap'
 
-import { IAPI, IState, ITotalsList } from '../../interfaces'
+import { IAPI, IClusterData, IQuest, IState, ITotalsList } from '../../interfaces'
 import { Investor, Pool, Quest } from '../../modules'
 import { createHashMappings } from '../../utils/logicUtils'
 import { getQuerySnapshotById, RELATION_TYPE, TABLE } from './constants'
@@ -44,6 +44,65 @@ export default class SimAPI implements IAPI {
     createQuest(name: string, description: string): boolean {
         // implementation details
         return true
+    }
+
+    async getQuestCluster(questId: number): Promise<IClusterData> {
+        try {
+            const citedCount = await this._dbClient
+                .from(this.TABLE.pool)
+                .select('*', { count: 'exact' })
+                .eq('token0', questId)
+                .eq('type', 'VALUE_LINK')
+
+            const followedBy = await this._dbClient
+                .from(this.TABLE.pool)
+                .select(`token1 (*)`)
+                .eq('token0', questId)
+                .eq('type', 'BLOCK')
+
+            const following = await this._dbClient
+                .from(this.TABLE.pool)
+                .select(`token0 (*)`)
+                .eq('token1', questId)
+                .eq('type', 'VALUE_LINK')
+
+            return {
+                cited: citedCount,
+                followedBy: await Promise.all(
+                    followedBy.map(async ({ follower }) => {
+                        let image: Quest | null = null
+
+                        if (follower.kind === 'AUTHOR') {
+                            image = await this._dbClient
+                                .from(this.TABLE.pool)
+                                .select('token1 (*)')
+                                .eq('token0', follower.id)
+                                .eq('kind', 'BLOCK')
+                                .eq('token1.kind', 'IMAGE')
+                        }
+
+                        return { ...follower, image }
+                    })
+                ),
+                following: following
+            }
+        } catch (e) {
+            console.log('getQuestCluster error: ', e.message)
+        }
+    }
+
+    async getQuestById(questId: number): Promise<{ quest: IQuest, cluster: IClusterData }> {
+        const quest = await this._dbClient
+            .from(this.TABLE.quest)
+            .select('*')
+            .eq('id', questId)
+
+        const questClusterData = await this.getQuestCluster(questId)
+
+        return {
+            quest: quest,
+            cluster: questClusterData
+        }
     }
 
     createPool(name: string, description: string): boolean {
@@ -459,11 +518,11 @@ export default class SimAPI implements IAPI {
     }
 
     async saveSnapshot({
-        scenarioId = 1,
-        seed,
-        creatorId,
-        currentDay
-    }: {
+                           scenarioId = 1,
+                           seed,
+                           creatorId,
+                           currentDay
+                       }: {
         scenarioId?: number
         seed: string
         creatorId: string

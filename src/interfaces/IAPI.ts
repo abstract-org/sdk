@@ -2,6 +2,7 @@ import { Investor, Pool, Quest } from '../modules'
 import HashMap from 'hashmap'
 
 import {
+    IClusterData,
     ILog,
     IPool,
     IPosition,
@@ -31,6 +32,7 @@ export interface IAPI {
     getQuestDependencies?(questId: number): Array<IQuest>
     getQuestsByPath?(path: string): Array<IQuest>
     updateQuest?(): void
+    getQuestById?(questId: number): Promise<{quest: IQuest, cluster: IClusterData}>
 
     // Swaps API
     getSwaps?(): Array<ISwap>
