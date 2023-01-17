@@ -1,7 +1,7 @@
 import { SupabaseRepository } from './SupabaseRepository'
-import { IQuest, IQuestPersistance } from '../interfaces'
+import { IQuest, IQuestPersistence } from '../interfaces'
 
-export class QuestPersistenceService implements IQuestPersistance {
+export class QuestPersistenceService implements IQuestPersistence {
     constructor(public dataStoreRepository: SupabaseRepository) {
     }
 

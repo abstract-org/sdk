@@ -1,5 +1,4 @@
-import { IDataStoreRepository } from '../interfaces'
-import { IPool, IQuest, IWallet } from '../interfaces'
+import { IPool, IQuest, IWallet, IDataStoreRepository } from '../interfaces'
 
 export class SupabaseRepository implements IDataStoreRepository {
     constructor(config: any) {

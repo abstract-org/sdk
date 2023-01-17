@@ -1,6 +1,6 @@
-import { IPoolPersistance, IDataStoreRepository, IPool } from '../interfaces'
+import { IPoolPersistence, IDataStoreRepository, IPool } from '../interfaces'
 
-export class PoolPersistenceService implements IPoolPersistance {
+export class PoolPersistenceService implements IPoolPersistence {
     constructor(private dataStoreRepository: IDataStoreRepository) {
     }
 
