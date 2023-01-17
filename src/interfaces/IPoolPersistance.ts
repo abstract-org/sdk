@@ -1,6 +1,6 @@
 import { IPool } from './IPool'
 
-export interface IPoolPersistance {
+export interface IPoolPersistence {
     getPools(poolHashes: Array<string>): Promise<Array<IPool>>
 
     getPoolsByKind(kind: string, limit: number): Promise<Array<IPool>>

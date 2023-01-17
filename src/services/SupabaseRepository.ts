@@ -1,9 +1,10 @@
-import { IDataStoreRepository } from '../interfaces/IDataStoreRepository'
+import { IDataStoreRepository } from '../interfaces'
 import { IPool, IQuest, IWallet } from '../interfaces'
-import { Service } from 'typedi'
 
-@Service()
 export class SupabaseRepository implements IDataStoreRepository {
+    constructor(config: any) {
+    }
+
     createPool(data: IPool): Promise<IPool> {
         throw new Error('Not implemented')
     }

@@ -1,6 +1,6 @@
 import { IQuest } from './IQuest'
 
-export interface IQuestPersistance {
+export interface IQuestPersistence {
     getQuests(questHashes: Array<string>): Promise<Array<IQuest>>
 
     getQuestsByKind(kind: string, limit: number): Promise<Array<IQuest>>

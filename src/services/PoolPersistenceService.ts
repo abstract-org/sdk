@@ -1,14 +1,10 @@
-import { Service } from 'typedi'
-import { SupabaseRepository } from './SupabaseRepository'
-import { IPoolPersistance } from '../interfaces/IPoolPersistance'
-import { IPool } from '../interfaces'
+import { IPoolPersistance, IDataStoreRepository, IPool } from '../interfaces'
 
-@Service()
-export class PoolPersistanceService implements IPoolPersistance {
-    constructor(private dataStoreRepository: SupabaseRepository) {
+export class PoolPersistenceService implements IPoolPersistance {
+    constructor(private dataStoreRepository: IDataStoreRepository) {
     }
 
-    getPools(poolHashes: Array<string>): Promise<Array<IPool>> {
+    async getPools(poolHashes: Array<string>): Promise<Array<IPool>> {
         throw new Error('Not implemented')
     }
 

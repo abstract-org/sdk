@@ -1,10 +1,7 @@
-import { Service } from 'typedi'
 import { SupabaseRepository } from './SupabaseRepository'
-import { IQuest } from '../interfaces'
-import { IQuestPersistance } from '../interfaces/IQuestPersistance'
+import { IQuest, IQuestPersistance } from '../interfaces'
 
-@Service()
-export class QuestPersistanceService implements IQuestPersistance {
+export class QuestPersistenceService implements IQuestPersistance {
     constructor(public dataStoreRepository: SupabaseRepository) {
     }
 
