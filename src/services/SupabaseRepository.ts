@@ -2,16 +2,17 @@ import { IPool, IQuest, IWallet, IDataStoreRepository } from '../interfaces'
 import { SupabaseClient, createClient } from '@supabase/supabase-js'
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { QueryFilterType } from '../types'
+import { ConstructorSimConfig } from '../api/sim/SimAPI'
 
 type TableNameType = 'pools' | 'quests' | 'wallets'
 
 export class SupabaseRepository implements IDataStoreRepository {
     client: SupabaseClient
 
-    constructor(supabaseUrl, supabaseAnonKey) {
+    constructor(config: ConstructorSimConfig) {
         this.client = createClient(
-            supabaseUrl,
-            supabaseAnonKey
+            config.dbUrl,
+            config.accessToken
         )
     }
 
@@ -23,7 +24,7 @@ export class SupabaseRepository implements IDataStoreRepository {
         return await this.update('pools', data, [{ filterType: 'eq', propertyName: 'id', value: id }])
     }
 
-    async findPoolByFilter(filters: QueryFilterType): Promise<IPool> {
+    async findPoolByFilter(filters: QueryFilterType): Promise<Array<IPool>> {
         return await this.find('pools', filters)
     }
 
@@ -91,13 +92,15 @@ export class SupabaseRepository implements IDataStoreRepository {
         }
     }
 
-    private async find(tableName: TableNameType, filters: QueryFilterType): Promise<IPool | IQuest | IWallet> {
+    private async find(tableName: TableNameType, filters: QueryFilterType): Promise<Array<IPool | IQuest | IWallet>> {
         try {
             let query = this.client.from(tableName).select()
 
             query = this.applyFiltersToQuery(query, filters)
 
-            return await query
+            const response = await query
+
+            return response.data
         } catch (e) {
             console.error(`[SupabaseRepository] find for table ${tableName} has failed with error ${e.message}`)
         }

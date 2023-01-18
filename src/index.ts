@@ -27,10 +27,10 @@ export class SimSdk {
 
         switch (adapter) {
             case 'supabase':
-                repository = new SupabaseRepository(config)
+                repository = new SupabaseRepository(config as ConstructorSimConfig)
                 break
             default:
-                repository = new SupabaseRepository(config)
+                repository = new SupabaseRepository(config as ConstructorSimConfig)
                 break
         }
 
