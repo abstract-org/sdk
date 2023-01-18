@@ -36,6 +36,10 @@ export class SimSdk {
 
         return { ...getPersistenceLayer(repository) }
     }
+
+    static initWithDataStore(dataStore: IDataStoreRepository): { PoolPersistence: IPoolPersistence, QuestPersistence: IQuestPersistence } {
+        return { ...getPersistenceLayer(dataStore) }
+    }
 }
 
 export * as LogicUtils from './utils/logicUtils'
