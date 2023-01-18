@@ -1,1 +1,4 @@
-export interface IQuest {}
+export interface IQuest {
+    hash: string;
+    kind: string;
+}

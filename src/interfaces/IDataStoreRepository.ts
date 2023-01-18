@@ -1,7 +1,8 @@
 import { IQuest, IPool, IWallet } from './index'
+import { QueryFilterType } from '../types'
 
 export interface IDataStoreRepository {
-    findPoolByFilter(filter: string): Promise<IPool>
+    findPoolByFilter(filters: QueryFilterType): Promise<Array<IPool>>
 
     createPool(data: IPool): Promise<IPool>
 
