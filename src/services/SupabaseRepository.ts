@@ -1,4 +1,12 @@
-import { IPool, IQuest, IWallet, IDataStoreRepository, IPoolCreate, IPoolQueryUpdate } from '../interfaces'
+import {
+    IPool,
+    IQuest,
+    IWallet,
+    IDataStoreRepository,
+    QuestDto,
+    IQueryOptions,
+    IPoolCreate, IPoolQueryUpdate
+} from '../interfaces'
 import { SupabaseClient, createClient } from '@supabase/supabase-js'
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { QueryFilterType } from '../types'
@@ -33,27 +41,17 @@ export class SupabaseRepository implements IDataStoreRepository {
     }
 
     async createQuest(data: IQuest): Promise<IQuest> {
-        try {
-            const resp = await this.client
-                .from('quests')
-                .insert({
-                    hash: data.hash,
-                    kind: data.kind
-                })
-                .select('*')
-                .maybeSingle()
-
-            return resp.data
-        } catch (err) {
-            return null
-        }
+        return this.create('quests', data)
     }
 
     updateQuest(id: number, data: IQuest): Promise<IQuest> {
         throw new Error('Not implemented')
     }
 
-    findQuestByFilter(filter: string): Promise<IQuest> {
+    findQuestsByFilter(
+        filter: QueryFilterType,
+        options?: IQueryOptions
+    ): Promise<QuestDto[]> {
         throw new Error('Not implemented')
     }
 
@@ -110,8 +108,11 @@ export class SupabaseRepository implements IDataStoreRepository {
         }
     }
 
-    private applyFiltersToQuery(query: PostgrestFilterBuilder<any, any, any>, filters: QueryFilterType) {
-        filters.forEach(filter => {
+    private applyFiltersToQuery(
+        query: PostgrestFilterBuilder<any, any, any>,
+        filters: QueryFilterType
+    ) {
+        filters.forEach((filter) => {
             query[filter.filterType](filter.propertyName, filter.value)
         })
 

@@ -1,22 +1,35 @@
-import { IQuest, IPool, IWallet } from './index'
+import { IQuest, IPool, IWallet, QuestDto, QuestUploadDto } from './index'
 import { QueryFilterType } from '../types'
 
+export interface IQueryOptions {
+    limit?: number
+}
+
 export interface IDataStoreRepository {
-    findPoolByFilter(filters: QueryFilterType): Promise<Array<IPool>>
+    findPoolByFilter(
+        filters: QueryFilterType,
+        options?: IQueryOptions
+    ): Promise<Array<IPool>>
 
     createPool(data: IPool): Promise<IPool>
 
     updatePool(id: number, data: IPool): Promise<IPool>
 
-    findWalletByFilter(filters: QueryFilterType): Promise<Array<IWallet>>
+    findWalletByFilter(
+        filter: QueryFilterType,
+        options?: IQueryOptions
+    ): Promise<Array<IWallet>>
 
     createWallet(data: IWallet): Promise<IWallet>
 
     updateWallet(id: number, data: IWallet): Promise<IWallet>
 
-    findQuestByFilter(filter: string): Promise<IQuest>
+    findQuestsByFilter(
+        filter: QueryFilterType,
+        options?: IQueryOptions
+    ): Promise<QuestDto[]>
 
-    createQuest(data: IQuest): Promise<IQuest>
+    createQuest(data: QuestUploadDto): Promise<IQuest>
 
-    updateQuest(id: number, data: IQuest): Promise<IQuest>
+    updateQuest(id: number, data: Partial<QuestUploadDto>): Promise<IQuest>
 }
