@@ -8,7 +8,7 @@ export interface IDataStoreRepository {
 
     updatePool(id: number, data: IPool): Promise<IPool>
 
-    findWalletByFilter(filter: string): Promise<IWallet>
+    findWalletByFilter(filters: QueryFilterType): Promise<Array<IWallet>>
 
     createWallet(data: IWallet): Promise<IWallet>
 

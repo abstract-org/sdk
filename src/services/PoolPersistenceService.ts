@@ -11,8 +11,10 @@ export class PoolPersistenceService implements IPoolPersistence {
         return await this.dataStoreRepository.findPoolByFilter(filters)
     }
 
-    getPoolsByKind(kind: string, limit: number): Promise<Array<IPool>> {
-        throw new Error('Not implemented')
+    async getPoolsByKind(kind: string, limit: number): Promise<Array<IPool>> {
+        const filters: QueryFilterType = [{ filterType: 'eq', propertyName: 'kind', value: kind }]
+
+        return await this.dataStoreRepository.findPoolByFilter(filters)
     }
 
     getPoolsByPriceRange(priceMin: number, priceMax: number, limit: number): Promise<IPool> {
@@ -23,11 +25,11 @@ export class PoolPersistenceService implements IPoolPersistence {
         throw new Error('Not implemented')
     }
 
-    savePool(data: IPool): Promise<IPool> {
-        throw new Error('Not implemented')
+    async savePool(data: IPool): Promise<IPool> {
+        return await this.dataStoreRepository.createPool(data)
     }
 
-    updatePool(questId: number, data: IPool): Promise<IPool> {
-        throw new Error('Not implemented')
+    async updatePool(poolId: number, data: IPool): Promise<IPool> {
+        return await this.dataStoreRepository.updatePool(poolId, data)
     }
 }
