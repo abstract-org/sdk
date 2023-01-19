@@ -1,4 +1,12 @@
-import { IPool, IQuest, IWallet, IDataStoreRepository } from '../interfaces'
+import {
+    IPool,
+    IQuest,
+    IWallet,
+    IDataStoreRepository,
+    IQueryFilter,
+    QuestDto,
+    IQueryOptions
+} from '../interfaces'
 import { SupabaseClient, createClient } from '@supabase/supabase-js'
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { QueryFilterType } from '../types'
@@ -49,11 +57,14 @@ export class SupabaseRepository implements IDataStoreRepository {
         throw new Error('Not implemented')
     }
 
-    findQuestByFilter(filter: string): Promise<IQuest> {
+    findQuestsByFilter(
+        filter: IQueryFilter,
+        options?: IQueryOptions
+    ): Promise<QuestDto[]> {
         throw new Error('Not implemented')
     }
 
-    findWalletByFilter(filter: string): Promise<IWallet> {
+    findWalletByFilter(filter: IQueryFilter): Promise<IWallet> {
         throw new Error('Not implemented')
     }
 

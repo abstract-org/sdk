@@ -1,27 +1,67 @@
 import { SupabaseRepository } from './SupabaseRepository'
-import { IQuest, IQuestPersistence } from '../interfaces'
+import {
+    IDataStoreRepository,
+    IQuest,
+    IQuestPersistence,
+    QuestUploadDto
+} from '../interfaces'
 
 export class QuestPersistenceService implements IQuestPersistence {
-    constructor(public dataStoreRepository: SupabaseRepository) {
+    constructor(private dataStoreRepository: IDataStoreRepository) {}
+
+    async getQuests(questHashes: Array<string>): Promise<Array<IQuest>> {
+        const hashesAsStr = questHashes.map((v) => `"${v}"`).join(',')
+        const filter = {
+            field: 'hash',
+            op: 'in',
+            value: `(${hashesAsStr})`
+        }
+        const questDtoList = await this.dataStoreRepository.findQuestsByFilter(
+            filter
+        )
+
+        return questDtoList.map((questDto) => questDto.toQuest())
     }
 
-    getQuests(questHashes: Array<string>): Promise<Array<IQuest>> {
-        throw new Error('Not implemented')
+    async getQuestsByKind(kind: string, limit: number): Promise<Array<IQuest>> {
+        const filter = {
+            field: 'kind',
+            op: 'eq',
+            value: kind
+        }
+        const questDtoList = await this.dataStoreRepository.findQuestsByFilter(
+            filter,
+            { limit }
+        )
+
+        return questDtoList.map((questDto) => questDto.toQuest())
     }
 
-    getQuestsByKind(kind: string, limit: number): Promise<Array<IQuest>> {
-        throw new Error('Not implemented')
+    async getQuestsByContent(
+        content: string,
+        limit: number
+    ): Promise<Array<IQuest>> {
+        const filter = {
+            field: 'content',
+            op: 'eq',
+            value: content
+        }
+        const questDtoList = await this.dataStoreRepository.findQuestsByFilter(
+            filter,
+            { limit }
+        )
+
+        return questDtoList.map((questDto) => questDto.toQuest())
     }
 
-    getQuestsByContent(content: string, limit: number): Promise<Array<IQuest>> {
-        throw new Error('Not implemented')
+    async saveQuest(data: QuestUploadDto): Promise<IQuest> {
+        return this.dataStoreRepository.createQuest(data)
     }
 
-    saveQuest(data: IQuest): Promise<IQuest> {
-        throw new Error('Not implemented')
-    }
-
-    updateQuest(questId: number, data: IQuest): Promise<IQuest> {
-        throw new Error('Not implemented')
+    async updateQuest(
+        questId: number,
+        data: Partial<QuestUploadDto>
+    ): Promise<IQuest> {
+        return this.dataStoreRepository.updateQuest(questId, data)
     }
 }

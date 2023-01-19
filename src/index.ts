@@ -1,8 +1,16 @@
 import 'reflect-metadata'
 import { ConstructorSimConfig } from './api/sim/SimAPI'
 import { ConstructorWeb3Config } from './api/web3/Web3API'
-import { PoolPersistenceService, QuestPersistenceService, SupabaseRepository } from './services'
-import { IDataStoreRepository, IPoolPersistence, IQuestPersistence } from './interfaces'
+import {
+    PoolPersistenceService,
+    QuestPersistenceService,
+    SupabaseRepository
+} from './services'
+import {
+    IDataStoreRepository,
+    IPoolPersistence,
+    IQuestPersistence
+} from './interfaces'
 
 const getPersistenceLayer = (repository) => ({
     PoolPersistence: new PoolPersistenceService(repository),
@@ -22,7 +30,10 @@ export class SimSdk {
     static init(
         adapter: string = 'supabase',
         config: ConstructorSimConfig | ConstructorWeb3Config
-    ): { PoolPersistence: IPoolPersistence, QuestPersistence: IQuestPersistence } {
+    ): {
+        PoolPersistence: IPoolPersistence
+        QuestPersistence: IQuestPersistence
+    } {
         let repository: IDataStoreRepository
 
         switch (adapter) {
@@ -37,7 +48,10 @@ export class SimSdk {
         return { ...getPersistenceLayer(repository) }
     }
 
-    static initWithDataStore(dataStore: IDataStoreRepository): { PoolPersistence: IPoolPersistence, QuestPersistence: IQuestPersistence } {
+    static initWithDataStore(dataStore: IDataStoreRepository): {
+        PoolPersistence: IPoolPersistence
+        QuestPersistence: IQuestPersistence
+    } {
         return { ...getPersistenceLayer(dataStore) }
     }
 }
@@ -45,3 +59,4 @@ export class SimSdk {
 export * as LogicUtils from './utils/logicUtils'
 export * as MathUtils from './utils/mathUtils'
 export * as Modules from './modules'
+export * as types from './types'
