@@ -18,10 +18,7 @@ export class SupabaseRepository implements IDataStoreRepository {
     client: SupabaseClient
 
     constructor(config: ConstructorSimConfig) {
-        this.client = createClient(
-            config.dbUrl,
-            config.accessToken
-        )
+        this.client = createClient(config.dbUrl, config.accessToken)
     }
 
     async createPool(data: IPool): Promise<IPool> {
@@ -29,7 +26,9 @@ export class SupabaseRepository implements IDataStoreRepository {
     }
 
     async updatePool(id: number, data: IPool): Promise<IPool> {
-        return await this.update('pools', data, [{ filterType: 'eq', propertyName: 'id', value: id }])
+        return await this.update('pools', data, [
+            { filterType: 'eq', propertyName: 'id', value: id }
+        ])
     }
 
     async findPoolByFilter(filters: QueryFilterType): Promise<Array<IPool>> {
@@ -37,20 +36,7 @@ export class SupabaseRepository implements IDataStoreRepository {
     }
 
     async createQuest(data: IQuest): Promise<IQuest> {
-        try {
-            const resp = await this.client
-                .from('quests')
-                .insert({
-                    hash: data.hash,
-                    kind: data.kind
-                })
-                .select('*')
-                .maybeSingle()
-
-            return resp.data
-        } catch (err) {
-            return null
-        }
+        return this.create('quests', data)
     }
 
     updateQuest(id: number, data: IQuest): Promise<IQuest> {
@@ -76,22 +62,26 @@ export class SupabaseRepository implements IDataStoreRepository {
         throw new Error('Not implemented')
     }
 
-    private async create(tableName: TableNameType, data: IPool | IQuest | IWallet): Promise<IPool | IQuest | IWallet> {
+    private async create(
+        tableName: TableNameType,
+        data: IPool | IQuest | IWallet
+    ): Promise<IPool | IQuest | IWallet> {
         try {
-            return this.client
-                .from(tableName)
-                .insert(data)
-                .select('*')
+            return this.client.from(tableName).insert(data).select('*')
         } catch (e) {
-            console.error(`[SupabaseRepository] create for table ${tableName} has failed with error ${e.message}`)
+            console.error(
+                `[SupabaseRepository] create for table ${tableName} has failed with error ${e.message}`
+            )
         }
     }
 
-    private async update(tableName: TableNameType, data: IPool | IQuest | IWallet, filters: QueryFilterType): Promise<IPool | IQuest | IWallet> {
+    private async update(
+        tableName: TableNameType,
+        data: IPool | IQuest | IWallet,
+        filters: QueryFilterType
+    ): Promise<IPool | IQuest | IWallet> {
         try {
-            let query = this.client
-                .from(tableName)
-                .update(data)
+            let query = this.client.from(tableName).update(data)
 
             query = this.applyFiltersToQuery(query, filters)
 
@@ -99,11 +89,16 @@ export class SupabaseRepository implements IDataStoreRepository {
 
             return await query
         } catch (e) {
-            console.error(`[SupabaseRepository] update for table ${tableName} has failed with error ${e.message}`)
+            console.error(
+                `[SupabaseRepository] update for table ${tableName} has failed with error ${e.message}`
+            )
         }
     }
 
-    private async find(tableName: TableNameType, filters: QueryFilterType): Promise<Array<IPool | IQuest | IWallet>> {
+    private async find(
+        tableName: TableNameType,
+        filters: QueryFilterType
+    ): Promise<Array<IPool | IQuest | IWallet>> {
         try {
             let query = this.client.from(tableName).select()
 
@@ -113,12 +108,17 @@ export class SupabaseRepository implements IDataStoreRepository {
 
             return response.data
         } catch (e) {
-            console.error(`[SupabaseRepository] find for table ${tableName} has failed with error ${e.message}`)
+            console.error(
+                `[SupabaseRepository] find for table ${tableName} has failed with error ${e.message}`
+            )
         }
     }
 
-    private applyFiltersToQuery(query: PostgrestFilterBuilder<any, any, any>, filters: QueryFilterType) {
-        filters.forEach(filter => {
+    private applyFiltersToQuery(
+        query: PostgrestFilterBuilder<any, any, any>,
+        filters: QueryFilterType
+    ) {
+        filters.forEach((filter) => {
             query[filter.filterType](filter.propertyName, filter.value)
         })
 

@@ -1,4 +1,5 @@
 import { IQuest, IPool, IWallet, QuestDto, QuestUploadDto } from './index'
+import { QueryFilterType } from '../types'
 
 export interface IQueryFilter {
     field: string
@@ -12,9 +13,9 @@ export interface IQueryOptions {
 
 export interface IDataStoreRepository {
     findPoolByFilter(
-        filter: IQueryFilter,
+        filters: QueryFilterType,
         options?: IQueryOptions
-    ): Promise<IPool>
+    ): Promise<Array<IPool>>
 
     createPool(data: IPool): Promise<IPool>
 
