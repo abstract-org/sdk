@@ -3,6 +3,7 @@ import HashMap from 'hashmap'
 
 import { Pool } from './Pool'
 import { UsdcToken } from './UsdcToken'
+import { IQuest } from '../interfaces'
 
 const TEMP_CONFIG = {
     INITIAL_LIQUIDITY: [
@@ -41,6 +42,12 @@ export class Quest {
     initialBalanceA = 0
     initialBalanceB = 0
     positions = new HashMap()
+    kind: string
+    content: string
+    creatorHash: string
+    initialBalance: number
+    createdAt: Date
+    publishedAt: Date
 
     /**
      * @description Instantiates new Token with name
@@ -53,6 +60,24 @@ export class Quest {
         thisToken.hash = '0x' + sha256(name)
 
         return thisToken
+    }
+
+    /**
+     * @description Instantiates new Quest and hydrates it with DTO
+     */
+    static instantiate(questDto: IQuest): Quest {
+        const quest = new Quest()
+        quest.id = questDto.id
+        quest.hash = questDto.hash
+        quest.kind = questDto.kind
+        quest.content = questDto.content
+        quest.creatorHash = questDto.creator_hash
+        quest.name = questDto.hash
+        quest.pools = questDto.pools
+        quest.initialBalanceA = questDto.initial_balance
+        quest.initialBalanceB = questDto.initial_balance
+
+        return quest
     }
 
     createPool({

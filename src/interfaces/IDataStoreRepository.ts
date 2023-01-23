@@ -1,5 +1,4 @@
-import {QuestDto, QuestUploadDto} from '../api/sim/dtos'
-import { IQuest, IPool, IWallet, IWalletCreate, IWalletQueryUpdate } from './index'
+import { IQuest, IPool, IWallet, IWalletCreate, IWalletQueryUpdate, IQuestCreate, IQuestUpdate } from './index'
 import { QueryFilterType } from '../types'
 
 export interface IQueryOptions {
@@ -28,9 +27,9 @@ export interface IDataStoreRepository {
     findQuestsByFilter(
         filter: QueryFilterType,
         options?: IQueryOptions
-    ): Promise<QuestDto[]>
+    ): Promise<Array<IQuest>>
 
-    createQuest(data: QuestUploadDto): Promise<IQuest>
+    createQuest(data: IQuestCreate): Promise<IQuest>
 
-    updateQuest(id: number, data: Partial<QuestUploadDto>): Promise<IQuest>
+    updateQuest(id: number, data: Partial<IQuestUpdate>): Promise<IQuest>
 }

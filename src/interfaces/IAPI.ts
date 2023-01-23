@@ -12,6 +12,7 @@ import {
     ITotalsList
 } from './index'
 
+// @deprecated
 export interface IAPI {
     // Snapshot API
     getSnapshotById?(snapshotId: number): ISnapshot
