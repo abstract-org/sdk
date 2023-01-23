@@ -4,17 +4,19 @@ import { ConstructorWeb3Config } from './api/web3/Web3API'
 import {
     PoolPersistenceService,
     QuestPersistenceService,
+    WalletPersistenceService,
     SupabaseRepository
 } from './services'
 import {
     IDataStoreRepository,
     IPoolPersistence,
-    IQuestPersistence
+    IQuestPersistence, IWalletPersistance
 } from './interfaces'
 
 const getPersistenceLayer = (repository) => ({
     PoolPersistence: new PoolPersistenceService(repository),
-    QuestPersistence: new QuestPersistenceService(repository)
+    QuestPersistence: new QuestPersistenceService(repository),
+    WalletPersistence: new WalletPersistenceService(repository)
 })
 
 /**
@@ -32,7 +34,8 @@ export class SimSdk {
         config: ConstructorSimConfig | ConstructorWeb3Config
     ): {
         PoolPersistence: IPoolPersistence
-        QuestPersistence: IQuestPersistence
+        QuestPersistence: IQuestPersistence,
+        WalletPersistence: IWalletPersistance
     } {
         let repository: IDataStoreRepository
 

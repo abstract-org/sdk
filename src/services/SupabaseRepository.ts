@@ -1,9 +1,9 @@
+import { QuestDto, QuestUploadDto } from '../api/sim/dtos'
 import {
     IPool,
     IQuest,
     IWallet,
     IDataStoreRepository,
-    QuestDto,
     IQueryOptions,
     IPoolCreate, IPoolQueryUpdate
 } from '../interfaces'
@@ -40,7 +40,7 @@ export class SupabaseRepository implements IDataStoreRepository {
         return await this.find<IPool>('pools', filters)
     }
 
-    async createQuest(data: IQuest): Promise<IQuest> {
+    async createQuest(data: QuestUploadDto): Promise<IQuest> {
         return this.create('quests', data)
     }
 

@@ -1,4 +1,5 @@
-import { IQuest, IPool, IWallet, QuestDto, QuestUploadDto } from './index'
+import {QuestDto, QuestUploadDto} from '../api/sim/dtos'
+import { IQuest, IPool, IWallet } from './index'
 import { QueryFilterType } from '../types'
 
 export interface IQueryOptions {

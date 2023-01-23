@@ -1,17 +1,16 @@
-import { SupabaseRepository } from './SupabaseRepository'
 import {
     IDataStoreRepository,
     IQuest,
     IQuestPersistence,
-    QuestUploadDto
 } from '../interfaces'
+import {QuestUploadDto} from '../api/sim/dtos'
 import { QueryFilterType } from '../types'
 
 export class QuestPersistenceService implements IQuestPersistence {
     constructor(private dataStoreRepository: IDataStoreRepository) {
     }
 
-    async getQuests(questHashes: Array<string>): Promise<Array<IQuest>> {
+    async getQuests(questHashes: Array<string>): Promise<Array<any>> {
         const hashesAsStr = questHashes.map((v) => `"${v}"`).join(',')
         const filters: QueryFilterType = [{
             propertyName: 'hash',
@@ -25,7 +24,7 @@ export class QuestPersistenceService implements IQuestPersistence {
         return questDtoList.map((questDto) => questDto.toQuest())
     }
 
-    async getQuestsByKind(kind: string, limit: number): Promise<Array<IQuest>> {
+    async getQuestsByKind(kind: string, limit: number): Promise<Array<any>> {
         const filters: QueryFilterType = [{
             propertyName: 'kind',
             filterType: 'eq',
@@ -42,7 +41,7 @@ export class QuestPersistenceService implements IQuestPersistence {
     async getQuestsByContent(
         content: string,
         limit: number
-    ): Promise<Array<IQuest>> {
+    ): Promise<Array<any>> {
         const filters: QueryFilterType = [{
             propertyName: 'content',
             filterType: 'eq',
