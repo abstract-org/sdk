@@ -1,4 +1,4 @@
-import { IDataStoreRepository, IWallet, IWalletPersistance } from '../interfaces'
+import { IDataStoreRepository, IWallet, IWalletCreate, IWalletPersistance, IWalletQueryUpdate } from '../interfaces'
 import { QueryFilterType } from '../types'
 
 export class WalletPersistenceService implements IWalletPersistance {
@@ -15,11 +15,11 @@ export class WalletPersistenceService implements IWalletPersistance {
         throw new Error('Not implemented')
     }
 
-    async saveWallet(data: IWallet): Promise<IWallet> {
+    async saveWallet(data: IWalletCreate): Promise<IWallet> {
         return await this.dataStoreRepository.createWallet(data)
     }
 
-    async updateWallet(questId: number, data: IWallet): Promise<IWallet> {
+    async updateWallet(questId: number, data: IWalletQueryUpdate): Promise<IWallet> {
         return await this.dataStoreRepository.updateWallet(questId, data)
     }
 }
