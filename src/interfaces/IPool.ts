@@ -1,4 +1,4 @@
-import { PoolType } from '../types/PoolType'
+import { PoolType } from '../types'
 import { IPosition } from './IPosition'
 import { IPoolState } from './IPoolState'
 
