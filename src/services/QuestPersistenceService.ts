@@ -1,16 +1,16 @@
 import {
     IDataStoreRepository,
     IQuestPersistence,
+    IQuest,
     IQuestCreate,
     IQuestUpdate
 } from '../interfaces'
-import { Quest } from '../modules'
 import { QueryFilterType } from '../types'
 
 export class QuestPersistenceService implements IQuestPersistence {
     constructor(private dataStoreRepository: IDataStoreRepository) {}
 
-    async getQuests(questHashes: Array<string>): Promise<Array<Quest>> {
+    async getQuests(questHashes: Array<string>): Promise<Array<IQuest>> {
         const hashesAsStr = questHashes.map((v) => `"${v}"`).join(',')
         const filters: QueryFilterType = [
             {
@@ -23,10 +23,10 @@ export class QuestPersistenceService implements IQuestPersistence {
             filters
         )
 
-        return questDtoList.map((questDto) => Quest.instantiate(questDto))
+        return questDtoList
     }
 
-    async getQuestsByKind(kind: string, limit: number): Promise<Array<Quest>> {
+    async getQuestsByKind(kind: string, limit: number): Promise<Array<IQuest>> {
         const filters: QueryFilterType = [
             {
                 propertyName: 'kind',
@@ -39,13 +39,13 @@ export class QuestPersistenceService implements IQuestPersistence {
             { limit }
         )
 
-        return questDtoList.map((questDto) => Quest.instantiate(questDto))
+        return questDtoList
     }
 
     async getQuestsByContent(
         content: string,
         limit: number
-    ): Promise<Array<Quest>> {
+    ): Promise<Array<IQuest>> {
         const filters: QueryFilterType = [
             {
                 propertyName: 'content',
@@ -58,21 +58,21 @@ export class QuestPersistenceService implements IQuestPersistence {
             { limit }
         )
 
-        return questDtoList.map((questDto) => Quest.instantiate(questDto))
+        return questDtoList
     }
 
-    async saveQuest(data: IQuestCreate): Promise<Quest> {
+    async saveQuest(data: IQuestCreate): Promise<IQuest> {
         const newQuestDto = await this.dataStoreRepository.createQuest(data)
 
-        return Quest.instantiate(newQuestDto)
+        return newQuestDto
     }
 
-    async updateQuest(questId: number, data: IQuestUpdate): Promise<Quest> {
+    async updateQuest(questId: number, data: IQuestUpdate): Promise<IQuest> {
         const updatedQuestDto = await this.dataStoreRepository.updateQuest(
             questId,
             data
         )
 
-        return Quest.instantiate(updatedQuestDto)
+        return updatedQuestDto
     }
 }
