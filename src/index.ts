@@ -53,7 +53,8 @@ export class SimSdk {
 
     static initWithDataStore(dataStore: IDataStoreRepository): {
         PoolPersistence: IPoolPersistence
-        QuestPersistence: IQuestPersistence
+        QuestPersistence: IQuestPersistence,
+        WalletPersistence: IWalletPersistance
     } {
         return { ...getPersistenceLayer(dataStore) }
     }
