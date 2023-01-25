@@ -13,11 +13,17 @@ import {
     IQuestPersistence, IWalletPersistance
 } from './interfaces'
 
-const getPersistenceLayer = (repository) => ({
-    PoolPersistence: new PoolPersistenceService(repository),
-    QuestPersistence: new QuestPersistenceService(repository),
-    WalletPersistence: new WalletPersistenceService(repository)
-})
+const getPersistenceLayer = (repository): {
+    PoolPersistence: IPoolPersistence
+    QuestPersistence: IQuestPersistence,
+    WalletPersistence: IWalletPersistance
+} => {
+    return {
+        PoolPersistence: new PoolPersistenceService(repository),
+        QuestPersistence: new QuestPersistenceService(repository),
+        WalletPersistence: new WalletPersistenceService(repository)
+    }
+}
 
 /**
  * SimSdk - main entry to SDK
