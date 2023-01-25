@@ -1,5 +1,4 @@
-import { IQuest } from './IQuest'
-import {QuestUploadDto} from '../api/sim/dtos'
+import { IQuest, IQuestCreate, IQuestUpdate } from './IQuest'
 
 export interface IQuestPersistence {
     getQuests(questHashes: Array<string>): Promise<Array<IQuest>>
@@ -8,7 +7,7 @@ export interface IQuestPersistence {
 
     getQuestsByContent(content: string, limit: number): Promise<Array<IQuest>>
 
-    saveQuest(data: QuestUploadDto): Promise<IQuest>
+    saveQuest(data: IQuestCreate): Promise<IQuest>
 
-    updateQuest(questId: number, data: IQuest): Promise<IQuest>
+    updateQuest(questId: number, data: IQuestUpdate): Promise<IQuest>
 }
