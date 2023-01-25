@@ -1,0 +1,1 @@
+export type PoolType = "quest" | "value-link"

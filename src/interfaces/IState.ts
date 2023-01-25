@@ -5,6 +5,7 @@ export declare type TQuestName = string
 export declare type TPoolName = string
 export declare type TInvestorHash = string
 
+// @deprecated
 export interface IState {
     investors: HashMap<TInvestorHash, Investor>
     pools: HashMap<TPoolName, Pool>

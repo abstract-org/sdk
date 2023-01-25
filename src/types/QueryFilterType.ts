@@ -1,0 +1,1 @@
+export type QueryFilterType = Array<{ filterType: string, propertyName: string, value: any }>
