@@ -1,4 +1,13 @@
-import { IQuest, IPool, IWallet, IWalletCreate, IWalletQueryUpdate, IQuestCreate, IQuestUpdate } from './index'
+import {
+    IQuest,
+    IPool,
+    IWallet,
+    IWalletCreate,
+    IWalletQueryUpdate,
+    IQuestCreate,
+    IQuestUpdate,
+    IPoolCreate, IPoolQueryUpdate
+} from './index'
 import { QueryFilterType } from '../types'
 
 export interface IQueryOptions {
@@ -11,9 +20,9 @@ export interface IDataStoreRepository {
         options?: IQueryOptions
     ): Promise<Array<IPool>>
 
-    createPool(data: IPool): Promise<IPool>
+    createPool(data: IPoolCreate): Promise<IPool>
 
-    updatePool(id: number, data: IPool): Promise<IPool>
+    updatePool(id: number, data: IPoolQueryUpdate): Promise<IPool>
 
     findWalletByFilter(
         filter: QueryFilterType,

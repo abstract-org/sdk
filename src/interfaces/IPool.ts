@@ -15,7 +15,6 @@ export interface IPoolCreate {
     questRightHash: string;
     type: PoolType;
     kind: string;
-    hash: string;
 }
 
 export interface IPool {

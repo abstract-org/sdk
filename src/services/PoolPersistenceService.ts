@@ -1,5 +1,5 @@
-import { IPoolPersistence, IDataStoreRepository, IPool } from '../interfaces'
-import { QueryFilterType } from '../types'
+import { IPoolPersistence, IDataStoreRepository, IPool, IPoolCreate } from '../interfaces'
+import { PoolType, QueryFilterType } from '../types'
 
 export class PoolPersistenceService implements IPoolPersistence {
     constructor(private dataStoreRepository: IDataStoreRepository) {
@@ -9,6 +9,12 @@ export class PoolPersistenceService implements IPoolPersistence {
         const filters: QueryFilterType = [{ filterType: 'in', propertyName: 'hash', value: poolHashes }]
 
         return await this.dataStoreRepository.findPoolByFilter(filters)
+    }
+
+    async getPoolsByType(type: PoolType, limit: number): Promise<Array<IPool>> {
+        const filters: QueryFilterType = [{ filterType: 'eq', propertyName: 'type', value: type }]
+
+        return await this.dataStoreRepository.findPoolByFilter(filters, { limit })
     }
 
     async getPoolsByKind(kind: string, limit: number): Promise<Array<IPool>> {
@@ -25,7 +31,7 @@ export class PoolPersistenceService implements IPoolPersistence {
         throw new Error('Not implemented')
     }
 
-    async savePool(data: IPool): Promise<IPool> {
+    async savePool(data: IPoolCreate): Promise<IPool> {
         return await this.dataStoreRepository.createPool(data)
     }
 
