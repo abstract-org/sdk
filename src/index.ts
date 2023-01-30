@@ -69,5 +69,5 @@ export class SimSdk {
 export * as LogicUtils from './utils/logicUtils'
 export * as MathUtils from './utils/mathUtils'
 export * as Modules from './modules'
-export * as types from './types'
-export * as interfaces from './interfaces'
+export * from './types'
+export * from './interfaces'
