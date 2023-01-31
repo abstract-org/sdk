@@ -41,4 +41,17 @@ export interface IDataStoreRepository {
     createQuest(data: IQuestCreate): Promise<IQuest>
 
     updateQuest(id: number, data: Partial<IQuestUpdate>): Promise<IQuest>
+
+    find<T>(
+        tableName: string,
+        filters: QueryFilterType
+    ): Promise<Array<T>>
+
+    update<T, R>(
+        tableName: string,
+        data: R,
+        filters: QueryFilterType
+    ): Promise<T>
+
+    create<T, R>(tableName: string, data: R): Promise<T>
 }

@@ -67,7 +67,7 @@ export class SupabaseRepository implements IDataStoreRepository {
         throw new Error('Not implemented')
     }
 
-    private async create<T, R>(tableName: TableNameType, data: R): Promise<T> {
+    async create<T, R>(tableName: TableNameType, data: R): Promise<T> {
         try {
             return (await this.client
                 .from(tableName)
@@ -80,7 +80,7 @@ export class SupabaseRepository implements IDataStoreRepository {
         }
     }
 
-    private async update<T, R>(
+    async update<T, R>(
         tableName: TableNameType,
         data: R,
         filters: QueryFilterType
@@ -100,7 +100,7 @@ export class SupabaseRepository implements IDataStoreRepository {
         }
     }
 
-    private async find<T>(
+    async find<T>(
         tableName: TableNameType,
         filters: QueryFilterType
     ): Promise<Array<T>> {

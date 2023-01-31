@@ -1,4 +1,12 @@
-import { IDataStoreRepository, IWallet, IWalletCreate, IWalletPersistance, IWalletQueryUpdate } from '../interfaces'
+import {
+    IDataStoreRepository,
+    IWallet,
+    IWalletCreate,
+    IWalletPersistance,
+    IWalletQueryUpdate,
+    IBalance,
+    IBalanceCreate
+} from '../interfaces'
 import { QueryFilterType } from '../types'
 
 export class WalletPersistenceService implements IWalletPersistance {
@@ -21,5 +29,19 @@ export class WalletPersistenceService implements IWalletPersistance {
 
     async updateWallet(questId: number, data: IWalletQueryUpdate): Promise<IWallet> {
         return await this.dataStoreRepository.updateWallet(questId, data)
+    }
+
+    async getBalances(walletHash: string): Promise<Array<IBalance>> {
+        const filters: QueryFilterType = [{ propertyName: 'walletHash', filterType: 'eq', value: walletHash }]
+
+        return await this.dataStoreRepository.find<IBalance>('balances', filters)
+    }
+
+    async addBalance(walletHash: string, questHash: string, balance: number): Promise<IBalance> {
+        return await this.dataStoreRepository.create<IBalance, IBalanceCreate>('balances', {
+            walletHash,
+            questHash,
+            balance
+        })
     }
 }
