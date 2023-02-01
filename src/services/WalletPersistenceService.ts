@@ -5,7 +5,7 @@ import {
     IWalletPersistance,
     IWalletQueryUpdate,
     IBalance,
-    IBalanceCreate
+    IBalanceCreate, IBalanceQueryUpdate
 } from '../interfaces'
 import { QueryFilterType } from '../types'
 
@@ -38,6 +38,18 @@ export class WalletPersistenceService implements IWalletPersistance {
     }
 
     async addBalance(walletHash: string, questHash: string, balance: number): Promise<IBalance> {
+        const filters: QueryFilterType = [{
+            propertyName: 'walletHash',
+            filterType: 'eq',
+            value: walletHash
+        }, { propertyName: 'questHash', filterType: 'eq', value: questHash }]
+
+        const existingBalance = await this.dataStoreRepository.find<IBalance>('balances', filters)
+
+        if (existingBalance.length) {
+            return await this.dataStoreRepository.update<IBalance, IBalanceQueryUpdate>('balances', { balance: balance }, filters)
+        }
+
         return await this.dataStoreRepository.create<IBalance, IBalanceCreate>('balances', {
             walletHash,
             questHash,
