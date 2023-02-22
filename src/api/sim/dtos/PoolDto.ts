@@ -41,18 +41,17 @@ export class PoolDto {
 
         const poolData = this.pool_data.toObj()
 
-        pool.priceToken0 = poolData.token0_price
-        pool.priceToken1 = poolData.token1_price
+        pool.questLeftPrice = poolData.token0_price
+        pool.questRightPrice = poolData.token1_price
         pool.curLeft = poolData.current_left_lg2
         pool.curRight = poolData.current_right_lg2
         pool.curPrice = poolData.current_price
         pool.curPP = poolData.current_price_point_lg2
         pool.curLiq = poolData.current_liquidity
-        pool.volumeToken0 = poolData.volume_token0
-        pool.volumeToken1 = poolData.volume_token1
-        pool.type = pool.tokenLeft === 'USDC' ? 'QUEST' : 'VALUE_LINK'
+        pool.questLeftVolume = poolData.volume_token0
+        pool.questRightVolume = poolData.volume_token1
+        pool.type = pool.tokenLeft === 'USDC' ? 'quest' : 'value-link'
         pool.totalSold = poolData.total_sold
-        pool.FRESH = poolData.is_fresh
         pool.soldToken0 = poolData.sold_token0
         pool.soldToken1 = poolData.sold_token1
 

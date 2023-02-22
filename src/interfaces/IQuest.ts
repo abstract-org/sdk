@@ -6,13 +6,13 @@ export interface IQuestCreate {
     kind: string
     content: string
     creator_hash: string
-    initial_balance: number
 }
 
 export interface IQuest extends IQuestCreate {
     id: number
-    created_at: Date
-    published_at?: Date
+    name: string
+    created_at: number
+    published_at?: number
     pools: string[]
 }
 
@@ -26,15 +26,14 @@ export interface IQuestBasicFields {
 }
 
 export interface IQuestUtilityFields {
-    creatorHash?: string // Wallet that created the Quest
+    creator_hash?: string // Wallet that created the Quest
     pools: string[] // List of Pools in which current Quest exists
-    initialBalance: number // Amount of balance/tokens minted during Quest creation
-    createdAt: Date // Creation date
-    publishedAt: Date // ublication date
+    created_at: number // Creation date
+    published_at: number // ublication date
 }
 
 export interface IQuestMethods {
-    create(kind: string, content: string, creatorHash?: string): IQuest
+    create(kind: string, content: string, creator_hash?: string): IQuest
     createPool(createArg: {
         questLeft?: IQuest
         startingPrice?: number

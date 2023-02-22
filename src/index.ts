@@ -10,12 +10,15 @@ import {
 import {
     IDataStoreRepository,
     IPoolPersistence,
-    IQuestPersistence, IWalletPersistance
+    IQuestPersistence,
+    IWalletPersistance
 } from './interfaces'
 
-const getPersistenceLayer = (repository): {
+const getPersistenceLayer = (
+    repository
+): {
     PoolPersistence: IPoolPersistence
-    QuestPersistence: IQuestPersistence,
+    QuestPersistence: IQuestPersistence
     WalletPersistence: IWalletPersistance
 } => {
     return {
@@ -40,17 +43,21 @@ export class SimSdk {
         config: ConstructorSimConfig | ConstructorWeb3Config
     ): {
         PoolPersistence: IPoolPersistence
-        QuestPersistence: IQuestPersistence,
+        QuestPersistence: IQuestPersistence
         WalletPersistence: IWalletPersistance
     } {
         let repository: IDataStoreRepository
 
         switch (adapter) {
             case 'supabase':
-                repository = new SupabaseRepository(config as ConstructorSimConfig)
+                repository = new SupabaseRepository(
+                    config as ConstructorSimConfig
+                )
                 break
             default:
-                repository = new SupabaseRepository(config as ConstructorSimConfig)
+                repository = new SupabaseRepository(
+                    config as ConstructorSimConfig
+                )
                 break
         }
 
@@ -59,7 +66,7 @@ export class SimSdk {
 
     static initWithDataStore(dataStore: IDataStoreRepository): {
         PoolPersistence: IPoolPersistence
-        QuestPersistence: IQuestPersistence,
+        QuestPersistence: IQuestPersistence
         WalletPersistence: IWalletPersistance
     } {
         return { ...getPersistenceLayer(dataStore) }

@@ -1,4 +1,4 @@
-export * from './Investor'
+export * from './Wallet'
 export * from './Pool'
 export * from './Quest'
 export * from './UsdcToken'

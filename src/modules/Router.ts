@@ -503,8 +503,8 @@ export class Router {
             const zeroForOne = action === 'buy'
 
             const hasNextToken = zeroForOne
-                ? !isZero(pool.volumeToken1)
-                : !isZero(pool.volumeToken0)
+                ? !isZero(pool.questRightVolume)
+                : !isZero(pool.questLeftVolume)
 
             if (!hasNextToken) {
                 return null

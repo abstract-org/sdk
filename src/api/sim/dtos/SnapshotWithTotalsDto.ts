@@ -3,7 +3,7 @@ import { SnapshotDto } from './SnapshotDto'
 export class SnapshotWithTotalsDto extends SnapshotDto {
     quests: number
     cross_pools: number
-    investors: number
+    wallets: number
     tvl: number
     mcap: number
     usdc: number
@@ -15,7 +15,7 @@ export class SnapshotWithTotalsDto extends SnapshotDto {
         if (totalsData) {
             this.quests = totalsData.quests
             this.cross_pools = totalsData.cross_pools
-            this.investors = totalsData.investors
+            this.wallets = totalsData.wallets
             this.tvl = totalsData.tvl
             this.mcap = totalsData.mcap
             this.usdc = totalsData.usdc
@@ -31,7 +31,7 @@ export class SnapshotWithTotalsDto extends SnapshotDto {
             created_at: this.created_at,
             quests: this.quests,
             cross_pools: this.cross_pools,
-            investors: this.investors,
+            wallets: this.wallets,
             tvl: this.tvl,
             mcap: this.mcap,
             usdc: this.usdc,

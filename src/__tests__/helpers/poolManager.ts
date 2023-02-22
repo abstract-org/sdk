@@ -1,4 +1,4 @@
-import { Investor, UsdcToken } from '../../modules'
+import { Wallet, UsdcToken } from '../../modules'
 import { faker } from '@faker-js/faker'
 
 const TEMP_CONFIG = {
@@ -59,7 +59,7 @@ const initialPositions = [
 
 export const preparePool = (
     initialSum = 35000,
-    investorType = 'creator',
+    walletType = 'creator',
     initialPositions?: any
 ) => {
     if (!initialPositions) {
@@ -67,17 +67,17 @@ export const preparePool = (
     }
 
     const name = faker.word.adjective()
-    const investor = Investor.create(investorType, name, initialSum)
-    const tokenRight = investor.createQuest('RP1')
+    const wallet = Wallet.create(walletType, name, initialSum)
+    const tokenRight = wallet.createQuest('RP1')
     const tokenLeft = new UsdcToken()
     const pool = tokenRight.createPool({ tokenLeft, initialPositions })
 
-    return { pool, investor, tokenLeft, tokenRight }
+    return { pool, wallet, tokenLeft, tokenRight }
 }
 
 export const prepareCrossPools = (citingSum): Array<any> => {
     const name = faker.word.adjective()
-    const creator = Investor.create('creator', name, 10000)
+    const creator = Wallet.create('creator', name, 10000)
     const quests = []
 
     // USCD Pools

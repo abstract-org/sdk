@@ -1,5 +1,5 @@
 import HashMap from 'hashmap'
-import { Investor, UsdcToken, Router } from '../modules'
+import { Wallet, UsdcToken, Router } from '../modules'
 import { getCP, getQP } from './helpers/getQuestPools'
 import { preparePool } from './helpers/poolManager'
 
@@ -113,14 +113,14 @@ describe('Cross Pool swapping', () => {
 })
 
 it('Does micro price buy properly within the same liquidity', () => {
-    const { pool, investor, tokenLeft, tokenRight } = preparePool(
+    const { pool, wallet, tokenLeft, tokenRight } = preparePool(
         20001,
-        'investor',
+        'wallet',
         initialPositions
     )
     const [totalAmountIn, totalAmountOut] = pool.buy(0.000001)
-    investor.addBalance(tokenLeft.name, totalAmountIn)
-    investor.addBalance(tokenRight.name, totalAmountOut)
+    wallet.addBalance(tokenLeft.name, totalAmountIn)
+    wallet.addBalance(tokenRight.name, totalAmountOut)
 
     expect(pool.curLiq).toBeCloseTo(5050.505)
     expect(pool.totalSold).toBeCloseTo(0.000001)
@@ -128,7 +128,7 @@ it('Does micro price buy properly within the same liquidity', () => {
 })
 
 it('Does mini price buy properly within the same liquidity', () => {
-    const { pool } = preparePool(10000, 'investor', initialPositions)
+    const { pool } = preparePool(10000, 'wallet', initialPositions)
     pool.buy(1)
 
     expect(pool.curLiq).toBeCloseTo(5050.505)
@@ -137,7 +137,7 @@ it('Does mini price buy properly within the same liquidity', () => {
 })
 
 it('Does mini price buy properly while jumping liquidity', () => {
-    const { pool } = preparePool(100000, 'investor', initialPositions)
+    const { pool } = preparePool(100000, 'wallet', initialPositions)
     pool.buy(17500)
 
     expect(pool.curPrice).toBeCloseTo(19.9, 0)
@@ -150,7 +150,7 @@ it('Does mini price buy properly while jumping liquidity', () => {
 })
 
 it('Tries to buy over limit', () => {
-    const { pool } = preparePool(10000, 'investor', initialPositions)
+    const { pool } = preparePool(10000, 'wallet', initialPositions)
     pool.buy(150000000)
     const [totalIn, totalOut] = pool.buy(20000)
 
@@ -162,7 +162,7 @@ it('Tries to buy over limit', () => {
 })
 
 it('Does micro price sell properly within the same liquidity', () => {
-    const { pool } = preparePool(10000, 'investor', initialPositions)
+    const { pool } = preparePool(10000, 'wallet', initialPositions)
     pool.buy(2)
     const [totalAmountIn, totalAmountOut] = pool.sell(1)
 
@@ -175,7 +175,7 @@ it('Does micro price sell properly within the same liquidity', () => {
 })
 
 it('Dry buy all', () => {
-    const { pool } = preparePool(10000, 'investor', initialPositions)
+    const { pool } = preparePool(10000, 'wallet', initialPositions)
 
     const [totalIn, totalOut] = pool.dryBuy(1000000000)
     expect(totalIn).toBeCloseTo(-13342669.6, 0)
@@ -183,7 +183,7 @@ it('Dry buy all', () => {
 })
 
 it('Dry sell all', () => {
-    const { pool } = preparePool(10000, 'investor', initialPositions)
+    const { pool } = preparePool(10000, 'wallet', initialPositions)
 
     pool.buy(10000000000)
     const [totalIn, totalOut] = pool.drySell(1000000000)
@@ -192,7 +192,7 @@ it('Dry sell all', () => {
 })
 
 it('Does micro price sell properly while jumping liquidity', () => {
-    const { pool } = preparePool(100000, 'investor', initialPositions)
+    const { pool } = preparePool(100000, 'wallet', initialPositions)
     pool.buy(17530)
     expect(pool.curPrice).toBeCloseTo(19.9, 0)
 
@@ -209,9 +209,9 @@ it('Does micro price sell properly while jumping liquidity', () => {
 })
 
 it('Tries to sell over limit', () => {
-    const { pool, investor, tokenLeft, tokenRight } = preparePool(
+    const { pool, wallet, tokenLeft, tokenRight } = preparePool(
         10000,
-        'investor',
+        'wallet',
         initialPositions
     )
     const [a1in, a1out] = pool.buy(1000000000)
@@ -283,7 +283,7 @@ it('Tries to sell over limit', () => {
 })
 
 it('swaps USDC for RP1 and updates current price', () => {
-    const { pool } = preparePool(10000, 'investor', initialPositions)
+    const { pool } = preparePool(10000, 'wallet', initialPositions)
 
     pool.buy(5000)
     expect(pool.curPrice).toBeCloseTo(3.96)
@@ -293,49 +293,49 @@ it('swaps USDC for RP1 and updates current price', () => {
 })
 
 it('Buys until runs out of USDC', () => {
-    const { pool, investor, tokenLeft, tokenRight } = preparePool(
+    const { pool, wallet, tokenLeft, tokenRight } = preparePool(
         20001,
-        'investor',
+        'wallet',
         initialPositions
     )
 
     let [totalAmountIn, totalAmountOut] = pool.buy(5000)
 
-    investor.addBalance(tokenLeft.name, totalAmountIn)
-    investor.addBalance(tokenRight.name, totalAmountOut)
+    wallet.addBalance(tokenLeft.name, totalAmountIn)
+    wallet.addBalance(tokenRight.name, totalAmountOut)
 
-    const leftBalance = investor.balances[tokenLeft.name]
-    const rightBalance = investor.balances[tokenRight.name]
+    const leftBalance = wallet.balances[tokenLeft.name]
+    const rightBalance = wallet.balances[tokenRight.name]
 
     expect(leftBalance).toBe(15001)
     expect(rightBalance).toBeCloseTo(2512.562, 0)
 
     let [totalAmountIn2, totalAmountOut2] = pool.buy(5000)
-    investor.addBalance(tokenLeft.name, totalAmountIn2)
-    investor.addBalance(tokenRight.name, totalAmountOut2)
+    wallet.addBalance(tokenLeft.name, totalAmountIn2)
+    wallet.addBalance(tokenRight.name, totalAmountOut2)
 
-    expect(investor.balances[tokenLeft.name]).toBe(10001)
-    expect(investor.balances[tokenRight.name]).toBeCloseTo(3356, 0)
+    expect(wallet.balances[tokenLeft.name]).toBe(10001)
+    expect(wallet.balances[tokenRight.name]).toBeCloseTo(3356, 0)
 
     let [totalAmountIn3, totalAmountOut3] = pool.buy(5000)
-    investor.addBalance(tokenLeft.name, totalAmountIn3)
-    investor.addBalance(tokenRight.name, totalAmountOut3)
+    wallet.addBalance(tokenLeft.name, totalAmountIn3)
+    wallet.addBalance(tokenRight.name, totalAmountOut3)
 
-    expect(investor.balances[tokenLeft.name]).toBeCloseTo(5001)
+    expect(wallet.balances[tokenLeft.name]).toBeCloseTo(5001)
 })
 
-it('Three investors one tick (buy during liquidity shift)', () => {
-    const { pool, investor, tokenLeft, tokenRight } = preparePool(
+it('Three wallets one tick (buy during liquidity shift)', () => {
+    const { pool, wallet, tokenLeft, tokenRight } = preparePool(
         10000,
-        'investor',
+        'wallet',
         initialPositions
     )
-    const longTerm = Investor.create('long-term', 'long-term', 1000000)
-    const fomo = Investor.create('fomo', 'fomo', 1000, true)
+    const longTerm = Wallet.create('long-term', 'long-term', 1000000)
+    const fomo = Wallet.create('fomo', 'fomo', 1000, true)
 
     let [totalAmountIn, totalAmountOut] = pool.buy(5000)
-    investor.addBalance(tokenLeft.name, totalAmountIn)
-    investor.addBalance(tokenRight.name, totalAmountOut)
+    wallet.addBalance(tokenLeft.name, totalAmountIn)
+    wallet.addBalance(tokenRight.name, totalAmountOut)
 
     let [totalAmountIn2, totalAmountOut2] = pool.buy(5000)
     longTerm.addBalance(tokenLeft.name, totalAmountIn2)
@@ -350,9 +350,9 @@ it('Three investors one tick (buy during liquidity shift)', () => {
 })
 
 it('Buy all the way to the right', () => {
-    const { pool, investor, tokenLeft, tokenRight } = preparePool(
+    const { pool, wallet, tokenLeft, tokenRight } = preparePool(
         10000,
-        'investor',
+        'wallet',
         initialPositions
     )
 
@@ -364,9 +364,9 @@ it('Buy all the way to the right', () => {
 })
 
 it('Sell all the way to the left', () => {
-    const { pool, investor, tokenLeft, tokenRight } = preparePool(
+    const { pool, wallet, tokenLeft, tokenRight } = preparePool(
         10000,
-        'investor',
+        'wallet',
         initialPositions
     )
 
@@ -377,30 +377,30 @@ it('Sell all the way to the left', () => {
 })
 
 it('Swaps RP1 for USDC and updates current price', () => {
-    const { pool, investor, tokenLeft, tokenRight } = preparePool(
+    const { pool, wallet, tokenLeft, tokenRight } = preparePool(
         10000,
-        'investor',
+        'wallet',
         initialPositions
     )
 
     let [totalAmountIn, totalAmountOut] = pool.buy(5000)
-    investor.addBalance(tokenLeft.name, totalAmountIn)
-    investor.addBalance(tokenRight.name, totalAmountOut)
+    wallet.addBalance(tokenLeft.name, totalAmountIn)
+    wallet.addBalance(tokenRight.name, totalAmountOut)
 
     expect(pool.curPrice).toBeCloseTo(3.9601)
 
     let [totalAmountIn2, totalAmountOut2] = pool.sell(
-        investor.balances[tokenRight.name]
+        wallet.balances[tokenRight.name]
     )
-    investor.addBalance(tokenLeft.name, totalAmountOut2)
-    investor.addBalance(tokenRight.name, totalAmountIn2)
+    wallet.addBalance(tokenLeft.name, totalAmountOut2)
+    wallet.addBalance(tokenRight.name, totalAmountIn2)
 
-    expect(investor.balances[pool.tokenLeft]).toBe(10000)
+    expect(wallet.balances[pool.tokenLeft]).toBe(10000)
     expect(pool.curPrice).toBe(1)
 })
 
 it('buys with a price limit up to X within the same liquidity', () => {
-    const { pool } = preparePool(10000, 'investor', initialPositions)
+    const { pool } = preparePool(10000, 'wallet', initialPositions)
 
     let [totalAmountIn, totalAmountOut] = pool.buy(10000, 5)
     expect(totalAmountIn).toBeCloseTo(-6242.767)
@@ -409,7 +409,7 @@ it('buys with a price limit up to X within the same liquidity', () => {
 })
 
 it('buys with a price limit up to X by jumping through liquidity', () => {
-    const { pool } = preparePool(10000, 'investor', initialPositions)
+    const { pool } = preparePool(10000, 'wallet', initialPositions)
 
     let [totalAmountIn, totalAmountOut] = pool.buy(20000, 11)
     expect(totalAmountIn).toBeCloseTo(-11700, 0)
@@ -418,7 +418,7 @@ it('buys with a price limit up to X by jumping through liquidity', () => {
 })
 
 it('sells with a price limit down to X', () => {
-    const { pool } = preparePool(10000, 'investor', initialPositions)
+    const { pool } = preparePool(10000, 'wallet', initialPositions)
 
     pool.buy(50000)
     expect(pool.totalSold).toBeCloseTo(5214, 0)
@@ -430,7 +430,7 @@ it('sells with a price limit down to X', () => {
 })
 
 it('sells with a price limit down to X by jumping through liquidity', () => {
-    const { pool } = preparePool(10000, 'investor', initialPositions)
+    const { pool } = preparePool(10000, 'wallet', initialPositions)
 
     pool.buy(50000)
     expect(pool.totalSold).toBeCloseTo(5214, 0)
@@ -442,11 +442,11 @@ it('sells with a price limit down to X by jumping through liquidity', () => {
 })
 
 it('Calculates reserves properly by swapping in different directions in both USDC and cross pools', () => {
-    const investor = Investor.create('creator', 'creator', 500000)
-    const quest = investor.createQuest('AGORA')
-    const quest2 = investor.createQuest('AGORA2')
-    const quest3 = investor.createQuest('AGORA3')
-    const quest4 = investor.createQuest('AGORA4')
+    const wallet = Wallet.create('creator', 'creator', 500000)
+    const quest = wallet.createQuest('AGORA')
+    const quest2 = wallet.createQuest('AGORA2')
+    const quest3 = wallet.createQuest('AGORA3')
+    const quest4 = wallet.createQuest('AGORA4')
 
     const pool = quest.createPool({ initialPositions })
     const pool2 = quest2.createPool({ initialPositions })
@@ -464,49 +464,49 @@ it('Calculates reserves properly by swapping in different directions in both USD
     pool4.sell(10000)
 
     const startingPrice1 = pool.curPrice / pool2.curPrice
-    const BA = investor.createPool(quest2, quest, startingPrice1)
-    const priceRange1 = investor.calculatePriceRange(BA, pool2, pool)
-    investor.citeQuest(BA, priceRange1.min, priceRange1.max, 0, 1000)
+    const BA = wallet.createPool(quest2, quest, startingPrice1)
+    const priceRange1 = wallet.calculatePriceRange(BA, pool2, pool)
+    wallet.citeQuest(BA, priceRange1.min, priceRange1.max, 0, 1000)
     quest.addPool(BA)
     quest2.addPool(BA)
 
     const startingPrice2 = pool.curPrice / pool3.curPrice
-    const CA = investor.createPool(quest3, quest, startingPrice2)
-    const priceRange2 = investor.calculatePriceRange(CA, pool, pool3)
-    investor.citeQuest(CA, priceRange2.min, priceRange2.max, 1000, 0)
+    const CA = wallet.createPool(quest3, quest, startingPrice2)
+    const priceRange2 = wallet.calculatePriceRange(CA, pool, pool3)
+    wallet.citeQuest(CA, priceRange2.min, priceRange2.max, 1000, 0)
     quest.addPool(CA)
     quest3.addPool(CA)
 
     const startingPrice3 = pool.curPrice / pool4.curPrice
-    const AD = investor.createPool(quest4, quest, startingPrice3)
-    const priceRange3 = investor.calculatePriceRange(AD, pool4, pool)
-    investor.citeQuest(AD, priceRange3.min, priceRange3.max, 1000, 600)
+    const AD = wallet.createPool(quest4, quest, startingPrice3)
+    const priceRange3 = wallet.calculatePriceRange(AD, pool4, pool)
+    wallet.citeQuest(AD, priceRange3.min, priceRange3.max, 1000, 600)
     quest.addPool(AD)
     quest4.addPool(AD)
 
-    expect(Math.abs(pool.volumeToken1)).toBe(0)
-    expect(Math.abs(pool.volumeToken0)).toBeCloseTo(13342669.6, 0)
+    expect(Math.abs(pool.questRightVolume)).toBe(0)
+    expect(Math.abs(pool.questLeftVolume)).toBeCloseTo(13342669.6, 0)
     expect(pool.curLiq).toBeCloseTo(0)
 
-    expect(Math.abs(pool2.volumeToken0)).toBeCloseTo(0)
-    expect(Math.abs(pool2.volumeToken1)).toBe(20000)
+    expect(Math.abs(pool2.questLeftVolume)).toBeCloseTo(0)
+    expect(Math.abs(pool2.questRightVolume)).toBe(20000)
     expect(pool2.curLiq).toBeCloseTo(0)
 
-    expect(Math.abs(pool3.volumeToken0)).toBeCloseTo(6000000)
-    expect(Math.abs(pool3.volumeToken1)).toBeCloseTo(1448.9, 0)
+    expect(Math.abs(pool3.questLeftVolume)).toBeCloseTo(6000000)
+    expect(Math.abs(pool3.questRightVolume)).toBeCloseTo(1448.9, 0)
     expect(pool3.curLiq).toBeCloseTo(148861, 0)
 
-    expect(Math.abs(pool4.volumeToken0)).toBeCloseTo(401950.6, 0)
-    expect(Math.abs(pool4.volumeToken1)).toBeCloseTo(10000, 0)
+    expect(Math.abs(pool4.questLeftVolume)).toBeCloseTo(401950.6, 0)
+    expect(Math.abs(pool4.questRightVolume)).toBeCloseTo(10000, 0)
     expect(pool4.curLiq).toBeCloseTo(66503.5, 0)
 
-    expect(Math.abs(BA.volumeToken1)).toBe(1000)
-    expect(Math.abs(BA.volumeToken0)).toBe(0)
+    expect(Math.abs(BA.questRightVolume)).toBe(1000)
+    expect(Math.abs(BA.questLeftVolume)).toBe(0)
 
     // @TODO investigate why it fails for CA pool here
-    // expect(Math.abs(CA.volumeToken1)).toBe(0)
-    // expect(Math.abs(CA.volumeToken0)).toBe(1000)
+    // expect(Math.abs(CA.questRightVolume)).toBe(0)
+    // expect(Math.abs(CA.questLeftVolume)).toBe(1000)
 
-    expect(Math.abs(AD.volumeToken1)).toBeCloseTo(600)
-    expect(Math.abs(AD.volumeToken0)).toBeCloseTo(1000)
+    expect(Math.abs(AD.questRightVolume)).toBeCloseTo(600)
+    expect(Math.abs(AD.questLeftVolume)).toBeCloseTo(1000)
 })

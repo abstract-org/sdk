@@ -1,9 +1,9 @@
-import { Investor, UsdcToken } from '../../modules'
+import { Wallet, UsdcToken } from '../../modules'
 
 export const getQP = (name, priceMax = 10000) => {
-    const investor = Investor.create('INV', 'INV', 10000)
+    const wallet = Wallet.create('INV', 'INV', 10000)
 
-    const quest = investor.createQuest(name)
+    const quest = wallet.createQuest(name)
     const pool = quest.createPool({
         tokenLeft: new UsdcToken(),
         initialPositions: [
@@ -30,14 +30,14 @@ export const getCP = (
     citedSumA = 0,
     citedSumB = 0
 ) => {
-    const investor = Investor.create('INV', 'INV', 10000)
+    const wallet = Wallet.create('INV', 'INV', 10000)
     const startingPrice = citingP.curPrice / citedP.curPrice
-    const AB = investor.createPool(citedQ, citingQ, startingPrice)
+    const AB = wallet.createPool(citedQ, citingQ, startingPrice)
     citedQ.addPool(AB)
     citingQ.addPool(AB)
 
-    const priceRange = investor.calculatePriceRange(AB, citedP, citingP, 2)
-    investor.citeQuest(
+    const priceRange = wallet.calculatePriceRange(AB, citedP, citingP, 2)
+    wallet.citeQuest(
         AB,
         priceRange.min,
         priceRange.max,

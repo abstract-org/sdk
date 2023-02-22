@@ -1,4 +1,5 @@
 import sha256 from 'crypto-js/sha256'
+import Hex from 'crypto-js/enc-hex'
 import HashMap from 'hashmap'
 
 import { Pool } from './Pool'
@@ -35,29 +36,38 @@ const TEMP_CONFIG = {
 }
 
 export class Quest {
-    id // make uuid
+    id
     hash
     name
     pools = []
-    initialBalanceA = 0
-    initialBalanceB = 0
     positions = new HashMap()
     kind: string
     content: string
-    creatorHash: string
-    initialBalance: number
-    createdAt: Date
-    publishedAt: Date
+    creator_hash: string
+    created_at: number
+    published_at: number
 
     /**
-     * @description Instantiates new Token with name
+     * @description Instantiates new Quest
      * @param {string} name
+     * @param {string} kind
+     * @param {string} content
      * @returns {Token}
      */
-    static create(name) {
+    static create(
+        name: string,
+        kind?: string,
+        content?: string,
+        creatorHash?: string,
+        createdAt?: number
+    ): IQuest {
         const thisToken = new Quest()
         thisToken.name = name
-        thisToken.hash = '0x' + sha256(name)
+        thisToken.hash = Hex.stringify(sha256(name))
+        thisToken.kind = kind
+        thisToken.content = content
+        thisToken.creator_hash = creatorHash
+        thisToken.created_at = createdAt
 
         return thisToken
     }
@@ -71,11 +81,9 @@ export class Quest {
         quest.hash = questDto.hash
         quest.kind = questDto.kind
         quest.content = questDto.content
-        quest.creatorHash = questDto.creator_hash
+        quest.creator_hash = questDto.creator_hash
         quest.name = questDto.hash
         quest.pools = questDto.pools
-        quest.initialBalanceA = questDto.initial_balance
-        quest.initialBalanceB = questDto.initial_balance
 
         return quest
     }
@@ -91,7 +99,9 @@ export class Quest {
         this.addPool(pool)
         tokenLeftInstance.addPool(pool)
 
-        this.initializePoolPositions(pool, initialPositions)
+        if (initialPositions) {
+            this.initializePoolPositions(pool, initialPositions)
+        }
 
         return pool
     }
@@ -119,18 +129,6 @@ export class Quest {
                 position.tokenA,
                 position.tokenB
             )
-
-            this.initialBalanceA += parseFloat(position.tokenA)
-            this.initialBalanceB += parseFloat(position.tokenB)
-
-            pool.posOwners.push({
-                hash: this.hash,
-                pmin: position.priceMin,
-                pmax: position.priceMax,
-                amt0: position.tokenA,
-                amt1: position.tokenB,
-                type: 'token'
-            })
         })
 
         this.positions.set(pool.name, pool.pos.values())

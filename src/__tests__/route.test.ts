@@ -1,12 +1,12 @@
 import HashMap from 'hashmap'
-import { Investor, UsdcToken, Router, Quest } from '../modules'
+import { Wallet, UsdcToken, Router, Quest } from '../modules'
 import { getPathActions, pp2p } from '../utils/logicUtils'
 import { getCP, getQP } from './helpers/getQuestPools'
 import { prepareCrossPools, preparePool } from './helpers/poolManager'
 
 let globalState = {
     pools: new HashMap(),
-    investors: new HashMap(),
+    wallets: new HashMap(),
     quests: new HashMap()
 }
 
@@ -15,7 +15,7 @@ beforeAll(() => {})
 afterEach(() => {
     globalState = {
         pools: new HashMap(),
-        investors: new HashMap(),
+        wallets: new HashMap(),
         quests: new HashMap()
     }
 })
@@ -99,7 +99,7 @@ describe('Building routes', () => {
 
 describe('Graph', () => {
     it('Graphs single pool properly', () => {
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
         const questA = creator.createQuest('TEST_1')
         const poolA = questA.createPool() // Deposit A
         globalState.quests.set('USDC', new UsdcToken())
@@ -149,7 +149,7 @@ describe('Path finding', () => {
     it('Finds pools for token->USDC', () => {
         const { pool, tokenRight, tokenLeft } = preparePool(
             10000,
-            'investor',
+            'wallet',
             initialPositions
         )
 
@@ -227,8 +227,8 @@ describe('Routing', () => {
             AGORA_PRA3.name,
             AGORA_PRA3.curPrice,
             pp2p(AGORA_PRA3.curPP),
-            AGORA_PRA3.volumeToken0,
-            AGORA_PRA3.volumeToken1
+            AGORA_PRA3.questLeftVolume,
+            AGORA_PRA3.questRightVolume
         )
         console.log(AGORA_PRA3)
         console.log(AGORA_PRA3.sell(40))
@@ -237,8 +237,8 @@ describe('Routing', () => {
         console.log(
             AGORA_PRA3.name,
             AGORA_PRA3.curPrice,
-            AGORA_PRA3.volumeToken0,
-            AGORA_PRA3.volumeToken1
+            AGORA_PRA3.questLeftVolume,
+            AGORA_PRA3.questRightVolume
         )
 
         const pools = new HashMap()
@@ -260,7 +260,7 @@ describe('Routing', () => {
     })
 
     it('Smart route and taking right amount in/out', () => {
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questX = creator.createQuest('AGORA')
         const poolX = questX.createPool()
@@ -308,7 +308,7 @@ describe('Routing', () => {
     })
 
     it('Smart route with single pool', () => {
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questX = creator.createQuest('TEST_X')
         const poolTest = questX.createPool({ initialPositions })
@@ -335,7 +335,7 @@ describe('Routing', () => {
     })
 
     it('Smart route with single pool and high amount', () => {
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
         const poolA = questA.createPool({ initialPositions }) // Mint TEST_1
@@ -354,7 +354,7 @@ describe('Routing', () => {
     })
 
     it('Smart route with amount above 100 with high chunk size', () => {
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
         const poolA = questA.createPool({ initialPositions }) // Mint TEST_1
@@ -370,7 +370,7 @@ describe('Routing', () => {
     })
 
     it('Smart route with amount below 100 with sliced chunk', () => {
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
         const poolA = questA.createPool({ initialPositions }) // Mint TEST_1
@@ -386,7 +386,7 @@ describe('Routing', () => {
     })
 
     it('Smart route with amount based on liquidity', () => {
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
         const poolA = questA.createPool({ initialPositions }) // Mint TEST_1
@@ -417,7 +417,7 @@ describe('Routing', () => {
         globalState.pools.set(BC.name, BC)
 
         const pr = creator.calculatePriceRange(BC, poolC, poolB)
-        creator.citeQuest(BC, pr.min, pr.max, 0, 10000, pr.native)
+        creator.(BC, pr.min, pr.max, 0, 10000, pr.native)
 
         const router = new Router(globalState.quests, globalState.pools)
         const results1 = router.smartSwap('USDC', 'TEST_2', 2500000)
@@ -493,7 +493,7 @@ describe('Routing', () => {
         const priceMax = 10
         const citeAmount = 27
 
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
         const poolA = questA.createPool({ initialPositions }) // Deposit A
@@ -535,7 +535,7 @@ describe('Routing', () => {
         const amount = 100
         const citeAmount = 25
 
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
         const poolA = questA.createPool() // Deposit A
@@ -571,7 +571,7 @@ describe('Routing', () => {
         const amount = 100
         const citeAmount = 25
 
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
         const poolA = questA.createPool() // Deposit A
@@ -602,7 +602,7 @@ describe('Routing', () => {
     })
 
     it('Smart route for token through cited cross pool', () => {
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST')
         const poolA = questA.createPool() // Deposit A
@@ -639,7 +639,7 @@ describe('Routing', () => {
     })
 
     it('Smart route for token through cited cross pool with multiple smart swaps', () => {
-        const creator = Investor.create('creator', 'creator', 10000)
+        const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST')
         const poolA = questA.createPool() // Deposit A

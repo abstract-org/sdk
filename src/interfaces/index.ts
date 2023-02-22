@@ -1,4 +1,5 @@
 export * from './IPool'
+export * from './IPoolState'
 export * from './IPosition'
 export * from './IQuest'
 export * from './ISwap'

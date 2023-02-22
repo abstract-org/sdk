@@ -1,7 +1,7 @@
 CREATE POLICY "Allow agora to update" ON snapshot FOR UPDATE TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
-CREATE POLICY "Allow agora to update" ON snapshot_investor FOR UPDATE TO authenticated
+CREATE POLICY "Allow agora to update" ON snapshot_wallet FOR UPDATE TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
 CREATE POLICY "Allow agora to update" ON snapshot_pool FOR UPDATE TO authenticated
@@ -22,13 +22,13 @@ WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 CREATE POLICY "Allow agora to update" ON _prisma_migrations FOR UPDATE TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
-CREATE POLICY "Allow agora to update" ON investor FOR UPDATE TO authenticated
+CREATE POLICY "Allow agora to update" ON wallet FOR UPDATE TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
-CREATE POLICY "Allow agora to update" ON investor_balances FOR UPDATE TO authenticated
+CREATE POLICY "Allow agora to update" ON wallet_balances FOR UPDATE TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
-CREATE POLICY "Allow agora to update" ON investor_navs FOR UPDATE TO authenticated
+CREATE POLICY "Allow agora to update" ON wallet_navs FOR UPDATE TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
 CREATE POLICY "Allow agora to update" ON log FOR UPDATE TO authenticated
@@ -52,7 +52,7 @@ WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 CREATE POLICY "Allow agora to update" ON scenario FOR UPDATE TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
-CREATE POLICY "Allow agora to update" ON scenario_investor_config FOR UPDATE TO authenticated
+CREATE POLICY "Allow agora to update" ON scenario_wallet_config FOR UPDATE TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
 CREATE POLICY "Allow agora to update" ON scenario_quest_config FOR UPDATE TO authenticated

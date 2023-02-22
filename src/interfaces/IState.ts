@@ -1,17 +1,17 @@
 import HashMap from 'hashmap'
-import { Investor, Pool, Quest } from '../modules'
+import { Wallet, Pool, Quest } from '../modules'
 
 export declare type TQuestName = string
 export declare type TPoolName = string
-export declare type TInvestorHash = string
+export declare type TWalletHash = string
 
 // @deprecated
 export interface IState {
-    investors: HashMap<TInvestorHash, Investor>
+    wallets: HashMap<TWalletHash, Wallet>
     pools: HashMap<TPoolName, Pool>
     quests: HashMap<TQuestName, Quest>
-    investorStore: {
-        investors: TInvestorHash[]
+    walletStore: {
+        wallets: TWalletHash[]
     }
     poolStore: {
         pools: Array<TPoolName>
@@ -32,8 +32,8 @@ export interface IState {
         currentDay: number
     }
     historical: {
-        investorNavs: object
-        investorBalances: object
+        walletNavs: object
+        walletBalances: object
     }
     moneyDist: {
         citing: Array<any>

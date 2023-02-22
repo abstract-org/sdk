@@ -7,9 +7,9 @@ export class PosOwnersUploadDto {
     pmin: number
     type: string
     pool_id: number
-    investor_id: number
+    wallet_id: number
 
-    constructor(data, poolId, investorId) {
+    constructor(data, poolId, walletId) {
         this.amt0 = data.amt0
         this.amt1 = data.amt1
         this.hash = data.hash
@@ -18,6 +18,6 @@ export class PosOwnersUploadDto {
         this.pmin = data.pmin
         this.type = data.type
         this.pool_id = poolId
-        this.investor_id = investorId
+        this.wallet_id = walletId
     }
 }

@@ -1,19 +1,19 @@
 export const RELATION_TYPE = {
-    INVESTOR: 'investor',
+    INVESTOR: 'wallet',
     QUEST: 'quest',
     POOL: 'pool'
 }
 
 export const TABLE = {
     quest: 'quest',
-    investor: 'investor',
-    investor_balances: 'investor_balances',
-    investor_navs: 'investor_navs',
+    wallet: 'wallet',
+    wallet_balances: 'wallet_balances',
+    wallet_navs: 'wallet_navs',
     pool: 'pool',
     pool_data: 'pool_data',
     position: 'position',
     position_owner: 'position_owner',
-    snapshot_investor: 'snapshot_investor',
+    snapshot_wallet: 'snapshot_wallet',
     snapshot_quest: 'snapshot_quest',
     snapshot_pool: 'snapshot_pool',
     swap: 'swap',
@@ -22,24 +22,24 @@ export const TABLE = {
     user: 'user',
     snapshot_totals: 'snapshot_totals',
     scenario: 'scenario',
-    scenario_investor_config: 'scenario_investor_config',
+    scenario_wallet_config: 'scenario_wallet_config',
     scenario_quest_config: 'scenario_quest_config'
 }
 
 export const getQuerySnapshotById = ({ T } = { T: TABLE }) => `*,
         creator: creator_id ( email ),
         scenario (
-            ${T.scenario_investor_config}(*),
+            ${T.scenario_wallet_config}(*),
             ${T.scenario_quest_config}(*)
         ),
-        ${T.investor}(
+        ${T.wallet}(
             *,
-            ${T.investor_balances}(
+            ${T.wallet_balances}(
                 ${T.quest}(name),
                 balance,
                 day
             ),
-            ${T.investor_navs}(*),
+            ${T.wallet_navs}(*),
             quests:${T.quest}(name)
         ),
         ${T.pool} (
@@ -52,13 +52,13 @@ export const getQuerySnapshotById = ({ T } = { T: TABLE }) => `*,
             ${T.log}(
                 *, 
                 pool (name),
-                investor (hash)
+                wallet (hash)
             ),
             ${T.swap}(*)
         ),
         ${T.quest}(
             *,
-            investor (
+            wallet (
                 name,
                 hash
             )

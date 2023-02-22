@@ -1,4 +1,4 @@
-import { Investor, UsdcToken } from '../../modules'
+import { Wallet, UsdcToken } from '../../modules'
 import { p2pp } from '../../utils/logicUtils'
 import { getQP } from '../helpers/getQuestPools'
 import { preparePool } from '../helpers/poolManager'
@@ -216,11 +216,7 @@ describe('Position Manager', () => {
                 tokenA: null
             }
         ]
-        const { pool, investor } = preparePool(
-            20000,
-            'creator',
-            initialPositions
-        )
+        const { pool, wallet } = preparePool(20000, 'creator', initialPositions)
 
         const removeTokenA = 0
         const removeTokenB = 3000
@@ -235,7 +231,7 @@ describe('Position Manager', () => {
             )
         )
 
-        investor.removeLiquidity(
+        wallet.removeLiquidity(
             pool,
             initialPositions[2].priceMin,
             initialPositions[2].priceMax,
@@ -281,11 +277,7 @@ describe('Position Manager', () => {
                 tokenA: null
             }
         ]
-        const { pool, investor } = preparePool(
-            20000,
-            'creator',
-            initialPositions
-        )
+        const { pool, wallet } = preparePool(20000, 'creator', initialPositions)
 
         const oldPosition = pool.pos.get(p2pp(initialPositions[2].priceMin))
         expect(oldPosition.liquidity).toBeCloseTo(
@@ -298,7 +290,7 @@ describe('Position Manager', () => {
             )
         )
 
-        investor.removeLiquidity(
+        wallet.removeLiquidity(
             pool,
             initialPositions[2].priceMin,
             initialPositions[2].priceMax,
@@ -374,13 +366,13 @@ describe('Position Manager', () => {
                 tokenA: null
             }
         ]
-        const { pool, investor, tokenLeft, tokenRight } = preparePool(
+        const { pool, wallet, tokenLeft, tokenRight } = preparePool(
             20000,
             'creator',
             initialPositions
         )
 
-        const [amountLeft, amountRight] = investor.removeLiquidity(
+        const [amountLeft, amountRight] = wallet.removeLiquidity(
             pool,
             50,
             10000,
@@ -388,11 +380,11 @@ describe('Position Manager', () => {
             3000
         )
 
-        investor.addBalance(tokenLeft.name, amountLeft)
-        investor.addBalance(tokenRight.name, amountRight)
+        wallet.addBalance(tokenLeft.name, amountLeft)
+        wallet.addBalance(tokenRight.name, amountRight)
 
-        expect(pool.volumeToken1).toBe(17000)
-        expect(investor.balances[tokenRight.name]).toBe(3000)
+        expect(pool.questRightVolume).toBe(17000)
+        expect(wallet.balances[tokenRight.name]).toBe(3000)
     })
 })
 
@@ -425,9 +417,9 @@ describe('Price Range Manager', () => {
     ]
 
     it('calculates positions for maxed out A', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({
             tokenLeft: new UsdcToken(),
             initialPositions
@@ -437,10 +429,10 @@ describe('Price Range Manager', () => {
         A.buy(999999999)
 
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
+        const AB = wallet.createPool(qB, qA, startingPrice)
 
-        const ppAB = investor.calculatePriceRange(AB, B, A, 2)
-        const ppBA = investor.calculatePriceRange(AB, A, B, 2)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 2)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 2)
 
         expect(ppAB.min).toBeCloseTo(10000, 0)
         expect(ppAB.max).toBeCloseTo(20000, 0)
@@ -451,19 +443,19 @@ describe('Price Range Manager', () => {
     })
 
     it('calculates positions for maxed out B', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({ tokenLeft: new UsdcToken() })
         const B = qB.createPool({ tokenLeft: new UsdcToken() })
 
         B.buy(999999999)
 
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
+        const AB = wallet.createPool(qB, qA, startingPrice)
 
-        const ppAB = investor.calculatePriceRange(AB, B, A, 2)
-        const ppBA = investor.calculatePriceRange(AB, A, B, 2)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 2)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 2)
 
         expect(ppAB.min).toBeCloseTo(0.0001, 0)
         expect(ppAB.max).toBeCloseTo(0.0002, 0)
@@ -474,9 +466,9 @@ describe('Price Range Manager', () => {
     })
 
     it('calculates price range for expensive citing token non-native', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({ tokenLeft: new UsdcToken() })
         const B = qB.createPool({ tokenLeft: new UsdcToken() })
 
@@ -492,9 +484,9 @@ describe('Price Range Manager', () => {
         const expectedMinNative = startingPrice / multiplier
         const expectedMaxNative = startingPrice
 
-        const AB = investor.createPool(qB, qA, startingPrice)
-        const ppAB = investor.calculatePriceRange(AB, B, A, multiplier)
-        const ppBA = investor.calculatePriceRange(AB, A, B, multiplier)
+        const AB = wallet.createPool(qB, qA, startingPrice)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, multiplier)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, multiplier)
 
         expect(ppAB.min).toBeCloseTo(expectedMinNonNative, 2)
         expect(ppAB.max).toBeCloseTo(expectedMaxNonNative, 2)
@@ -506,9 +498,9 @@ describe('Price Range Manager', () => {
     })
 
     it('calculates positions for high B', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({ tokenLeft: new UsdcToken() })
         const B = qB.createPool({ tokenLeft: new UsdcToken() })
 
@@ -516,9 +508,9 @@ describe('Price Range Manager', () => {
         B.buy(25000)
 
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
-        const ppAB = investor.calculatePriceRange(AB, B, A, 2)
-        const ppBA = investor.calculatePriceRange(AB, A, B, 2)
+        const AB = wallet.createPool(qB, qA, startingPrice)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 2)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 2)
 
         expect(ppAB.min).toBeCloseTo(0.27, 0)
         expect(ppAB.max).toBeCloseTo(0.54, 0)
@@ -529,9 +521,9 @@ describe('Price Range Manager', () => {
     })
 
     it('calculates positions for equal A and B with multiplier 3', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({ tokenLeft: new UsdcToken() })
         const B = qB.createPool({ tokenLeft: new UsdcToken() })
 
@@ -539,9 +531,9 @@ describe('Price Range Manager', () => {
         B.buy(25000)
 
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
-        const ppAB = investor.calculatePriceRange(AB, B, A, 3)
-        const ppBA = investor.calculatePriceRange(AB, A, B, 3)
+        const AB = wallet.createPool(qB, qA, startingPrice)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 3)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 3)
 
         expect(ppAB.min).toBe(1)
         expect(ppAB.max).toBe(3)
@@ -552,16 +544,16 @@ describe('Price Range Manager', () => {
     })
 
     it('calculates positions for default A and B', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({ tokenLeft: new UsdcToken() })
         const B = qB.createPool({ tokenLeft: new UsdcToken() })
 
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
-        const ppAB = investor.calculatePriceRange(AB, B, A, 2)
-        const ppBA = investor.calculatePriceRange(AB, A, B, 2)
+        const AB = wallet.createPool(qB, qA, startingPrice)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 2)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 2)
 
         expect(ppAB.min).toBe(1)
         expect(ppAB.max).toBe(2)
@@ -572,9 +564,9 @@ describe('Price Range Manager', () => {
     })
 
     it('calculates positions for maxed out A and B', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({ tokenLeft: new UsdcToken() })
         const B = qB.createPool({ tokenLeft: new UsdcToken() })
 
@@ -582,9 +574,9 @@ describe('Price Range Manager', () => {
         B.buy(999999999)
 
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
-        const ppAB = investor.calculatePriceRange(AB, B, A, 2)
-        const ppBA = investor.calculatePriceRange(AB, A, B, 2)
+        const AB = wallet.createPool(qB, qA, startingPrice)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 2)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 2)
 
         expect(ppAB.min).toBe(1)
         expect(ppAB.max).toBe(2)
@@ -623,17 +615,17 @@ describe('Citation Manager', () => {
         }
     ]
     it('Returns totalIn positive when citing non-native direction', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({ tokenLeft: new UsdcToken() })
         const B = qB.createPool({ tokenLeft: new UsdcToken() })
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
+        const AB = wallet.createPool(qB, qA, startingPrice)
 
-        const ppAB = investor.calculatePriceRange(AB, B, A, 2)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 2)
 
-        const [totalIn, totalOut] = investor.citeQuest(
+        const [totalIn, totalOut] = wallet.citeQuest(
             AB,
             ppAB.min,
             ppAB.max,
@@ -646,17 +638,17 @@ describe('Citation Manager', () => {
     })
 
     it('Returns totalIn positive when citing native direction', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({ tokenLeft: new UsdcToken() })
         const B = qB.createPool({ tokenLeft: new UsdcToken() })
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
+        const AB = wallet.createPool(qB, qA, startingPrice)
 
-        const ppBA = investor.calculatePriceRange(AB, A, B, 2)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 2)
 
-        const [totalIn, totalOut] = investor.citeQuest(
+        const [totalIn, totalOut] = wallet.citeQuest(
             AB,
             ppBA.min,
             ppBA.max,
@@ -669,9 +661,9 @@ describe('Citation Manager', () => {
     })
 
     it('Cites both sides with default prices in cross pool', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({
             tokenLeft: new UsdcToken(),
             initialPositions
@@ -681,19 +673,19 @@ describe('Citation Manager', () => {
             initialPositions
         })
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
+        const AB = wallet.createPool(qB, qA, startingPrice)
 
-        const ppAB = investor.calculatePriceRange(AB, B, A, 2)
-        const ppBA = investor.calculatePriceRange(AB, A, B, 2)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 2)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 2)
 
-        investor.citeQuest(AB, ppAB.min, ppAB.max, 0, 1000, false)
-        investor.citeQuest(AB, ppBA.min, ppBA.max, 1000, 0, true)
+        wallet.citeQuest(AB, ppAB.min, ppAB.max, 0, 1000, false)
+        wallet.citeQuest(AB, ppBA.min, ppBA.max, 1000, 0, true)
 
         const posOwnerAB = AB.posOwners.find(
-            (p) => p.hash === investor.hash && p.amt1 === 1000
+            (p) => p.hash === wallet.hash && p.amt1 === 1000
         )
         const posOwnerBA = AB.posOwners.find(
-            (p) => p.hash === investor.hash && p.amt0 === 1000
+            (p) => p.hash === wallet.hash && p.amt0 === 1000
         )
 
         const posMinAB = AB.pos.get(p2pp(ppAB.min))
@@ -702,8 +694,8 @@ describe('Citation Manager', () => {
         const posMinBA = AB.pos.get(p2pp(ppBA.min))
         const posMaxBA = AB.pos.get(p2pp(ppBA.max))
 
-        expect(AB.volumeToken0).toBe(1000)
-        expect(AB.volumeToken1).toBe(1000)
+        expect(AB.questLeftVolume).toBe(1000)
+        expect(AB.questRightVolume).toBe(1000)
         expect(AB.curPrice).toBe(1)
         expect(AB.pos.get(-1).liquidity).toBeCloseTo(3414, 0)
         expect(AB.pos.get(0).liquidity).toBeCloseTo(0, 0)
@@ -727,9 +719,9 @@ describe('Citation Manager', () => {
     })
 
     it('Cites both sides with maxed out A', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({
             tokenLeft: new UsdcToken(),
             initialPositions
@@ -741,16 +733,16 @@ describe('Citation Manager', () => {
         A.buy(999999999)
 
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
+        const AB = wallet.createPool(qB, qA, startingPrice)
 
-        const ppAB = investor.calculatePriceRange(AB, B, A, 2)
-        const ppBA = investor.calculatePriceRange(AB, A, B, 2)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 2)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 2)
 
         const posOwnerAB = AB.posOwners.find(
-            (p) => p.hash === investor.hash && p.amt1 === 1000
+            (p) => p.hash === wallet.hash && p.amt1 === 1000
         )
         const posOwnerBA = AB.posOwners.find(
-            (p) => p.hash === investor.hash && p.amt0 === 1000
+            (p) => p.hash === wallet.hash && p.amt0 === 1000
         )
 
         const posMinAB = AB.pos.get(p2pp(ppAB.min))
@@ -759,8 +751,8 @@ describe('Citation Manager', () => {
         const posMinBA = AB.pos.get(p2pp(ppBA.min))
         const posMaxBA = AB.pos.get(p2pp(ppBA.max))
 
-        expect(AB.volumeToken0).toBe(1000)
-        expect(AB.volumeToken1).toBe(1000)
+        expect(AB.questLeftVolume).toBe(1000)
+        expect(AB.questRightVolume).toBe(1000)
         expect(AB.curPrice).toBeCloseTo(10000)
         expect(AB.pos.get(p2pp(10000)).liquidity).toBeCloseTo(341387, 0)
         expect(AB.pos.get(p2pp(5000)).liquidity).toBeCloseTo(34, 0)
@@ -784,9 +776,9 @@ describe('Citation Manager', () => {
     })
 
     it('Cites both sides with maxed out B', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({
             tokenLeft: new UsdcToken(),
             initialPositions
@@ -798,24 +790,24 @@ describe('Citation Manager', () => {
         B.buy(999999999)
 
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
+        const AB = wallet.createPool(qB, qA, startingPrice)
 
-        const ppAB = investor.calculatePriceRange(AB, B, A, 2)
-        const ppBA = investor.calculatePriceRange(AB, A, B, 2)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 2)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 2)
 
         console.log('ppBA: ', [ppBA.min, ppBA.max])
 
-        investor.citeQuest(AB, ppAB.min, ppAB.max, 0, 1000, false)
-        const res = investor.citeQuest(AB, ppBA.min, ppBA.max, 1000, 0, true)
+        wallet.citeQuest(AB, ppAB.min, ppAB.max, 0, 1000, false)
+        const res = wallet.citeQuest(AB, ppBA.min, ppBA.max, 1000, 0, true)
 
         const dryBuy = AB.dryBuy(Infinity)
         const drySell = AB.drySell(Infinity)
 
         const posOwnerAB = AB.posOwners.find(
-            (p) => p.hash === investor.hash && p.amt1 === 1000
+            (p) => p.hash === wallet.hash && p.amt1 === 1000
         )
         const posOwnerBA = AB.posOwners.find(
-            (p) => p.hash === investor.hash && p.amt0 === 1000
+            (p) => p.hash === wallet.hash && p.amt0 === 1000
         )
 
         const posMinAB = AB.pos.get(Math.abs(p2pp(ppAB.min)))
@@ -833,8 +825,8 @@ describe('Citation Manager', () => {
         console.log('posOwnerAB', posOwnerAB)
         console.log('posOwnerBA', posOwnerBA)
         console.log('res', res)
-        expect(AB.volumeToken0).toBe(0)
-        expect(AB.volumeToken1).toBe(1000)
+        expect(AB.questLeftVolume).toBe(0)
+        expect(AB.questRightVolume).toBe(1000)
         expect(AB.curPrice).toBeCloseTo(0.0002)
         expect(AB.pos.get(Math.abs(p2pp(ppAB.min))).liquidity).toBeCloseTo(
             -14.14,
@@ -863,9 +855,9 @@ describe('Citation Manager', () => {
 
     // @TODO: Redo test + add the same with higher B
     it('Cites both sides with higher A', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({
             tokenLeft: new UsdcToken(),
             initialPositions
@@ -878,19 +870,19 @@ describe('Citation Manager', () => {
         A.buy(25000)
         B.buy(5000)
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
+        const AB = wallet.createPool(qB, qA, startingPrice)
 
-        const ppAB = investor.calculatePriceRange(AB, B, A, 2)
-        const ppBA = investor.calculatePriceRange(AB, A, B, 2)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, 2)
+        const ppBA = wallet.calculatePriceRange(AB, A, B, 2)
 
-        investor.citeQuest(AB, ppAB.min, ppAB.max, 0, 1000, false)
-        investor.citeQuest(AB, ppBA.min, ppBA.max, 1000, 0, true)
+        wallet.citeQuest(AB, ppAB.min, ppAB.max, 0, 1000, false)
+        wallet.citeQuest(AB, ppBA.min, ppBA.max, 1000, 0, true)
 
         const posOwnerAB = AB.posOwners.find(
-            (p) => p.hash === investor.hash && p.amt1 === 1000
+            (p) => p.hash === wallet.hash && p.amt1 === 1000
         )
         const posOwnerBA = AB.posOwners.find(
-            (p) => p.hash === investor.hash && p.amt0 === 1000
+            (p) => p.hash === wallet.hash && p.amt0 === 1000
         )
 
         const posMinAB = AB.pos.get(p2pp(ppAB.min))
@@ -899,15 +891,15 @@ describe('Citation Manager', () => {
         const posMinBA = AB.pos.get(p2pp(ppBA.min))
         const posMaxBA = AB.pos.get(p2pp(ppBA.max))
 
-        expect(AB.volumeToken0).toBe(1000)
-        expect(AB.volumeToken1).toBe(1000)
+        expect(AB.questLeftVolume).toBe(1000)
+        expect(AB.questRightVolume).toBe(1000)
         expect(AB.curPrice).toBeCloseTo(5.66, 0) // was 3.69
     })
 
     it('Sums up liquidity on multiple positions opened on cross-pool', () => {
-        const investor = Investor.create('Author', 'Author', 10000)
-        const qA = investor.createQuest('A')
-        const qB = investor.createQuest('B')
+        const wallet = Wallet.create('Author', 'Author', 10000)
+        const qA = wallet.createQuest('A')
+        const qB = wallet.createQuest('B')
         const A = qA.createPool({
             tokenLeft: new UsdcToken(),
             initialPositions
@@ -925,8 +917,8 @@ describe('Citation Manager', () => {
         const multiplier = 2
         const native = false
         const startingPrice = A.curPrice / B.curPrice
-        const AB = investor.createPool(qB, qA, startingPrice)
-        const ppAB = investor.calculatePriceRange(AB, B, A, multiplier)
+        const AB = wallet.createPool(qB, qA, startingPrice)
+        const ppAB = wallet.calculatePriceRange(AB, B, A, multiplier)
 
         let expectedLiquidityArr = []
         Array.from({ length: 5 }).forEach(() =>
@@ -944,11 +936,11 @@ describe('Citation Manager', () => {
             (acc, cur) => acc + cur
         )
 
-        investor.citeQuest(AB, ppAB.min, ppAB.max, token0in, token1in, native)
-        investor.citeQuest(AB, ppAB.min, ppAB.max, token0in, token1in, native)
-        investor.citeQuest(AB, ppAB.min, ppAB.max, token0in, token1in, native)
-        investor.citeQuest(AB, ppAB.min, ppAB.max, token0in, token1in, native)
-        investor.citeQuest(AB, ppAB.min, ppAB.max, token0in, token1in, native)
+        wallet.citeQuest(AB, ppAB.min, ppAB.max, token0in, token1in, native)
+        wallet.citeQuest(AB, ppAB.min, ppAB.max, token0in, token1in, native)
+        wallet.citeQuest(AB, ppAB.min, ppAB.max, token0in, token1in, native)
+        wallet.citeQuest(AB, ppAB.min, ppAB.max, token0in, token1in, native)
+        wallet.citeQuest(AB, ppAB.min, ppAB.max, token0in, token1in, native)
 
         const poolTotalLiq = AB.pos
             .values()
@@ -961,17 +953,17 @@ describe('Citation Manager', () => {
     })
 
     it('Citing traded cross pool', () => {
-        const investor = Investor.create('INV', 'INV', 10000)
+        const wallet = Wallet.create('INV', 'INV', 10000)
         const { pool: agoraPool, quest: agoraQuest } = getQP('AGORA')
         const { pool: pra5Pool, quest: pra5Quest } = getQP('Praseodymium (5)')
         const { pool: pra7Pool, quest: pra7Quest } = getQP('Praseodymium (7)')
         const startingPrice = 1
-        const agoraPra7Pool = investor.createPool(
+        const agoraPra7Pool = wallet.createPool(
             agoraQuest,
             pra7Quest,
             startingPrice
         )
-        const agoraPra5Pool = investor.createPool(
+        const agoraPra5Pool = wallet.createPool(
             agoraQuest,
             pra5Quest,
             startingPrice
@@ -1002,7 +994,6 @@ describe('Citation Manager', () => {
                         mutatingPool.pos.set(posArr[0], posArr[1])
                     }
                 }
-                mutatingPool.FRESH = false
             }
 
             poolSnapshot[idx].pool = mutatingPool
@@ -1013,7 +1004,7 @@ describe('Citation Manager', () => {
             max: 0.04271557736032311,
             native: false
         }
-        investor.citeQuest(
+        wallet.citeQuest(
             agoraPra7Pool,
             priceRange.min,
             priceRange.max,
@@ -1031,7 +1022,7 @@ describe('Citation Manager', () => {
             max: 0.04443554086352179,
             native: false
         }
-        investor.citeQuest(
+        wallet.citeQuest(
             agoraPra5Pool,
             priceRangeSecond.min,
             priceRangeSecond.max,

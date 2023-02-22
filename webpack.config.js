@@ -9,7 +9,8 @@ module.exports = {
     // specify the output location for the bundled code
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'bundle.js'
+        filename: 'bundle.js',
+        libraryTarget: 'module'
     },
 
     // specify the module rules for handling different types of files
@@ -25,7 +26,10 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['.ts', '.tsx', '.js']
+        extensions: ['.ts', '.tsx', '.js'],
+        alias: {
+            '@': path.resolve(__dirname, 'src')
+        }
     },
 
     // specify the plugins to use in the webpack build process

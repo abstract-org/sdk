@@ -2,8 +2,8 @@ export class LogDto {
     id: number
     pool_id: number
     pool_name: string
-    investor_id: number
-    investor_hash: string
+    wallet_id: number
+    wallet_hash: string
     swap_id: number
     action: string
     day: number
@@ -20,8 +20,8 @@ export class LogDto {
         this.blk = data.blk
         this.pool_id = data.pool_id
         this.pool_name = data.pool.name
-        this.investor_id = data.investor_id
-        this.investor_hash = data.investor.hash
+        this.wallet_id = data.wallet_id
+        this.wallet_hash = data.wallet.hash
         this.swap_id = data.swap_id
         this.action = data.action
         this.day = data.day
@@ -38,7 +38,7 @@ export class LogDto {
             blk: this.blk,
             action: this.action,
             day: this.day,
-            investorHash: this.investor_hash,
+            walletHash: this.wallet_hash,
             mcap: this.mcap,
             opName: this.op_name,
             paths: this.pool_name,

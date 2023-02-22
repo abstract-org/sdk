@@ -16,7 +16,6 @@ export class PoolDataDto {
     tvl: number
     mcap: number
     created_at: Date
-    is_fresh: boolean
     total_sold: number
     sold_token0: number
     sold_token1: number
@@ -40,7 +39,6 @@ export class PoolDataDto {
         this.tvl = data.tvl
         this.mcap = data.mcap
         this.created_at = data.created_at
-        this.is_fresh = data.is_fresh
         this.total_sold = data.total_sold
         this.sold_token0 = data.sold_token0
         this.sold_token1 = data.sold_token1
@@ -63,7 +61,6 @@ export class PoolDataDto {
             tvl: this.tvl,
             mcap: this.mcap,
             created_at: this.created_at,
-            is_fresh: this.is_fresh,
             total_sold: this.total_sold,
             sold_token0: this.sold_token0,
             sold_token1: this.sold_token1

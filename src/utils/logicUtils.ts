@@ -11,7 +11,7 @@ export const p2pp = (price) => {
 
 export const formSwapData = (
     pool,
-    investor,
+    wallet,
     action,
     totalAmountIn,
     totalAmountOut,
@@ -22,7 +22,7 @@ export const formSwapData = (
     return {
         pool: pool ? pool.name : '',
         price: pool ? pool.curPrice.toFixed(3) : 0,
-        investorHash: investor.hash,
+        walletHash: wallet.hash,
         action: action,
         mcap: pool.isQuest() ? pool.getMarketCap() : '',
         tvl: pool.isQuest() ? pool.getTVL() : '',
