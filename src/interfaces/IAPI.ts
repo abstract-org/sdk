@@ -1,4 +1,4 @@
-import { Investor, Pool, Quest } from '../modules'
+import { Wallet, Pool, Quest } from '../modules'
 import HashMap from 'hashmap'
 
 import {
@@ -43,33 +43,33 @@ export interface IAPI {
     getLogsByPool?(poolId: number): Array<ILog>
     getLogsInDayRange?(dayFrom: number, dayTo: number): Array<ILog>
 
-    // Investor API
+    // Wallet API
     openPosition?(poolId: number, position: IPosition): void
-    updateInvestorBalances?(): void
-    updateInvestorNavs?(config: {
-        investorId: number
+    updateWalletBalances?(): void
+    updateWalletNavs?(config: {
+        walletId: number
         day: number
         usdcNav: number
         tokenNav: number
     }): void
-    createInvestor?(
+    createWallet?(
         type: string,
         name: string,
         initialBalance: number,
         isDefault?: boolean
-    ): Investor
+    ): Wallet
 
     // Supabase API
 
     saveQuests?(
         quests: Array<Quest>,
         humanQuests: Array<string> | null,
-        questNamesToInvestorIds: HashMap<string, number>,
+        questNamesToWalletIds: HashMap<string, number>,
         snapshotId: number
     ): Promise<HashMap<string, number>>
 
-    saveInvestors?(
-        investors: Array<Investor>,
+    saveWallets?(
+        wallets: Array<Wallet>,
         snapshotId: number
     ): Promise<HashMap<string, number>>
 
@@ -87,37 +87,37 @@ export interface IAPI {
 
     saveScenario?(
         scenarioName: string,
-        investorConfigs: Record<string, any>,
+        walletConfigs: Record<string, any>,
         questConfigs: Record<string, any>
     ): Promise<number>
 
     saveSwaps?(
         swapsArray: object[],
         poolMappings: HashMap<string, number>,
-        investorMappings: HashMap<string, number>
+        walletMappings: HashMap<string, number>
     ): Promise<void>
 
     saveLogs?(
         logsArray: object[],
         poolMappings: HashMap<string, number>,
-        investorMappings: HashMap<string, number>
+        walletMappings: HashMap<string, number>
     ): Promise<void>
 
     savePositionsData?(
         pools: Pool[],
         poolMappings: HashMap<string, number>,
-        investorMappings: HashMap<string, number>
+        walletMappings: HashMap<string, number>
     ): Promise<boolean>
 
-    saveInvestorBalances?(
-        investorBalancesByDay: Array<[number, Record<string, object[]>]>,
-        investorHashToInvestorId: HashMap<string, number>,
+    saveWalletBalances?(
+        walletBalancesByDay: Array<[number, Record<string, object[]>]>,
+        walletHashToWalletId: HashMap<string, number>,
         questNameToQuestId: HashMap<string, number>
     ): Promise<void>
 
-    saveInvestorNavs?(
-        investorNavsByDay: Array<[number, Record<string, number>]>,
-        investorHashToInvestorId: HashMap<string, number>
+    saveWalletNavs?(
+        walletNavsByDay: Array<[number, Record<string, number>]>,
+        walletHashToWalletId: HashMap<string, number>
     ): Promise<void>
 
     saveSnapshotTotals?(
@@ -125,8 +125,8 @@ export interface IAPI {
         {
             quests,
             pools,
-            investors
-        }: { quests: Quest[]; pools: Pool[]; investors: Investor[] }
+            wallets
+        }: { quests: Quest[]; pools: Pool[]; wallets: Wallet[] }
     ): Promise<any>
 
     saveSnapshot?({

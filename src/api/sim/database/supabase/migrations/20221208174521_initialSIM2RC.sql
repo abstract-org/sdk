@@ -31,18 +31,18 @@ GRANT EXECUTE ON FUNCTION public.handle_new_user() TO PUBLIC;
 
 GRANT EXECUTE ON FUNCTION public.handle_new_user() TO service_role;
 
-CREATE TABLE IF NOT EXISTS public.snapshot_investor
+CREATE TABLE IF NOT EXISTS public.snapshot_wallet
 (
-    id bigint NOT NULL DEFAULT nextval('snapshot_investor_id_seq'::regclass),
+    id bigint NOT NULL DEFAULT nextval('snapshot_wallet_id_seq'::regclass),
     created_at timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP,
     snapshot_id integer NOT NULL,
     entity_id integer NOT NULL,
-    CONSTRAINT snapshot_investor_pkey PRIMARY KEY (snapshot_id, entity_id),
-    CONSTRAINT snapshot_investor_entity_id_fkey FOREIGN KEY (entity_id)
-        REFERENCES public.investor (id) MATCH SIMPLE
+    CONSTRAINT snapshot_wallet_pkey PRIMARY KEY (snapshot_id, entity_id),
+    CONSTRAINT snapshot_wallet_entity_id_fkey FOREIGN KEY (entity_id)
+        REFERENCES public.wallet (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
-    CONSTRAINT snapshot_investor_snapshot_id_fkey FOREIGN KEY (snapshot_id)
+    CONSTRAINT snapshot_wallet_snapshot_id_fkey FOREIGN KEY (snapshot_id)
         REFERENCES public.snapshot (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
@@ -50,29 +50,29 @@ CREATE TABLE IF NOT EXISTS public.snapshot_investor
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.snapshot_investor
+ALTER TABLE IF EXISTS public.snapshot_wallet
     OWNER to postgres;
 
-ALTER TABLE IF EXISTS public.snapshot_investor
+ALTER TABLE IF EXISTS public.snapshot_wallet
     ENABLE ROW LEVEL SECURITY;
 
-GRANT ALL ON TABLE public.snapshot_investor TO anon;
+GRANT ALL ON TABLE public.snapshot_wallet TO anon;
 
-GRANT ALL ON TABLE public.snapshot_investor TO authenticated;
+GRANT ALL ON TABLE public.snapshot_wallet TO authenticated;
 
-GRANT ALL ON TABLE public.snapshot_investor TO postgres;
+GRANT ALL ON TABLE public.snapshot_wallet TO postgres;
 
-GRANT ALL ON TABLE public.snapshot_investor TO service_role;
+GRANT ALL ON TABLE public.snapshot_wallet TO service_role;
 
-GRANT ALL ON TABLE public.snapshot_investor TO supabase_admin;
+GRANT ALL ON TABLE public.snapshot_wallet TO supabase_admin;
 CREATE POLICY "Allow read for everyone"
-    ON public.snapshot_investor
+    ON public.snapshot_wallet
     AS PERMISSIVE
     FOR SELECT
     TO public
     USING (true);
 CREATE POLICY "Only agora-labs.com staff can insert"
-    ON public.snapshot_investor
+    ON public.snapshot_wallet
     AS PERMISSIVE
     FOR INSERT
     TO authenticated
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS public.snapshot_totals
     snapshot_id integer NOT NULL,
     quests integer NOT NULL,
     cross_pools integer NOT NULL,
-    investors integer NOT NULL,
+    wallets integer NOT NULL,
     tvl integer NOT NULL,
     mcap integer NOT NULL,
     usdc integer NOT NULL,
@@ -175,46 +175,46 @@ CREATE POLICY "Only agora-labs.com staff can insert"
     TO authenticated
     WITH CHECK (("right"((auth.jwt() ->> 'email'::text), 15) ~~ '@agora-labs.com'::text));
 
-CREATE TABLE IF NOT EXISTS public.investor_navs
+CREATE TABLE IF NOT EXISTS public.wallet_navs
 (
-    id bigint NOT NULL DEFAULT nextval('investor_navs_id_seq'::regclass),
-    investor_id integer NOT NULL,
+    id bigint NOT NULL DEFAULT nextval('wallet_navs_id_seq'::regclass),
+    wallet_id integer NOT NULL,
     day integer NOT NULL,
     usdc_nav double precision NOT NULL,
     token_nav double precision NOT NULL,
     created_at timestamp(6) with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT investor_navs_pkey PRIMARY KEY (id),
-    CONSTRAINT investor_navs_investor_id_fkey FOREIGN KEY (investor_id)
-        REFERENCES public.investor (id) MATCH SIMPLE
+    CONSTRAINT wallet_navs_pkey PRIMARY KEY (id),
+    CONSTRAINT wallet_navs_wallet_id_fkey FOREIGN KEY (wallet_id)
+        REFERENCES public.wallet (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.investor_navs
+ALTER TABLE IF EXISTS public.wallet_navs
     OWNER to postgres;
 
-ALTER TABLE IF EXISTS public.investor_navs
+ALTER TABLE IF EXISTS public.wallet_navs
     ENABLE ROW LEVEL SECURITY;
 
-GRANT ALL ON TABLE public.investor_navs TO anon;
+GRANT ALL ON TABLE public.wallet_navs TO anon;
 
-GRANT ALL ON TABLE public.investor_navs TO authenticated;
+GRANT ALL ON TABLE public.wallet_navs TO authenticated;
 
-GRANT ALL ON TABLE public.investor_navs TO postgres;
+GRANT ALL ON TABLE public.wallet_navs TO postgres;
 
-GRANT ALL ON TABLE public.investor_navs TO service_role;
+GRANT ALL ON TABLE public.wallet_navs TO service_role;
 
-GRANT ALL ON TABLE public.investor_navs TO supabase_admin;
+GRANT ALL ON TABLE public.wallet_navs TO supabase_admin;
 CREATE POLICY "Allow read for everyone"
-    ON public.investor_navs
+    ON public.wallet_navs
     AS PERMISSIVE
     FOR SELECT
     TO public
     USING (true);
 CREATE POLICY "Only agora-labs.com staff can insert"
-    ON public.investor_navs
+    ON public.wallet_navs
     AS PERMISSIVE
     FOR INSERT
     TO authenticated
@@ -340,7 +340,7 @@ CREATE POLICY "Only agora-labs.com staff can insert"
     TO authenticated
     WITH CHECK (("right"((auth.jwt() ->> 'email'::text), 15) ~~ '@agora-labs.com'::text));
 
-CREATE TABLE IF NOT EXISTS public.investor
+CREATE TABLE IF NOT EXISTS public.wallet
 (
     id integer NOT NULL GENERATED BY DEFAULT AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
     id integer NOT NULL GENERATED BY DEFAULT AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
@@ -349,52 +349,52 @@ CREATE TABLE IF NOT EXISTS public.investor
     hash character varying(255) COLLATE pg_catalog."default" NOT NULL,
     created_at timestamp(0) with time zone NOT NULL,
     initial_balance double precision NOT NULL DEFAULT '0'::double precision,
-    CONSTRAINT investor_pkey PRIMARY KEY (id)
+    CONSTRAINT wallet_pkey PRIMARY KEY (id)
 )
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.investor
+ALTER TABLE IF EXISTS public.wallet
     OWNER to postgres;
 
-ALTER TABLE IF EXISTS public.investor
+ALTER TABLE IF EXISTS public.wallet
     ENABLE ROW LEVEL SECURITY;
 
-GRANT ALL ON TABLE public.investor TO anon;
+GRANT ALL ON TABLE public.wallet TO anon;
 
-GRANT ALL ON TABLE public.investor TO authenticated;
+GRANT ALL ON TABLE public.wallet TO authenticated;
 
-GRANT ALL ON TABLE public.investor TO postgres;
+GRANT ALL ON TABLE public.wallet TO postgres;
 
-GRANT ALL ON TABLE public.investor TO service_role;
+GRANT ALL ON TABLE public.wallet TO service_role;
 
-GRANT ALL ON TABLE public.investor TO supabase_admin;
+GRANT ALL ON TABLE public.wallet TO supabase_admin;
 CREATE POLICY "Allow read for everyone"
-    ON public.investor
+    ON public.wallet
     AS PERMISSIVE
     FOR SELECT
     TO public
     USING (true);
 CREATE POLICY "Only agora-labs.com staff can insert"
-    ON public.investor
+    ON public.wallet
     AS PERMISSIVE
     FOR INSERT
     TO authenticated
     WITH CHECK (("right"((auth.jwt() ->> 'email'::text), 15) ~~ '@agora-labs.com'::text));
 
-CREATE TABLE IF NOT EXISTS public.investor_balances
+CREATE TABLE IF NOT EXISTS public.wallet_balances
 (
     id integer NOT NULL GENERATED BY DEFAULT AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
-    investor_id integer NOT NULL,
+    wallet_id integer NOT NULL,
     quest_id integer NOT NULL,
     balance numeric NOT NULL,
     day integer,
-    CONSTRAINT investor_balances_pkey PRIMARY KEY (id),
-    CONSTRAINT investor_balances_investor_id_foreign FOREIGN KEY (investor_id)
-        REFERENCES public.investor (id) MATCH SIMPLE
+    CONSTRAINT wallet_balances_pkey PRIMARY KEY (id),
+    CONSTRAINT wallet_balances_wallet_id_foreign FOREIGN KEY (wallet_id)
+        REFERENCES public.wallet (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
-    CONSTRAINT investor_balances_quest_id_foreign FOREIGN KEY (quest_id)
+    CONSTRAINT wallet_balances_quest_id_foreign FOREIGN KEY (quest_id)
         REFERENCES public.quest (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
@@ -402,29 +402,29 @@ CREATE TABLE IF NOT EXISTS public.investor_balances
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.investor_balances
+ALTER TABLE IF EXISTS public.wallet_balances
     OWNER to postgres;
 
-ALTER TABLE IF EXISTS public.investor_balances
+ALTER TABLE IF EXISTS public.wallet_balances
     ENABLE ROW LEVEL SECURITY;
 
-GRANT ALL ON TABLE public.investor_balances TO anon;
+GRANT ALL ON TABLE public.wallet_balances TO anon;
 
-GRANT ALL ON TABLE public.investor_balances TO authenticated;
+GRANT ALL ON TABLE public.wallet_balances TO authenticated;
 
-GRANT ALL ON TABLE public.investor_balances TO postgres;
+GRANT ALL ON TABLE public.wallet_balances TO postgres;
 
-GRANT ALL ON TABLE public.investor_balances TO service_role;
+GRANT ALL ON TABLE public.wallet_balances TO service_role;
 
-GRANT ALL ON TABLE public.investor_balances TO supabase_admin;
+GRANT ALL ON TABLE public.wallet_balances TO supabase_admin;
 CREATE POLICY "Allow read for everyone"
-    ON public.investor_balances
+    ON public.wallet_balances
     AS PERMISSIVE
     FOR SELECT
     TO public
     USING (true);
 CREATE POLICY "Only agora-labs.com staff can insert"
-    ON public.investor_balances
+    ON public.wallet_balances
     AS PERMISSIVE
     FOR INSERT
     TO authenticated
@@ -434,7 +434,7 @@ CREATE TABLE IF NOT EXISTS public.log
 (
     id integer NOT NULL DEFAULT nextval('log_id_seq'::regclass),
     pool_id integer,
-    investor_id integer NOT NULL,
+    wallet_id integer NOT NULL,
     action character varying(255) COLLATE pg_catalog."default" NOT NULL,
     day integer,
     mcap bigint,
@@ -445,8 +445,8 @@ CREATE TABLE IF NOT EXISTS public.log
     price text COLLATE pg_catalog."default",
     blk bigint NOT NULL DEFAULT '0'::bigint,
     CONSTRAINT log_pkey PRIMARY KEY (id),
-    CONSTRAINT log_investor_id_foreign FOREIGN KEY (investor_id)
-        REFERENCES public.investor (id) MATCH SIMPLE
+    CONSTRAINT log_wallet_id_foreign FOREIGN KEY (wallet_id)
+        REFERENCES public.wallet (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT log_pool_id_fkey FOREIGN KEY (pool_id)
@@ -472,9 +472,9 @@ GRANT ALL ON TABLE public.log TO postgres;
 GRANT ALL ON TABLE public.log TO service_role;
 
 GRANT ALL ON TABLE public.log TO supabase_admin;
-CREATE INDEX IF NOT EXISTS log_investor_id_index
+CREATE INDEX IF NOT EXISTS log_wallet_id_index
     ON public.log USING btree
-    (investor_id ASC NULLS LAST)
+    (wallet_id ASC NULLS LAST)
     TABLESPACE pg_default;
 CREATE INDEX IF NOT EXISTS log_pool_id_index
     ON public.log USING btree
@@ -639,7 +639,7 @@ CREATE TABLE IF NOT EXISTS public.quest
     initial_balance_b double precision NOT NULL DEFAULT '0'::double precision,
     CONSTRAINT quest_pkey PRIMARY KEY (id),
     CONSTRAINT quest_author_id_fkey FOREIGN KEY (author_id)
-        REFERENCES public.investor (id) MATCH SIMPLE
+        REFERENCES public.wallet (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
@@ -753,7 +753,7 @@ CREATE TABLE IF NOT EXISTS public.swap
 (
     id integer NOT NULL DEFAULT nextval('swap_id_seq'::regclass),
     pool_id integer NOT NULL,
-    investor_id integer NOT NULL,
+    wallet_id integer NOT NULL,
     action character varying(255) COLLATE pg_catalog."default" NOT NULL,
     amount_in text COLLATE pg_catalog."default" NOT NULL,
     amount_out text COLLATE pg_catalog."default" NOT NULL,
@@ -765,8 +765,8 @@ CREATE TABLE IF NOT EXISTS public.swap
     tvl text COLLATE pg_catalog."default",
     op_name text COLLATE pg_catalog."default",
     CONSTRAINT swap_pkey PRIMARY KEY (id),
-    CONSTRAINT swap_investor_id_fkey FOREIGN KEY (investor_id)
-        REFERENCES public.investor (id) MATCH SIMPLE
+    CONSTRAINT swap_wallet_id_fkey FOREIGN KEY (wallet_id)
+        REFERENCES public.wallet (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT swap_pool_id_fkey FOREIGN KEY (pool_id)
@@ -792,9 +792,9 @@ GRANT ALL ON TABLE public.swap TO postgres;
 GRANT ALL ON TABLE public.swap TO service_role;
 
 GRANT ALL ON TABLE public.swap TO supabase_admin;
-CREATE INDEX IF NOT EXISTS swap_investor_id_index
+CREATE INDEX IF NOT EXISTS swap_wallet_id_index
     ON public.swap USING btree
-    (investor_id ASC NULLS LAST)
+    (wallet_id ASC NULLS LAST)
     TABLESPACE pg_default;
 CREATE INDEX IF NOT EXISTS swap_pool_id_index
     ON public.swap USING btree
@@ -851,7 +851,7 @@ CREATE POLICY "Only agora-labs.com staff can insert"
     TO authenticated
     WITH CHECK (("right"((auth.jwt() ->> 'email'::text), 15) ~~ '@agora-labs.com'::text));
 
-CREATE TABLE IF NOT EXISTS public.scenario_investor_config
+CREATE TABLE IF NOT EXISTS public.scenario_wallet_config
 (
     id bigint NOT NULL GENERATED BY DEFAULT AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     created_at timestamp with time zone DEFAULT now(),
@@ -892,8 +892,8 @@ CREATE TABLE IF NOT EXISTS public.scenario_investor_config
     swap_inc_sum_amount bigint,
     swap_dec_sum_amount bigint,
     value_sell_perc bigint,
-    CONSTRAINT scenario_investor_config_pkey PRIMARY KEY (id),
-    CONSTRAINT scenario_investor_config_scenario_id_fkey FOREIGN KEY (scenario_id)
+    CONSTRAINT scenario_wallet_config_pkey PRIMARY KEY (id),
+    CONSTRAINT scenario_wallet_config_scenario_id_fkey FOREIGN KEY (scenario_id)
         REFERENCES public.scenario (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
@@ -901,29 +901,29 @@ CREATE TABLE IF NOT EXISTS public.scenario_investor_config
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.scenario_investor_config
+ALTER TABLE IF EXISTS public.scenario_wallet_config
     OWNER to supabase_admin;
 
-ALTER TABLE IF EXISTS public.scenario_investor_config
+ALTER TABLE IF EXISTS public.scenario_wallet_config
     ENABLE ROW LEVEL SECURITY;
 
-GRANT ALL ON TABLE public.scenario_investor_config TO anon;
+GRANT ALL ON TABLE public.scenario_wallet_config TO anon;
 
-GRANT ALL ON TABLE public.scenario_investor_config TO authenticated;
+GRANT ALL ON TABLE public.scenario_wallet_config TO authenticated;
 
-GRANT ALL ON TABLE public.scenario_investor_config TO postgres;
+GRANT ALL ON TABLE public.scenario_wallet_config TO postgres;
 
-GRANT ALL ON TABLE public.scenario_investor_config TO service_role;
+GRANT ALL ON TABLE public.scenario_wallet_config TO service_role;
 
-GRANT ALL ON TABLE public.scenario_investor_config TO supabase_admin;
+GRANT ALL ON TABLE public.scenario_wallet_config TO supabase_admin;
 CREATE POLICY "Allow read for everyone"
-    ON public.scenario_investor_config
+    ON public.scenario_wallet_config
     AS PERMISSIVE
     FOR SELECT
     TO public
     USING (true);
 CREATE POLICY "Only agora-labs.com staff can insert"
-    ON public.scenario_investor_config
+    ON public.scenario_wallet_config
     AS PERMISSIVE
     FOR INSERT
     TO authenticated

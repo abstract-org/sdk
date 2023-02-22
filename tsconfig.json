@@ -18,9 +18,9 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noEmit": false,
-        "module": "es2022",
-        "target": "es2022"
+        "module": "CommonJS",
+        "target": "ES2022"
     },
-    "include": ["src", "src/index.ts"],
+    "include": ["src", "src/index.ts", "src/__tests__"],
     "exclude": ["dist", "**/node_modules"]
 }

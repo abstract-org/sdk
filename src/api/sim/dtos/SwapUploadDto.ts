@@ -6,13 +6,13 @@ export class SwapUploadDto {
     block: number
     path: string
     pool_id: number
-    investor_id: number
+    wallet_id: number
     price: number
     mcap: number
     tvl: number
     op_name: string
 
-    constructor(data, poolMappings, investorMappings) {
+    constructor(data, poolMappings, walletMappings) {
         this.action = data.action || 'UNKNOWN'
         this.amount_in = data.totalAmountIn
         this.amount_out = data.totalAmountOut
@@ -20,7 +20,7 @@ export class SwapUploadDto {
         this.block = data.block || 0
         this.path = data.paths
         this.pool_id = poolMappings.get(data.pool)
-        this.investor_id = investorMappings.get(data.investorHash)
+        this.wallet_id = walletMappings.get(data.walletHash)
         this.price = data.price
         this.mcap = data.mcap
         this.tvl = data.tvl

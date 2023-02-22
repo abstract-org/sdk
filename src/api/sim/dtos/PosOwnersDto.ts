@@ -7,7 +7,7 @@ export class PosOwnersDto {
     pmax: number
     pmin: number
     type: string
-    investor_id: number
+    wallet_id: number
 
     constructor(data) {
         this.id = data.id
@@ -18,7 +18,7 @@ export class PosOwnersDto {
         this.pmax = data.pmax
         this.pmin = data.pmin
         this.type = data.type
-        this.investor_id = data.investor_id
+        this.wallet_id = data.wallet_id
     }
 
     toObj() {
@@ -30,7 +30,7 @@ export class PosOwnersDto {
             pmax: this.pmax,
             pmin: this.pmin,
             type: this.type,
-            investor_id: this.investor_id
+            wallet_id: this.wallet_id
         }
     }
 }

@@ -1,5 +1,5 @@
 import HashMap from 'hashmap'
-import { Investor, UsdcToken, Router, Pool, Quest } from '../modules'
+import { Wallet, UsdcToken, Router, Pool, Quest } from '../modules'
 import {
     buySameLiqGiveT0GetT1,
     buySameLiqGiveT1GetT0,
@@ -50,7 +50,7 @@ describe('Smart route math works', () => {
     })
 
     it('oneShotGetBuyCap() / oneShotGetSellCap()', () => {
-        const investor = Investor.create('INV', 'INV', 10000)
+        const wallet = Wallet.create('INV', 'INV', 10000)
 
         pools.A.buy(25000)
         pools.A.buy(555555)
@@ -115,7 +115,7 @@ describe('Smart route math works', () => {
     })
 
     it('buySameLiqGiveT1GetT0() / buySameLiqGiveT0GetT1()', () => {
-        const investor = Investor.create('INV', 'INV', 10000)
+        const wallet = Wallet.create('INV', 'INV', 10000)
 
         pools.A.buy(25000)
         pools.A.buy(555555)
@@ -149,7 +149,7 @@ describe('Smart route math works', () => {
     })
 
     it('sellSameLiqGiveT0GetT1() / sellSameLiqGiveT1GetT0()', () => {
-        const investor = Investor.create('INV', 'INV', 10000)
+        const wallet = Wallet.create('INV', 'INV', 10000)
 
         pools.A.buy(25000)
         pools.A.buy(555555)
@@ -186,7 +186,7 @@ describe('Smart route math works', () => {
     })
 
     it('getSwapAmtSameLiq', () => {
-        const investor = Investor.create('INV', 'INV', 10000)
+        const wallet = Wallet.create('INV', 'INV', 10000)
 
         pools.A.buy(25000)
         pools.A.buy(555555)
@@ -396,7 +396,7 @@ describe.skip('Basic math works', () => {
     })
 
     it('Sells out the entire cross pool with price 1:1 via smart route', () => {
-        const investor = Investor.create('INV', 'INV', 10000)
+        const wallet = Wallet.create('INV', 'INV', 10000)
         // Assume path: USDC-Praseodymium (5)-AGORA-Praseodymium (3)
         const { quest: qTST3, pool: TST3 } = getQP('TEST_1', 1000000)
         const { quest: qTST5, pool: TST5 } = getQP('TEST_2', 1000000)
@@ -417,7 +417,7 @@ describe.skip('Basic math works', () => {
             0,
             50.025
         )
-        const priceRange = investor.calculatePriceRange(
+        const priceRange = wallet.calculatePriceRange(
             AGORA_TST3,
             AGORA,
             TST3,
@@ -425,7 +425,7 @@ describe.skip('Basic math works', () => {
         )
         console.log(priceRange)
 
-        investor.citeQuest(
+        wallet.citeQuest(
             AGORA_TST3,
             priceRange.min,
             priceRange.max,

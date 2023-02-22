@@ -1,5 +1,5 @@
 import HashMap from 'hashmap'
-import { Investor, UsdcToken, Router, Pool } from '../modules'
+import { Wallet, UsdcToken, Router, Pool } from '../modules'
 import { getCP, getQP } from './helpers/getQuestPools'
 import { SNAPSHOT_PATH_WITH_ACTIONS } from './resources/pathWithActionCapsSnapshot'
 
@@ -74,8 +74,8 @@ describe('smartSwap()', () => {
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
                     name: p.name,
-                    volumeToken0: p.volumeToken0,
-                    volumeToken1: p.volumeToken1
+                    questLeftVolume: p.questLeftVolume,
+                    questRightVolume: p.questRightVolume
                 }))
             const router = createRouter(quests, pools, true)
             const amountIn = Math.round(Math.random() * 1000 + 1000)
@@ -85,8 +85,8 @@ describe('smartSwap()', () => {
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
                     name: p.name,
-                    volumeToken0: p.volumeToken0,
-                    volumeToken1: p.volumeToken1
+                    questLeftVolume: p.questLeftVolume,
+                    questRightVolume: p.questRightVolume
                 }))
 
             expect(volumeTokensAfter).not.toEqual(
@@ -97,8 +97,12 @@ describe('smartSwap()', () => {
                     (poolBefore) => poolBefore === after.name
                 )
                 if (!before) return
-                expect(after.volumeToken0).not.toEqual(before.volumeToken0)
-                expect(after.volumeToken1).not.toEqual(before.volumeToken1)
+                expect(after.questLeftVolume).not.toEqual(
+                    before.questLeftVolume
+                )
+                expect(after.questRightVolume).not.toEqual(
+                    before.questRightVolume
+                )
             })
         })
 
@@ -181,8 +185,8 @@ describe('smartSwap()', () => {
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
                     name: p.name,
-                    volumeToken0: p.volumeToken0,
-                    volumeToken1: p.volumeToken1
+                    questLeftVolume: p.questLeftVolume,
+                    questRightVolume: p.questRightVolume
                 }))
             const router = createRouter(quests, pools, true)
             const amountIn = Math.round(Math.random() * 1000 + 1000)
@@ -192,8 +196,8 @@ describe('smartSwap()', () => {
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
                     name: p.name,
-                    volumeToken0: p.volumeToken0,
-                    volumeToken1: p.volumeToken1
+                    questLeftVolume: p.questLeftVolume,
+                    questRightVolume: p.questRightVolume
                 }))
 
             expect(volumeTokensAfter).not.toEqual(
@@ -204,8 +208,12 @@ describe('smartSwap()', () => {
                     (poolBefore) => poolBefore === after.name
                 )
                 if (!before) return
-                expect(after.volumeToken0).not.toEqual(before.volumeToken0)
-                expect(after.volumeToken1).not.toEqual(before.volumeToken1)
+                expect(after.questLeftVolume).not.toEqual(
+                    before.questLeftVolume
+                )
+                expect(after.questRightVolume).not.toEqual(
+                    before.questRightVolume
+                )
             })
         })
 
@@ -288,8 +296,8 @@ describe('smartSwap()', () => {
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
                     name: p.name,
-                    volumeToken0: p.volumeToken0,
-                    volumeToken1: p.volumeToken1
+                    questLeftVolume: p.questLeftVolume,
+                    questRightVolume: p.questRightVolume
                 }))
             const router = createRouter(quests, pools, true)
             const token0 = quests.A.name
@@ -301,8 +309,8 @@ describe('smartSwap()', () => {
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
                     name: p.name,
-                    volumeToken0: p.volumeToken0,
-                    volumeToken1: p.volumeToken1
+                    questLeftVolume: p.questLeftVolume,
+                    questRightVolume: p.questRightVolume
                 }))
 
             expect(volumeTokensAfter).not.toEqual(
@@ -314,8 +322,12 @@ describe('smartSwap()', () => {
                         (poolBefore) => poolBefore === after.name
                     ) || {}
 
-                expect(after.volumeToken0).not.toEqual(before.volumeToken0)
-                expect(after.volumeToken1).not.toEqual(before.volumeToken1)
+                expect(after.questLeftVolume).not.toEqual(
+                    before.questLeftVolume
+                )
+                expect(after.questRightVolume).not.toEqual(
+                    before.questRightVolume
+                )
             })
         })
 
@@ -334,14 +346,14 @@ describe('smartSwap()', () => {
         it('spent ~== amountIn & received > 0 when amountIn < 100', () => {
             const router = createRouter(quests, pools, true)
             const amountIn = Math.ceil(Math.random() * 100)
-            const volumeToken1before = pools.CD.volumeToken1
+            const questRightVolumebefore = pools.CD.questRightVolume
             const result = router.smartSwap(token0, token1, amountIn)
             console.log(`amountIn: ${amountIn}\t\tRESULT ${result}`)
             const amountSpent = -result[0]
             const amountReceived = result[1]
 
             expect(amountSpent).toBeCloseTo(amountIn)
-            expect(amountReceived).toBeLessThanOrEqual(volumeToken1before)
+            expect(amountReceived).toBeLessThanOrEqual(questRightVolumebefore)
         })
     })
 
@@ -399,8 +411,8 @@ describe('smartSwap()', () => {
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
                     name: p.name,
-                    volumeToken0: p.volumeToken0,
-                    volumeToken1: p.volumeToken1
+                    questLeftVolume: p.questLeftVolume,
+                    questRightVolume: p.questRightVolume
                 }))
             const router = createRouter(quests, pools, true)
             const amountIn = Math.round(Math.random() * 1000 + 1000)
@@ -410,8 +422,8 @@ describe('smartSwap()', () => {
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
                     name: p.name,
-                    volumeToken0: p.volumeToken0,
-                    volumeToken1: p.volumeToken1
+                    questLeftVolume: p.questLeftVolume,
+                    questRightVolume: p.questRightVolume
                 }))
 
             expect(volumeTokensAfter).not.toEqual(
@@ -419,11 +431,15 @@ describe('smartSwap()', () => {
             )
             volumeTokensAfter.forEach((after) => {
                 const before = volumeTokensBefore.find(
-                    (poolBefore) => poolBefore === after.name
+                    (poolBefore) => poolBefore.name === after.name
                 )
                 if (!before) return
-                expect(after.volumeToken0).not.toEqual(before.volumeToken0)
-                expect(after.volumeToken1).not.toEqual(before.volumeToken1)
+                expect(after.questLeftVolume).not.toEqual(
+                    before.questLeftVolume
+                )
+                expect(after.questRightVolume).not.toEqual(
+                    before.questRightVolume
+                )
             })
         })
 
@@ -475,7 +491,7 @@ describe('smartSwap()', () => {
 
     describe('calculateAcceptableForCappedPathActions() -> buy -> buy -> sell', () => {
         fit('Calculates properAmountIn with buy->buy->sell', () => {
-            const investor = Investor.create('INV', 'INV', 10000)
+            const wallet = Wallet.create('INV', 'INV', 10000)
 
             const { pool: agoraPool, quest: agoraQuest } = getQP('AGORA')
             const { pool: pra5Pool, quest: pra5Quest } =
@@ -483,12 +499,12 @@ describe('smartSwap()', () => {
             const { pool: pra3Pool, quest: pra3Quest } =
                 getQP('Praseodymium (3)')
             const startingPrice = 1
-            const agoraPra5Pool = investor.createPool(
+            const agoraPra5Pool = wallet.createPool(
                 agoraQuest,
                 pra5Quest,
                 startingPrice
             )
-            const pra3Pra5Pool = investor.createPool(
+            const pra3Pra5Pool = wallet.createPool(
                 pra3Quest,
                 pra5Quest,
                 startingPrice
@@ -531,7 +547,6 @@ describe('smartSwap()', () => {
                             mutatingPool.pos.set(posArr[0], posArr[1])
                         }
                     }
-                    mutatingPool.FRESH = false
                 }
 
                 pathWithActionCapsSnapshot[idx].pool = mutatingPool

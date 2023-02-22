@@ -1,7 +1,9 @@
 import sha256 from 'crypto-js/sha256'
+import Hex from 'crypto-js/enc-hex'
 import HashMap from 'hashmap'
 import { isE10Zero, isNearZero, isZero, p2pp, pp2p } from '../utils/logicUtils'
 import { Quest } from './Quest'
+import { IPoolState } from '../interfaces'
 
 const TEMP_CONFIG = {
     PRICE_MIN: 0,
@@ -19,10 +21,9 @@ interface Position {
 }
 
 export class Pool {
-    id: string
-    name
-
-    FRESH = true
+    id: number
+    name: string
+    hash: string
 
     tokenLeft
     tokenRight
@@ -35,11 +36,11 @@ export class Pool {
 
     totalSold = 0
 
-    priceToken0 = 0
-    priceToken1 = 0
+    questLeftPrice = 0
+    questRightPrice = 0
 
-    volumeToken0 = 0
-    volumeToken1 = 0
+    questLeftVolume = 0
+    questRightVolume = 0
 
     soldToken0 = 0
     soldToken1 = 0
@@ -47,8 +48,8 @@ export class Pool {
     pos = new HashMap<any, any>()
     posOwners = []
 
-    type = 'VALUE_LINK'
-    private dryState = {}
+    type = 'value-link'
+    private dryState: IPoolState | object = {}
 
     /**
      * @description Instantiates new Pool with params
@@ -67,11 +68,13 @@ export class Pool {
         thisPool.tokenLeft = tokenLeft.name
         thisPool.tokenRight = tokenRight.name
 
-        thisPool.id = '0x' + sha256(tokenLeft.name + '-' + tokenRight.name)
+        thisPool.hash = Hex.stringify(
+            sha256(tokenLeft.hash + '' + tokenRight.hash)
+        )
         thisPool.name = `${tokenLeft.name}-${tokenRight.name}`
 
         if (tokenLeft.name === 'USDC' || tokenRight.name === 'USDC') {
-            thisPool.type = 'QUEST'
+            thisPool.type = 'quest'
         }
 
         thisPool.initializePoolBoundaries()
@@ -107,6 +110,41 @@ export class Pool {
             pp: p2pp(TEMP_CONFIG.PRICE_MAX),
             right: p2pp(TEMP_CONFIG.PRICE_MAX)
         })
+    }
+
+    hydratePositions(positions) {
+        let priceMin = Infinity
+
+        if (positions) {
+            positions.forEach((position) => {
+                const pos: any = Object.fromEntries(
+                    Object.entries(position).map(([key, value]) => [
+                        key,
+                        value === null
+                            ? -Infinity
+                            : !isNaN(Number(value))
+                            ? Number(value)
+                            : value
+                    ])
+                )
+
+                this.pos.set(pos.price_point, {
+                    left: pos.left_point,
+                    right: pos.right_point,
+                    pp: pos.price_point,
+                    liquidity: pos.liquidity,
+                    creator_hash: pos.creator_hash
+                })
+
+                if (
+                    pp2p(pos.price_point) < priceMin &&
+                    pp2p(pos.price_point) > TEMP_CONFIG.PRICE_MIN
+                ) {
+                    priceMin = pp2p(pos.price_point)
+                }
+            })
+            this.setActiveLiq(priceMin, false)
+        }
     }
 
     setPositionSingle(price, liquidity) {
@@ -253,8 +291,8 @@ export class Pool {
             return []
         }
 
-        this.volumeToken0 += isZero(token0Amt) ? 0 : token0Amt
-        this.volumeToken1 += isZero(token1Amt) ? 0 : token1Amt
+        this.questLeftVolume += isZero(token0Amt) ? 0 : token0Amt
+        this.questRightVolume += isZero(token1Amt) ? 0 : token1Amt
 
         this.setPositionSingle(p2pp(priceMin), liquidity)
         this.setPositionSingle(p2pp(priceMax), -liquidity)
@@ -289,8 +327,8 @@ export class Pool {
     setActiveLiq(pMin, native) {
         if (
             pp2p(this.curPP) !== this.curPrice ||
-            (this.curLiq === 0 && isE10Zero(this.volumeToken1)) ||
-            isNearZero(this.volumeToken1)
+            (this.curLiq === 0 && isE10Zero(this.questRightVolume)) ||
+            isNearZero(this.questRightVolume)
         ) {
             const ppNext =
                 pMin <= this.curPrice
@@ -307,8 +345,8 @@ export class Pool {
                 this.curRight = toPP.right
                 this.curLiq = newLiq <= 0 ? 0 : toPP.liquidity
                 this.curPrice = pp2p(toPP.pp)
-                this.priceToken0 = 1 / this.curPrice
-                this.priceToken1 = this.curPrice
+                this.questLeftPrice = 1 / this.curPrice
+                this.questRightPrice = this.curPrice
             }
         }
     }
@@ -422,9 +460,8 @@ export class Pool {
             curLeft: this.curLeft,
             curPP: this.curPP,
             totalSold: this.totalSold,
-            volumeToken0: this.volumeToken0,
-            volumeToken1: this.volumeToken1,
-            FRESH: this.FRESH
+            questLeftVolume: this.questLeftVolume,
+            questRightVolume: this.questRightVolume
         }
 
         const [totalIn, totalOut] = this.buy(amount, priceLimit, true)
@@ -547,8 +584,8 @@ export class Pool {
             )
             journal[i].push('---')
             this.curPrice = arrivedAtSqrtPrice ** 2
-            this.priceToken1 = this.curPrice
-            this.priceToken0 = 1 / this.curPrice
+            this.questRightPrice = this.curPrice
+            this.questLeftPrice = 1 / this.curPrice
 
             journal[i].push(
                 `New price: ${this.curPrice} (${arrivedAtSqrtPrice})`
@@ -585,11 +622,9 @@ export class Pool {
 
         if (!dry) {
             this.totalSold += Math.abs(totalAmountOut)
-            this.volumeToken0 += Math.abs(totalAmountIn)
-            this.volumeToken1 += -totalAmountOut
+            this.questLeftVolume += Math.abs(totalAmountIn)
+            this.questRightVolume += -totalAmountOut
         }
-
-        this.FRESH = false
 
         return [totalAmountIn, totalAmountOut]
     }
@@ -735,8 +770,8 @@ export class Pool {
             journal[i].push('---')
 
             this.curPrice = arrivedAtSqrtPrice ** 2
-            this.priceToken1 = this.curPrice
-            this.priceToken0 = 1 / this.curPrice
+            this.questRightPrice = this.curPrice
+            this.questLeftPrice = 1 / this.curPrice
 
             journal[i].push(
                 `New price: ${this.curPrice} (${Math.sqrt(arrivedAtSqrtPrice)})`
@@ -768,33 +803,21 @@ export class Pool {
 
         if (!dry) {
             this.totalSold += totalAmountIn
-            this.volumeToken1 += Math.abs(totalAmountIn)
-            this.volumeToken0 += -totalAmountOut
-            if (this.volumeToken0 < 0) {
-                this.volumeToken0 = 0
+            this.questRightVolume += Math.abs(totalAmountIn)
+            this.questLeftVolume += -totalAmountOut
+            if (this.questLeftVolume < 0) {
+                this.questLeftVolume = 0
             }
             if (this.totalSold < 0) {
                 this.totalSold = 0
             }
         }
 
-        this.FRESH = false
-
         return [totalAmountIn, totalAmountOut]
     }
 
     drySell(amount, priceLimit = null) {
-        this.dryState = {
-            curPrice: this.curPrice,
-            curLiq: this.curLiq,
-            curRight: this.curRight,
-            curLeft: this.curLeft,
-            curPP: this.curPP,
-            totalSold: this.totalSold,
-            volumeToken0: this.volumeToken0,
-            volumeToken1: this.volumeToken1,
-            FRESH: this.FRESH
-        }
+        this.dryState = this.getPoolState()
 
         const [totalIn, totalOut] = this.sell(amount, priceLimit, true)
 
@@ -821,12 +844,26 @@ export class Pool {
         return zeroForOne ? this.dryBuy(amount) : this.drySell(amount)
     }
 
+    getPoolState(): IPoolState {
+        return {
+            curPrice: this.curPrice,
+            curLiq: this.curLiq,
+            curRight: this.curRight,
+            curLeft: this.curLeft,
+            curPP: this.curPP,
+            questLeftPrice: this.questLeftPrice,
+            questRightPrice: this.questRightPrice,
+            questLeftVolume: this.questLeftVolume,
+            questRightVolume: this.questRightVolume
+        }
+    }
+
     getType() {
         return this.type
     }
 
     isQuest() {
-        return this.type === 'QUEST'
+        return this.type === 'quest'
     }
 
     getSwapInfo(logOut = false) {
@@ -876,7 +913,7 @@ export class Pool {
     }
 
     getUSDCValue() {
-        return this.isQuest() ? this.volumeToken0 : 0
+        return this.isQuest() ? this.questLeftVolume : 0
     }
 
     getDecPos() {

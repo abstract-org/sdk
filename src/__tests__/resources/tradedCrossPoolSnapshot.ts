@@ -1,17 +1,16 @@
 export const SNAPSHOT_TRADED_CROSSPOOL = [
     {
         pool: {
-            FRESH: false,
             curLeft: -Infinity,
             curRight: -4.677084989546371,
             curPrice: 0.029961037844954398,
             curPP: -5.677084989546371,
             curLiq: 23.877642971518977,
             totalSold: 32.84883238246823,
-            priceToken0: 33.28941410636248,
-            priceToken1: 0.030039579453243478,
-            volumeToken0: 0.7948989600179417,
-            volumeToken1: 17.176180123784903,
+            questLeftPrice: 33.28941410636248,
+            questRightPrice: 0.030039579453243478,
+            questLeftVolume: 0.7948989600179417,
+            questRightVolume: 17.176180123784903,
             soldToken0: 0,
             soldToken1: 0,
             pos: {
@@ -71,10 +70,10 @@ export const SNAPSHOT_TRADED_CROSSPOOL = [
                     pmax: 0.0390892309287793,
                     amt0: 0,
                     amt1: 50.025012506253134,
-                    type: 'investor'
+                    type: 'wallet'
                 }
             ],
-            type: 'VALUE_LINK',
+            type: 'value-link',
             tokenLeft: 'AGORA',
             tokenRight: 'Praseodymium (7)',
             id: '0x6c29ba683de72402986c50bc2cd3a4cbe0be02a5459ac6cef3c4035abae3bb49',
@@ -83,17 +82,16 @@ export const SNAPSHOT_TRADED_CROSSPOOL = [
     },
     {
         pool: {
-            FRESH: false,
             curLeft: -Infinity,
             curRight: -4.676609804998925,
             curPrice: 0.030732368079964174,
             curPP: -5.676609804998925,
             curLiq: 23.881575618748247,
             totalSold: 34.56852068228292,
-            priceToken0: 32.46307647759736,
-            priceToken1: 0.030804227710522016,
-            volumeToken0: 0.8473520712605289,
-            volumeToken1: 15.456491823970211,
+            questLeftPrice: 32.46307647759736,
+            questRightPrice: 0.030804227710522016,
+            questLeftVolume: 0.8473520712605289,
+            questRightVolume: 15.456491823970211,
             soldToken0: 0,
             soldToken1: 0,
             pos: {
@@ -153,10 +151,10 @@ export const SNAPSHOT_TRADED_CROSSPOOL = [
                     pmax: 0.03910210797992475,
                     amt0: 0,
                     amt1: 50.025012506253134,
-                    type: 'investor'
+                    type: 'wallet'
                 }
             ],
-            type: 'VALUE_LINK',
+            type: 'value-link',
             tokenLeft: 'AGORA',
             tokenRight: 'Praseodymium (5)',
             id: '0x76553e16d6db8220b806b6bb120f3440a4610d862fdb4f1390cf9b1ffbf8873d',

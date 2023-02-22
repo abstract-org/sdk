@@ -2,12 +2,12 @@ export class SwapDto {
     id: number
     price: number
     pool_id: number
-    investor_id: number
+    wallet_id: number
     mcap: number
     tvl: number
     op_name: string
     pool: string
-    investorHash: number
+    walletHash: number
     action: string
     amount_in: number
     amount_out: number
@@ -15,14 +15,14 @@ export class SwapDto {
     block: number
     path: string
 
-    constructor(data, poolNames, investorHashes) {
+    constructor(data, poolNames, walletHashes) {
         this.id = data.id
         this.price = data.price
         this.mcap = data.mcap
         this.tvl = data.tvl
         this.op_name = data.op_name
         this.pool = poolNames.get(data.pool_id)
-        this.investorHash = investorHashes.get(data.investor_id)
+        this.walletHash = walletHashes.get(data.wallet_id)
         this.action = data.action
         this.amount_in = data.amount_in
         this.amount_out = data.amount_out
@@ -35,7 +35,7 @@ export class SwapDto {
         return {
             pool: this.pool,
             price: this.price,
-            investorHash: this.investorHash,
+            walletHash: this.walletHash,
             action: this.action,
             mcap: this.mcap,
             tvl: this.tvl,

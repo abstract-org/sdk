@@ -15,7 +15,6 @@ export class PoolDataUploadDto {
     tvl: number
     mcap: number
     created_at: Date
-    is_fresh: boolean
     total_sold: number
     sold_token0: number
     sold_token1: number
@@ -27,14 +26,13 @@ export class PoolDataUploadDto {
         this.current_price_point_lg2 = convertNumToFloat8(data.curPP)
         this.current_left_lg2 = convertNumToFloat8(data.curLeft)
         this.current_right_lg2 = convertNumToFloat8(data.curRight)
-        this.token0_price = data.priceToken0
-        this.token1_price = data.priceToken1
-        this.volume_token0 = data.volumeToken0
-        this.volume_token1 = data.volumeToken1
+        this.token0_price = data.questLeftPrice
+        this.token1_price = data.questRightPrice
+        this.volume_token0 = data.questLeftVolume
+        this.volume_token1 = data.questRightVolume
         this.tvl = data.tvl || 0
         this.mcap = data.mcap || 0
         this.created_at = data.created_at || new Date()
-        this.is_fresh = data.FRESH
         this.total_sold = data.totalSold
         this.sold_token0 = data.soldToken0
         this.sold_token1 = data.soldToken1
@@ -56,7 +54,6 @@ export class PoolDataUploadDto {
     //         tvl: this.tvl,
     //         mcap: this.mcap,
     //         created_at: this.created_at,
-    //         is_fresh: this.is_fresh,
     //         total_sold: this.total_sold,
     //         sold_token0: this.sold_token0,
     //         sold_token1: this.sold_token1

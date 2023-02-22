@@ -2,23 +2,23 @@ import { createClient } from '@supabase/supabase-js'
 import HashMap from 'hashmap'
 
 import { IAPI, IState, ITotalsList } from '../../interfaces'
-import { Investor, Pool, Quest } from '../../modules'
+import { Wallet, Pool, Quest } from '../../modules'
 import { createHashMappings } from '../../utils/logicUtils'
 import { getQuerySnapshotById, RELATION_TYPE, TABLE } from './constants'
 import {
-    InvestorUploadDto,
+    WalletUploadDto,
     PoolUploadDto,
     QuestUploadDto,
     PoolDataUploadDto,
     ScenarioUploadDto,
-    ScenarioInvestorConfigUploadDto,
+    ScenarioWalletConfigUploadDto,
     ScenarioQuestConfigUploadDto,
     SwapUploadDto,
     LogUploadDto,
     PositionUploadDto,
     PosOwnersUploadDto,
-    InvestorBalancesUploadDto,
-    InvestorNavsUploadDto,
+    WalletBalancesUploadDto,
+    WalletNavsUploadDto,
     SnapshotTotalsUploadDto,
     SnapshotUploadDto,
     SnapshotWithTotalsDto
@@ -56,19 +56,19 @@ export default class SimAPI implements IAPI {
         return true
     }
 
-    createInvestor(
+    createWallet(
         type: string,
         name: string,
         initialBalance: number,
         isDefault?: boolean
-    ): Investor {
-        return Investor.create(type, name, initialBalance, isDefault)
+    ): Wallet {
+        return Wallet.create(type, name, initialBalance, isDefault)
     }
 
     async saveQuests(
         quests: Array<Quest>,
         humanQuests: Array<string> | null,
-        questNamesToInvestorIds: HashMap<string, number>,
+        questNamesToWalletIds: HashMap<string, number>,
         snapshotId: number
     ): Promise<HashMap<string, number>> {
         try {
@@ -76,7 +76,7 @@ export default class SimAPI implements IAPI {
                 const isHuman = !humanQuests || humanQuests.includes(quest.name)
                 return new QuestUploadDto(
                     { ...quest, isHuman },
-                    questNamesToInvestorIds
+                    questNamesToWalletIds
                 )
             })
 
@@ -101,35 +101,35 @@ export default class SimAPI implements IAPI {
         }
     }
 
-    async saveInvestors(
-        investors: Array<Investor>,
+    async saveWallets(
+        wallets: Array<Wallet>,
         snapshotId: number
     ): Promise<HashMap<string, number>> {
         try {
-            const preparedInvestors = investors.map(
-                (inv) => new InvestorUploadDto(inv)
+            const preparedWallets = wallets.map(
+                (inv) => new WalletUploadDto(inv)
             )
 
-            const investorDbResponse = await this._dbClient
-                .from(TABLE.investor)
-                .insert(preparedInvestors)
+            const walletDbResponse = await this._dbClient
+                .from(TABLE.wallet)
+                .insert(preparedWallets)
                 .select('id, hash')
 
             await this.createSnapshotDataRelation(
                 RELATION_TYPE.INVESTOR,
                 snapshotId,
-                investorDbResponse.data
+                walletDbResponse.data
             )
 
-            console.log('saveInvestors(): Investors inserted')
+            console.log('saveWallets(): Wallets inserted')
 
-            if (!investorDbResponse.data) {
+            if (!walletDbResponse.data) {
                 return
             }
 
-            return createHashMappings(investorDbResponse.data, 'hash', 'id')
+            return createHashMappings(walletDbResponse.data, 'hash', 'id')
         } catch (e) {
-            console.log('aggregateInvestorsData error: ', e.message)
+            console.log('aggregateWalletsData error: ', e.message)
             return null
         }
     }
@@ -196,7 +196,7 @@ export default class SimAPI implements IAPI {
             switch (relationType) {
                 case this.RELATION_TYPE.INVESTOR:
                     return await this._dbClient
-                        .from(TABLE.snapshot_investor)
+                        .from(TABLE.snapshot_wallet)
                         .insert(formattedSnapshotData)
                 case this.RELATION_TYPE.QUEST:
                     return await this._dbClient
@@ -219,7 +219,7 @@ export default class SimAPI implements IAPI {
 
     async saveScenario(
         scenarioName: string,
-        investorConfigs: Record<string, any>,
+        walletConfigs: Record<string, any>,
         questConfigs: Record<string, any>
     ): Promise<number> {
         try {
@@ -240,12 +240,9 @@ export default class SimAPI implements IAPI {
                     scenarioId
                 )
 
-                const preparedInvestorConfigs = investorConfigs.map(
+                const preparedWalletConfigs = walletConfigs.map(
                     (invConfig) =>
-                        new ScenarioInvestorConfigUploadDto(
-                            invConfig,
-                            scenarioId
-                        )
+                        new ScenarioWalletConfigUploadDto(invConfig, scenarioId)
                 )
 
                 const preparedQuestConfigs = questConfigs.map(
@@ -258,8 +255,8 @@ export default class SimAPI implements IAPI {
 
                 await Promise.all([
                     this._dbClient
-                        .from(TABLE.scenario_investor_config)
-                        .insert(preparedInvestorConfigs),
+                        .from(TABLE.scenario_wallet_config)
+                        .insert(preparedWalletConfigs),
                     this._dbClient
                         .from(TABLE.scenario_quest_config)
                         .insert(preparedQuestConfigs)
@@ -282,10 +279,10 @@ export default class SimAPI implements IAPI {
     async saveSwaps(
         swapsArray: object[],
         poolMappings: HashMap<string, number>,
-        investorMappings: HashMap<string, number>
+        walletMappings: HashMap<string, number>
     ): Promise<void> {
         const preparedSwaps = swapsArray.map(
-            (swap) => new SwapUploadDto(swap, poolMappings, investorMappings)
+            (swap) => new SwapUploadDto(swap, poolMappings, walletMappings)
         )
 
         await this._dbClient.from(TABLE.swap).insert(preparedSwaps)
@@ -296,11 +293,11 @@ export default class SimAPI implements IAPI {
     async saveLogs(
         logsArray: object[],
         poolMappings: HashMap<string, number>,
-        investorMappings: HashMap<string, number>
+        walletMappings: HashMap<string, number>
     ): Promise<void> {
         const preparedLogs = logsArray.map(
             (log, idx) =>
-                new LogUploadDto(log, poolMappings, investorMappings, idx)
+                new LogUploadDto(log, poolMappings, walletMappings, idx)
         )
 
         await this._dbClient.from(TABLE.log).insert(preparedLogs)
@@ -311,7 +308,7 @@ export default class SimAPI implements IAPI {
     async savePositionsData(
         pools: Pool[],
         poolMappings: HashMap<string, number>,
-        investorMappings: HashMap<string, number>
+        walletMappings: HashMap<string, number>
     ): Promise<boolean> {
         try {
             let preparedPositions = []
@@ -323,12 +320,12 @@ export default class SimAPI implements IAPI {
                     .values()
                     .map((position) => new PositionUploadDto(position, poolId))
                 const poolPosOwners = pool.posOwners.map((posOwnerData) => {
-                    let investorId = investorMappings.get(posOwnerData.hash)
+                    let walletId = walletMappings.get(posOwnerData.hash)
 
                     return new PosOwnersUploadDto(
                         posOwnerData,
                         poolId,
-                        investorId
+                        walletId
                     )
                 })
 
@@ -352,27 +349,26 @@ export default class SimAPI implements IAPI {
         }
     }
 
-    async saveInvestorBalances(
-        investorBalancesByDay: Array<[number, Record<string, object[]>]>,
-        investorHashToInvestorId: HashMap<string, number>,
+    async saveWalletBalances(
+        walletBalancesByDay: Array<[number, Record<string, object[]>]>,
+        walletHashToWalletId: HashMap<string, number>,
         questNameToQuestId: HashMap<string, number>
     ): Promise<void> {
         try {
-            const preparedInvestorBalances = []
+            const preparedWalletBalances = []
 
-            for (const [day, investorDayBalances] of investorBalancesByDay) {
-                Object.entries(investorDayBalances).forEach(
-                    ([investorHash, balances]) => {
-                        const investor_id =
-                            investorHashToInvestorId.get(investorHash)
+            for (const [day, walletDayBalances] of walletBalancesByDay) {
+                Object.entries(walletDayBalances).forEach(
+                    ([walletHash, balances]) => {
+                        const wallet_id = walletHashToWalletId.get(walletHash)
                         Object.entries(balances).forEach(
                             ([tokenName, balance]) => {
                                 const quest_id =
                                     questNameToQuestId.get(tokenName)
 
-                                preparedInvestorBalances.push(
-                                    new InvestorBalancesUploadDto({
-                                        investor_id,
+                                preparedWalletBalances.push(
+                                    new WalletBalancesUploadDto({
+                                        wallet_id,
                                         quest_id,
                                         balance,
                                         day
@@ -385,28 +381,28 @@ export default class SimAPI implements IAPI {
             }
 
             await this._dbClient
-                .from(TABLE.investor_balances)
-                .insert(preparedInvestorBalances)
+                .from(TABLE.wallet_balances)
+                .insert(preparedWalletBalances)
 
-            console.log('saveInvestorBalances() completed')
+            console.log('saveWalletBalances() completed')
         } catch (err) {
-            console.log('saveInvestorBalances() error: ', err.message)
+            console.log('saveWalletBalances() error: ', err.message)
             return null
         }
     }
 
-    async saveInvestorNavs(
-        investorNavsByDay: Array<[number, Record<string, number>]>,
-        investorHashToInvestorId: HashMap<string, number>
+    async saveWalletNavs(
+        walletNavsByDay: Array<[number, Record<string, number>]>,
+        walletHashToWalletId: HashMap<string, number>
     ): Promise<void> {
         try {
-            const preparedInvestorNavs = []
+            const preparedWalletNavs = []
 
-            for (const [day, invNavs] of investorNavsByDay) {
+            for (const [day, invNavs] of walletNavsByDay) {
                 Object.entries(invNavs).forEach(([hash, nav]) => {
-                    preparedInvestorNavs.push(
-                        new InvestorNavsUploadDto({
-                            investor_id: investorHashToInvestorId.get(hash),
+                    preparedWalletNavs.push(
+                        new WalletNavsUploadDto({
+                            wallet_id: walletHashToWalletId.get(hash),
                             usdc_nav: nav,
                             token_nav: nav,
                             day
@@ -416,12 +412,12 @@ export default class SimAPI implements IAPI {
             }
 
             await this._dbClient
-                .from(TABLE.investor_navs)
-                .insert(preparedInvestorNavs)
+                .from(TABLE.wallet_navs)
+                .insert(preparedWalletNavs)
 
-            console.log('saveInvestorNavs() completed')
+            console.log('saveWalletNavs() completed')
         } catch (err) {
-            console.log('saveInvestorNavs() error: ', err.message)
+            console.log('saveWalletNavs() error: ', err.message)
             return null
         }
     }
@@ -431,8 +427,8 @@ export default class SimAPI implements IAPI {
         {
             quests,
             pools,
-            investors
-        }: { quests: Quest[]; pools: Pool[]; investors: Investor[] }
+            wallets
+        }: { quests: Quest[]; pools: Pool[]; wallets: Wallet[] }
     ): Promise<any> {
         let marketCap = 0
         let totalValueLocked = 0
@@ -449,7 +445,7 @@ export default class SimAPI implements IAPI {
             snapshot_id: snapshotId,
             quests: quests.length,
             cross_pools: pools.filter((p) => !p.isQuest()).length,
-            investors: investors.length,
+            wallets: wallets.length,
             tvl: totalValueLocked,
             mcap: marketCap,
             usdc: totalUSDCLocked

@@ -1,8 +1,8 @@
 -- agora-labs.com policies for every table
-ALTER TABLE snapshot_investor ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow read for everyone" ON snapshot_investor FOR SELECT USING (true);
+ALTER TABLE snapshot_wallet ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read for everyone" ON snapshot_wallet FOR SELECT USING (true);
 CREATE POLICY "Only agora-labs.com staff can insert"
-ON snapshot_investor FOR INSERT
+ON snapshot_wallet FOR INSERT
 TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
@@ -34,31 +34,31 @@ ON snapshot_totals FOR INSERT
 TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
-ALTER TABLE scenario_investor_config ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow read for everyone" ON scenario_investor_config FOR SELECT USING (true);
+ALTER TABLE scenario_wallet_config ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read for everyone" ON scenario_wallet_config FOR SELECT USING (true);
 CREATE POLICY "Only agora-labs.com staff can insert"
-ON scenario_investor_config FOR INSERT
+ON scenario_wallet_config FOR INSERT
 TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
-ALTER TABLE investor_navs ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow read for everyone" ON investor_navs FOR SELECT USING (true);
+ALTER TABLE wallet_navs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read for everyone" ON wallet_navs FOR SELECT USING (true);
 CREATE POLICY "Only agora-labs.com staff can insert"
-ON investor_navs FOR INSERT
+ON wallet_navs FOR INSERT
 TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
-ALTER TABLE investor ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow read for everyone" ON investor FOR SELECT USING (true);
+ALTER TABLE wallet ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read for everyone" ON wallet FOR SELECT USING (true);
 CREATE POLICY "Only agora-labs.com staff can insert"
-ON investor FOR INSERT
+ON wallet FOR INSERT
 TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 
-ALTER TABLE investor_balances ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow read for everyone" ON investor_balances FOR SELECT USING (true);
+ALTER TABLE wallet_balances ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read for everyone" ON wallet_balances FOR SELECT USING (true);
 CREATE POLICY "Only agora-labs.com staff can insert"
-ON investor_balances FOR INSERT
+ON wallet_balances FOR INSERT
 TO authenticated
 WITH CHECK (right(auth.jwt() ->> 'email', 15) LIKE '@agora-labs.com');
 

@@ -1,6 +1,6 @@
 export class LogUploadDto {
     pool_id: number
-    investor_id: number
+    wallet_id: number
     action: string
     day: number
     mcap: number
@@ -11,10 +11,10 @@ export class LogUploadDto {
     tvl: number
     blk: number
 
-    constructor(data, poolMappings, investorMappings, idx) {
+    constructor(data, poolMappings, walletMappings, idx) {
         this.blk = idx
         this.pool_id = poolMappings.get(data.pool)
-        this.investor_id = investorMappings.get(data.investorHash)
+        this.wallet_id = walletMappings.get(data.walletHash)
         this.action = data.action
         this.day = data.day
         this.tvl = data.tvl || 0

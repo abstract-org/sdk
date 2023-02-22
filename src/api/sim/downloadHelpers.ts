@@ -1,10 +1,10 @@
 import HashMap from 'hashmap'
 import setInto from 'lodash/set'
-import { IState, TInvestorHash, TPoolName } from '../../interfaces'
+import { IState, TWalletHash, TPoolName } from '../../interfaces'
 import {
-    ScenarioInvestorConfigDto,
+    ScenarioWalletConfigDto,
     ScenarioQuestConfigDto,
-    InvestorDto,
+    WalletDto,
     PoolDto,
     SwapDto,
     LogDto,
@@ -16,23 +16,19 @@ import {
     createHashMappings
 } from '../../utils/logicUtils'
 
-import { Investor, Pool } from '../../modules'
+import { Wallet, Pool } from '../../modules'
 
 export function gatherStateFromSnapshot(data): IState {
     let newState = makeEmptyState()
     newState.dayTrackerStore.currentDay = data.current_day + 1
     newState.generatorStore = transformScenario(data.scenario)
 
-    const {
-        investors,
-        investorStoreInvestors,
-        investorNavs,
-        investorBalances
-    } = aggregateInvestorsForStore(data.investor)
-    newState.investorStore.investors = investorStoreInvestors
-    newState.investors = investors
-    newState.historical.investorNavs = investorNavs
-    newState.historical.investorBalances = investorBalances
+    const { wallets, walletStoreWallets, walletNavs, walletBalances } =
+        aggregateWalletsForStore(data.wallet)
+    newState.walletStore.wallets = walletStoreWallets
+    newState.wallets = wallets
+    newState.historical.walletNavs = walletNavs
+    newState.historical.walletBalances = walletBalances
 
     const { pools, poolStorePools } = aggregatePoolsForStore(data.pool)
     newState.poolStore.pools = poolStorePools
@@ -60,8 +56,8 @@ export function gatherStateFromSnapshot(data): IState {
 
 const makeEmptyState = () => ({
     generatorStore: { invConfigs: [], questConfigs: [] },
-    investorStore: { investors: [] },
-    investors: new HashMap(),
+    walletStore: { wallets: [] },
+    wallets: new HashMap(),
     logStore: { logObjs: [] },
     poolStore: {
         pools: [],
@@ -80,8 +76,8 @@ const makeEmptyState = () => ({
     quests: new HashMap(),
     dayTrackerStore: { currentDay: 0 },
     historical: {
-        investorNavs: {},
-        investorBalances: {}
+        walletNavs: {},
+        walletBalances: {}
     },
     moneyDist: {
         citing: [],
@@ -94,8 +90,8 @@ const makeEmptyState = () => ({
 
 const transformScenario = (scenario) => {
     return {
-        invConfigs: scenario.scenario_investor_config.map((cfg) =>
-            new ScenarioInvestorConfigDto(cfg).toObj()
+        invConfigs: scenario.scenario_wallet_config.map((cfg) =>
+            new ScenarioWalletConfigDto(cfg).toObj()
         ),
         questConfigs: scenario.scenario_quest_config.map((cfg) =>
             new ScenarioQuestConfigDto(cfg).toObj()
@@ -105,53 +101,51 @@ const transformScenario = (scenario) => {
 
 const gatherHistoricalInvBalances = (invDtoList) => {
     const allInvBalances = invDtoList.reduce((resultList, invDto) => {
-        const currentInvestorBalanceList = invDto.investor_balances.map(
+        const currentWalletBalanceList = invDto.wallet_balances.map(
             (invBalanceItem) => ({
-                investorHash: invDto.hash,
+                walletHash: invDto.hash,
                 token: invBalanceItem.quest.name,
                 day: invBalanceItem.day,
                 balance: invBalanceItem.balance
             })
         )
-        resultList.push(...currentInvestorBalanceList)
+        resultList.push(...currentWalletBalanceList)
 
         return resultList
     }, [])
 
     let result = {}
-    for (const { day, investorHash, token, balance } of allInvBalances) {
-        setInto(result, [day, investorHash, token], balance)
+    for (const { day, walletHash, token, balance } of allInvBalances) {
+        setInto(result, [day, walletHash, token], balance)
     }
 
     return result
 }
 
-const aggregateInvestorsForStore = (
+const aggregateWalletsForStore = (
     data
 ): {
-    investorStoreInvestors: Array<TInvestorHash>
-    investors: HashMap<TInvestorHash, Investor>
-    investorNavs: object
-    investorBalances: object
+    walletStoreWallets: Array<TWalletHash>
+    wallets: HashMap<TWalletHash, Wallet>
+    walletNavs: object
+    walletBalances: object
 } => {
-    const investorDtoList = data.map((ssInv) => new InvestorDto(ssInv))
+    const walletDtoList = data.map((ssInv) => new WalletDto(ssInv))
 
     return {
-        investorStoreInvestors: investorDtoList.map((invDto) =>
-            invDto.toHash()
-        ),
-        investors: convertArrayToHashMapByKey(
-            investorDtoList.map((invDto) => invDto.toInvestor()),
+        walletStoreWallets: walletDtoList.map((invDto) => invDto.toHash()),
+        wallets: convertArrayToHashMapByKey(
+            walletDtoList.map((invDto) => invDto.toWallet()),
             'hash'
         ),
-        investorNavs: investorDtoList.reduce((result, invDto) => {
-            invDto.investor_navs.forEach(({ day, usdc_nav }) => {
+        walletNavs: walletDtoList.reduce((result, invDto) => {
+            invDto.wallet_navs.forEach(({ day, usdc_nav }) => {
                 setInto(result, [day, invDto.hash], usdc_nav)
             })
 
             return result
         }, {}),
-        investorBalances: gatherHistoricalInvBalances(investorDtoList)
+        walletBalances: gatherHistoricalInvBalances(walletDtoList)
     }
 }
 
@@ -174,7 +168,7 @@ const aggregatePoolsForStore = (
 
 const aggregateSwapsForStore = (data, respData) => {
     const poolNamesById = createHashMappings(respData.pool, 'id', 'name')
-    const invHashById = createHashMappings(respData.investor, 'id', 'hash')
+    const invHashById = createHashMappings(respData.wallet, 'id', 'hash')
 
     return data.map((ssSwap) =>
         new SwapDto(ssSwap, poolNamesById, invHashById).toObj()
