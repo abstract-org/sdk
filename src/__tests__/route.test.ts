@@ -417,7 +417,7 @@ describe('Routing', () => {
         globalState.pools.set(BC.name, BC)
 
         const pr = creator.calculatePriceRange(BC, poolC, poolB)
-        creator.(BC, pr.min, pr.max, 0, 10000, pr.native)
+        creator.citeQuest(BC, pr.min, pr.max, 0, 10000, pr.native)
 
         const router = new Router(globalState.quests, globalState.pools)
         const results1 = router.smartSwap('USDC', 'TEST_2', 2500000)

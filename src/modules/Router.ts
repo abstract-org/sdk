@@ -99,11 +99,11 @@ export class Router {
                     amountIn,
                     pricedPath.path
                 )
-                console.debug(
+                /* console.debug(
                     'seeking proper amt in',
                     properAmountIn,
                     pricedPath.path
-                )
+                ) */
 
                 if (!isZero(properAmountIn)) {
                     // console.log('properAmountIn() > 0 loop', properAmountIn)

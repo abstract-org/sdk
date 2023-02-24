@@ -11,8 +11,8 @@ export interface IQuestCreate {
 export interface IQuest extends IQuestCreate {
     id: number
     name: string
-    created_at: number
-    published_at?: number
+    created_at: string
+    published_at?: string
     pools: string[]
 }
 
@@ -28,8 +28,8 @@ export interface IQuestBasicFields {
 export interface IQuestUtilityFields {
     creator_hash?: string // Wallet that created the Quest
     pools: string[] // List of Pools in which current Quest exists
-    created_at: number // Creation date
-    published_at: number // ublication date
+    created_at: string // Creation date
+    published_at: string // ublication date
 }
 
 export interface IQuestMethods {

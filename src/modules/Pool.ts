@@ -120,27 +120,29 @@ export class Pool {
                 const pos: any = Object.fromEntries(
                     Object.entries(position).map(([key, value]) => [
                         key,
-                        value === null
+                        value === '-Infinity'
                             ? -Infinity
-                            : !isNaN(Number(value))
-                            ? Number(value)
+                            : value === 'Infinity'
+                            ? Infinity
                             : value
                     ])
                 )
 
-                this.pos.set(pos.price_point, {
-                    left: pos.left_point,
-                    right: pos.right_point,
-                    pp: pos.price_point,
-                    liquidity: pos.liquidity,
+                pos.pp = Number(pos.pp)
+
+                this.pos.set(pos.pp, {
+                    left: Number(pos.left),
+                    right: Number(pos.right),
+                    pp: pos.pp,
+                    liquidity: Number(pos.liquidity),
                     creator_hash: pos.creator_hash
                 })
 
                 if (
-                    pp2p(pos.price_point) < priceMin &&
-                    pp2p(pos.price_point) > TEMP_CONFIG.PRICE_MIN
+                    pp2p(pos.pp) < priceMin &&
+                    pp2p(pos.pp) > TEMP_CONFIG.PRICE_MIN
                 ) {
-                    priceMin = pp2p(pos.price_point)
+                    priceMin = pp2p(pos.pp)
                 }
             })
             this.setActiveLiq(priceMin, false)
