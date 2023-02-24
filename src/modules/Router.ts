@@ -71,7 +71,6 @@ export class Router {
         const totalInOut = [0, 0]
         let properAmountIn
         let pathToSwap
-        let counterWhileLoop = 0
         do {
             this._PRICED_PATHS = this.drySwapForPricedPaths(
                 this.getPairPaths(token0, token1)
@@ -99,11 +98,11 @@ export class Router {
                     amountIn,
                     pricedPath.path
                 )
-                console.debug(
+                /* console.debug(
                     'seeking proper amt in',
                     properAmountIn,
                     pricedPath.path
-                )
+                ) */
 
                 if (!isZero(properAmountIn)) {
                     // console.log('properAmountIn() > 0 loop', properAmountIn)

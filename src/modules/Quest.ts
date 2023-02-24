@@ -6,7 +6,7 @@ import { Pool } from './Pool'
 import { UsdcToken } from './UsdcToken'
 import { IQuest } from '../interfaces'
 
-const TEMP_CONFIG = {
+export const TEMP_CONFIG = {
     INITIAL_LIQUIDITY: [
         {
             priceMin: 1,
@@ -44,8 +44,8 @@ export class Quest {
     kind: string
     content: string
     creator_hash: string
-    created_at: number
-    published_at: number
+    created_at: string
+    published_at: string
 
     /**
      * @description Instantiates new Quest
@@ -59,8 +59,8 @@ export class Quest {
         kind?: string,
         content?: string,
         creatorHash?: string,
-        createdAt?: number
-    ): IQuest {
+        createdAt?: string
+    ): Quest {
         const thisToken = new Quest()
         thisToken.name = name
         thisToken.hash = Hex.stringify(sha256(name))

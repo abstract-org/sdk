@@ -252,7 +252,7 @@ describe('Smart route math works', () => {
     })
 })
 
-describe.skip('Basic math works', () => {
+describe('Basic math works', () => {
     let quests
     let pools
 
@@ -481,35 +481,35 @@ describe.skip('Basic math works', () => {
 
     it('After opening a position on drained cross pool it opens with correct price range', () => {})
 
-    it('When selling out drained pool it correctly sets active position', () => {
+    xit('When selling out drained pool it correctly sets active position', () => {
         expect(0).toBe(1)
     })
 
-    it('Left position - When opening a new position with lower priceMin than curPrice and price shift is free - do the change to another active liquidity', () => {
+    xit('Left position - When opening a new position with lower priceMin than curPrice and price shift is free - do the change to another active liquidity', () => {
         expect(0).toBe(1)
     })
 
-    it('Right position - When opening a new position with lower priceMin than curPrice and price shift is free - do the change to another active liquidity', () => {
+    xit('Right position - When opening a new position with lower priceMin than curPrice and price shift is free - do the change to another active liquidity', () => {
         expect(0).toBe(1)
     })
 
-    it('Never sells tokens that do not exist in the pool', () => {
+    xit('Never sells tokens that do not exist in the pool', () => {
         expect(0).toBe(1)
     })
 
-    it('Never consumes more than it can exchange for during swap', () => {
+    xit('Never consumes more than it can exchange for during swap', () => {
         expect(0).toBe(1)
     })
 
-    it('Properly exists when 0 is passed to buy/sell', () => {
+    xit('Properly exists when 0 is passed to buy/sell', () => {
         expect(0).toBe(1)
     })
 
-    it('Properly exists when NaN is passed to buy/sell', () => {
+    xit('Properly exists when NaN is passed to buy/sell', () => {
         expect(0).toBe(1)
     })
 
-    it('Properly exists when during buy/sell calculation it got to NaN', () => {
+    xit('Properly exists when during buy/sell calculation it got to NaN', () => {
         expect(0).toBe(1)
     })
 })
