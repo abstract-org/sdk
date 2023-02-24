@@ -71,7 +71,6 @@ export class Router {
         const totalInOut = [0, 0]
         let properAmountIn
         let pathToSwap
-        let counterWhileLoop = 0
         do {
             this._PRICED_PATHS = this.drySwapForPricedPaths(
                 this.getPairPaths(token0, token1)

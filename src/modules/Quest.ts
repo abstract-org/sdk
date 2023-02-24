@@ -6,7 +6,7 @@ import { Pool } from './Pool'
 import { UsdcToken } from './UsdcToken'
 import { IQuest } from '../interfaces'
 
-const TEMP_CONFIG = {
+export const TEMP_CONFIG = {
     INITIAL_LIQUIDITY: [
         {
             priceMin: 1,

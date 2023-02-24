@@ -1,5 +1,5 @@
 import HashMap from 'hashmap'
-import { Wallet, UsdcToken, Router, Quest } from '../modules'
+import { Wallet, UsdcToken, Router, Quest, TEMP_CONFIG } from '../modules'
 import { getPathActions, pp2p } from '../utils/logicUtils'
 import { getCP, getQP } from './helpers/getQuestPools'
 import { prepareCrossPools, preparePool } from './helpers/poolManager'
@@ -193,7 +193,7 @@ describe('Routing', () => {
         }
     ]
 
-    xit('Proper selling in cross pools without violating price boundaries', () => {
+    it('Proper selling in cross pools without violating price boundaries', () => {
         // Assume path: USDC-Praseodymium (5)-AGORA-Praseodymium (3)
         const { quest: qPRA3, pool: PRA3 } = getQP('Praseodymium (3)', 1000000)
         const { quest: qPRA5, pool: PRA5 } = getQP('Praseodymium (5)', 1000000)
@@ -223,24 +223,6 @@ describe('Routing', () => {
             50.025
         )
 
-        console.log(
-            AGORA_PRA3.name,
-            AGORA_PRA3.curPrice,
-            pp2p(AGORA_PRA3.curPP),
-            AGORA_PRA3.questLeftVolume,
-            AGORA_PRA3.questRightVolume
-        )
-        console.log(AGORA_PRA3)
-        console.log(AGORA_PRA3.sell(40))
-        console.log(AGORA_PRA3.buy(40))
-        console.log(AGORA_PRA3.sell(40))
-        console.log(
-            AGORA_PRA3.name,
-            AGORA_PRA3.curPrice,
-            AGORA_PRA3.questLeftVolume,
-            AGORA_PRA3.questRightVolume
-        )
-
         const pools = new HashMap()
         const quests = new HashMap()
         pools.set(AGORA.name, AGORA)
@@ -260,36 +242,45 @@ describe('Routing', () => {
     })
 
     it('Smart route and taking right amount in/out', () => {
+        const defaultPositions = TEMP_CONFIG.INITIAL_LIQUIDITY
         const creator = Wallet.create('creator', 'creator', 10000)
 
-        const questX = creator.createQuest('AGORA')
-        const poolX = questX.createPool()
-        poolX.buy(5550)
+        const citedQuest = creator.createQuest('AGORA')
+        const citedPool = citedQuest.createPool({
+            initialPositions: defaultPositions
+        })
+        citedPool.buy(5550)
 
-        const questA = creator.createQuest('RUTHER')
-        const poolA = questA.createPool()
-        poolA.buy(5000)
+        const citingQuest = creator.createQuest('RUTHER')
+        const citingPool = citingQuest.createPool({
+            initialPositions: defaultPositions
+        })
+        citingPool.buy(5000)
 
         const usdcToken = new UsdcToken()
-        usdcToken.addPool(poolA)
-        usdcToken.addPool(poolX)
+        usdcToken.addPool(citingPool)
+        usdcToken.addPool(citedPool)
         globalState.quests.set('USDC', usdcToken)
 
-        const startingPrice = poolA.curPrice / poolX.curPrice
-        const XA = creator.createPool(questX, questA, startingPrice)
+        const startingPrice = citingPool.curPrice / citedPool.curPrice
+        const crossPool = creator.createPool(
+            citedQuest,
+            citingQuest,
+            startingPrice
+        )
 
-        questA.addPool(XA)
-        questX.addPool(XA)
-        globalState.quests.set(questA.name, questA)
-        globalState.quests.set(questX.name, questX)
+        citingQuest.addPool(crossPool)
+        citedQuest.addPool(crossPool)
+        globalState.quests.set(citingQuest.name, citingQuest)
+        globalState.quests.set(citedQuest.name, citedQuest)
 
-        globalState.pools.set(poolA.name, poolA)
-        globalState.pools.set(poolX.name, poolX)
+        globalState.pools.set(citingPool.name, citingPool)
+        globalState.pools.set(citedPool.name, citedPool)
 
-        const pr = creator.calculatePriceRange(XA, poolX, poolA)
-        creator.citeQuest(XA, pr.min, pr.max, 2, 172.57, pr.native)
+        const pr = creator.calculatePriceRange(crossPool, citedPool, citingPool)
+        creator.citeQuest(crossPool, pr.min, pr.max, 2, 172.57, pr.native)
 
-        globalState.pools.set(XA.name, XA)
+        globalState.pools.set(crossPool.name, crossPool)
 
         const router = new Router(globalState.quests, globalState.pools)
         const results1 = router.smartSwap('USDC', 'RUTHER', 1000)
@@ -534,17 +525,18 @@ describe('Routing', () => {
         const priceMax = 10
         const amount = 100
         const citeAmount = 25
+        const defaultPositions = TEMP_CONFIG.INITIAL_LIQUIDITY
 
         const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
-        const poolA = questA.createPool() // Deposit A
+        const poolA = questA.createPool({ initialPositions: defaultPositions }) // Deposit A
         globalState.quests.set('USDC', new UsdcToken())
         globalState.quests.set(questA.name, questA)
         globalState.pools.set(poolA.name, poolA)
 
         const questB = creator.createQuest('TEST_2')
-        const poolB = questB.createPool() // Deposit B
+        const poolB = questB.createPool({ initialPositions: defaultPositions }) // Deposit B
         globalState.quests.set(questB.name, questB)
         globalState.pools.set(poolB.name, poolB)
         poolB.buy(555) // Buy TEST_2 (around 500)
@@ -570,17 +562,18 @@ describe('Routing', () => {
         const priceMax = 10
         const amount = 100
         const citeAmount = 25
+        const defaultPositions = TEMP_CONFIG.INITIAL_LIQUIDITY
 
         const creator = Wallet.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
-        const poolA = questA.createPool() // Deposit A
+        const poolA = questA.createPool({ initialPositions: defaultPositions }) // Deposit A
         globalState.quests.set('USDC', new UsdcToken())
         globalState.quests.set(questA.name, questA)
         globalState.pools.set(poolA.name, poolA)
 
         const questB = creator.createQuest('TEST_2')
-        const poolB = questB.createPool() // Deposit B
+        const poolB = questB.createPool({ initialPositions: defaultPositions }) // Deposit B
         globalState.quests.set(questB.name, questB)
         globalState.pools.set(poolB.name, poolB)
         poolB.buy(555) // Buy TEST_2 (around 500)
@@ -603,16 +596,17 @@ describe('Routing', () => {
 
     it('Smart route for token through cited cross pool', () => {
         const creator = Wallet.create('creator', 'creator', 10000)
+        const defaultPositions = TEMP_CONFIG.INITIAL_LIQUIDITY
 
         const questA = creator.createQuest('TEST')
-        const poolA = questA.createPool() // Deposit A
+        const poolA = questA.createPool({ initialPositions: defaultPositions }) // Deposit A
         globalState.quests.set('USDC', new UsdcToken())
         globalState.quests.set(questA.name, questA)
         globalState.pools.set(poolA.name, poolA)
         poolA.buy(5000)
 
         const questB = creator.createQuest('AGORA')
-        const poolB = questB.createPool() // Deposit B
+        const poolB = questB.createPool({ initialPositions: defaultPositions }) // Deposit B
         globalState.quests.set(questB.name, questB)
         globalState.pools.set(poolB.name, poolB)
 
@@ -640,16 +634,17 @@ describe('Routing', () => {
 
     it('Smart route for token through cited cross pool with multiple smart swaps', () => {
         const creator = Wallet.create('creator', 'creator', 10000)
+        const defaultPositions = TEMP_CONFIG.INITIAL_LIQUIDITY
 
         const questA = creator.createQuest('TEST')
-        const poolA = questA.createPool() // Deposit A
+        const poolA = questA.createPool({ initialPositions: defaultPositions }) // Deposit A
         globalState.quests.set('USDC', new UsdcToken())
         globalState.quests.set(questA.name, questA)
         globalState.pools.set(poolA.name, poolA)
         poolA.buy(5000)
 
         const questB = creator.createQuest('AGORA')
-        const poolB = questB.createPool() // Deposit B
+        const poolB = questB.createPool({ initialPositions: defaultPositions }) // Deposit B
         globalState.quests.set(questB.name, questB)
         globalState.pools.set(poolB.name, poolB)
 
@@ -746,7 +741,6 @@ describe('getMaxAmountInForPath()', () => {
 
         const result = router.getMaxAmountInForPath(1000, path)
 
-        console.log(result)
         expect(result).toBeGreaterThanOrEqual(0.000000001)
     })
 

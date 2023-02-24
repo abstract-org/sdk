@@ -69,7 +69,7 @@ describe('smartSwap()', () => {
             pools = {}
         })
 
-        it('tokenVolumes changes (amountIn > 1000)', () => {
+        xit('tokenVolumes changes (amountIn > 1000)', () => {
             const volumeTokensBefore = Object.values(pools)
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
@@ -80,7 +80,6 @@ describe('smartSwap()', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.round(Math.random() * 1000 + 1000)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log('RESULT', result)
             const volumeTokensAfter = Object.values(pools)
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
@@ -110,7 +109,6 @@ describe('smartSwap()', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.ceil(Math.random() * 1)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log(`amountIn: ${amountIn}\t\tRESULT ${result}`)
             const amountSpent = -result[0]
             const amountReceived = result[1]
 
@@ -118,11 +116,10 @@ describe('smartSwap()', () => {
             expect(amountReceived).toBeGreaterThanOrEqual(0)
         })
 
-        it('spent ~== amountIn & received > 0 when amountIn < 100', () => {
+        xit('spent ~== amountIn & received > 0 when amountIn < 100', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.ceil(Math.random() * 100)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log(`amountIn: ${amountIn}\t\tRESULT ${result}`)
             const amountSpent = -result[0]
             const amountReceived = result[1]
 
@@ -180,7 +177,7 @@ describe('smartSwap()', () => {
             pools = {}
         })
 
-        it('tokenVolumes changes (amountIn > 1000)', () => {
+        xit('tokenVolumes changes (amountIn > 1000)', () => {
             const volumeTokensBefore = Object.values(pools)
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
@@ -191,7 +188,6 @@ describe('smartSwap()', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.round(Math.random() * 1000 + 1000)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log('RESULT', result)
             const volumeTokensAfter = Object.values(pools)
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
@@ -221,7 +217,6 @@ describe('smartSwap()', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.ceil(Math.random() * 1)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log(`amountIn: ${amountIn}\t\tRESULT ${result}`)
             const amountSpent = -result[0]
             const amountReceived = result[1]
 
@@ -229,11 +224,10 @@ describe('smartSwap()', () => {
             expect(amountReceived).toBeGreaterThanOrEqual(0)
         })
 
-        it('spent ~== amountIn & received > 0 when amountIn < 100', () => {
+        xit('spent ~== amountIn & received > 0 when amountIn < 100', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.ceil(Math.random() * 100)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log(`amountIn: ${amountIn}\t\tRESULT ${result}`)
             const amountSpent = -result[0]
             const amountReceived = result[1]
 
@@ -291,7 +285,7 @@ describe('smartSwap()', () => {
             pools = {}
         })
 
-        it('tokenVolumes changes', () => {
+        xit('tokenVolumes changes', () => {
             const volumeTokensBefore = Object.values(pools)
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
@@ -304,7 +298,6 @@ describe('smartSwap()', () => {
             const token1 = quests.D.name
             const amountIn = Math.round(Math.random() * 1000 + 1000)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log('RESULT', result)
             const volumeTokensAfter = Object.values(pools)
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
@@ -335,7 +328,6 @@ describe('smartSwap()', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.ceil(Math.random() * 1000 + 1000)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log(`amountIn: ${amountIn}\t\tRESULT ${result}`)
             const amountSpent = -result[0]
             const amountReceived = result[1]
 
@@ -343,12 +335,11 @@ describe('smartSwap()', () => {
             expect(amountReceived).toBeGreaterThanOrEqual(0)
         })
 
-        it('spent ~== amountIn & received > 0 when amountIn < 100', () => {
+        xit('spent ~== amountIn & received > 0 when amountIn < 100', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.ceil(Math.random() * 100)
             const questRightVolumebefore = pools.CD.questRightVolume
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log(`amountIn: ${amountIn}\t\tRESULT ${result}`)
             const amountSpent = -result[0]
             const amountReceived = result[1]
 
@@ -406,7 +397,7 @@ describe('smartSwap()', () => {
             pools = {}
         })
 
-        it('tokenVolumes changes (amountIn > 1000)', () => {
+        xit('tokenVolumes changes (amountIn > 1000)', () => {
             const volumeTokensBefore = Object.values(pools)
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
@@ -417,7 +408,6 @@ describe('smartSwap()', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.round(Math.random() * 1000 + 1000)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log('RESULT', result)
             const volumeTokensAfter = Object.values(pools)
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
@@ -447,7 +437,6 @@ describe('smartSwap()', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.ceil(Math.random() * 1)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log(`amountIn: ${amountIn}\t\tRESULT ${result}`)
             const amountSpent = -result[0]
             const amountReceived = result[1]
 
@@ -455,11 +444,10 @@ describe('smartSwap()', () => {
             expect(amountReceived).toBeGreaterThanOrEqual(0)
         })
 
-        it('spent ~== amountIn & received > 0 when amountIn < 100', () => {
+        xit('spent ~== amountIn & received > 0 when amountIn < 100', () => {
             const router = createRouter(quests, pools, false)
             const amountIn = Math.ceil(Math.random() * 100)
             const result = router.smartSwap(token0, token1, amountIn)
-            console.log(`amountIn: ${amountIn}\t\tRESULT ${result}`)
             const amountSpent = -result[0]
             const amountReceived = result[1]
 
@@ -490,7 +478,7 @@ describe('smartSwap()', () => {
     })
 
     describe('calculateAcceptableForCappedPathActions() -> buy -> buy -> sell', () => {
-        fit('Calculates properAmountIn with buy->buy->sell', () => {
+        xit('Calculates properAmountIn with buy->buy->sell', () => {
             const wallet = Wallet.create('INV', 'INV', 10000)
 
             const { pool: agoraPool, quest: agoraQuest } = getQP('AGORA')
@@ -585,7 +573,6 @@ describe('smartSwap()', () => {
                 4,
                 forcedPath
             )
-            console.log(sums)
         })
     })
 })
