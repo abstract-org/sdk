@@ -98,10 +98,37 @@ describe('Building routes', () => {
 })
 
 describe('Graph', () => {
+    const initialPositions = [
+        {
+            priceMin: 1,
+            priceMax: 10000,
+            tokenB: 5000,
+            tokenA: null
+        },
+        {
+            priceMin: 20,
+            priceMax: 10000,
+            tokenB: 5000,
+            tokenA: null
+        },
+        {
+            priceMin: 50,
+            priceMax: 10000,
+            tokenB: 5000,
+            tokenA: null
+        },
+        {
+            priceMin: 200,
+            priceMax: 10000,
+            tokenB: 5000,
+            tokenA: null
+        }
+    ]
+
     it('Graphs single pool properly', () => {
         const creator = Investor.create('creator', 'creator', 10000)
         const questA = creator.createQuest('TEST_1')
-        const poolA = questA.createPool() // Deposit A
+        const poolA = questA.createPool({ initialPositions }) // Deposit A
         globalState.quests.set('USDC', new UsdcToken())
         globalState.quests.set(questA.name, questA)
         globalState.pools.set(poolA.name, poolA)
@@ -169,25 +196,25 @@ describe('Routing', () => {
     const initialPositions = [
         {
             priceMin: 1,
-            priceMax: 10000,
+            priceMax: 1000000,
             tokenB: 5000,
             tokenA: null
         },
         {
             priceMin: 20,
-            priceMax: 10000,
+            priceMax: 1000000,
             tokenB: 5000,
             tokenA: null
         },
         {
             priceMin: 50,
-            priceMax: 10000,
+            priceMax: 1000000,
             tokenB: 5000,
             tokenA: null
         },
         {
             priceMin: 200,
-            priceMax: 10000,
+            priceMax: 1000000,
             tokenB: 5000,
             tokenA: null
         }
@@ -263,11 +290,11 @@ describe('Routing', () => {
         const creator = Investor.create('creator', 'creator', 10000)
 
         const questX = creator.createQuest('AGORA')
-        const poolX = questX.createPool()
+        const poolX = questX.createPool({ initialPositions })
         poolX.buy(5550)
 
         const questA = creator.createQuest('RUTHER')
-        const poolA = questA.createPool()
+        const poolA = questA.createPool({ initialPositions })
         poolA.buy(5000)
 
         const usdcToken = new UsdcToken()
@@ -308,6 +335,32 @@ describe('Routing', () => {
     })
 
     it('Smart route with single pool', () => {
+        const initialPositions = [
+            {
+                priceMin: 1,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 20,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 50,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 200,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            }
+        ]
         const creator = Investor.create('creator', 'creator', 10000)
 
         const questX = creator.createQuest('TEST_X')
@@ -335,6 +388,32 @@ describe('Routing', () => {
     })
 
     it('Smart route with single pool and high amount', () => {
+        const initialPositions = [
+            {
+                priceMin: 1,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 20,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 50,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 200,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            }
+        ]
         const creator = Investor.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
@@ -354,6 +433,32 @@ describe('Routing', () => {
     })
 
     it('Smart route with amount above 100 with high chunk size', () => {
+        const initialPositions = [
+            {
+                priceMin: 1,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 20,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 50,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 200,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            }
+        ]
         const creator = Investor.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
@@ -370,6 +475,32 @@ describe('Routing', () => {
     })
 
     it('Smart route with amount below 100 with sliced chunk', () => {
+        const initialPositions = [
+            {
+                priceMin: 1,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 20,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 50,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 200,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            }
+        ]
         const creator = Investor.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
@@ -386,6 +517,32 @@ describe('Routing', () => {
     })
 
     it('Smart route with amount based on liquidity', () => {
+        const initialPositions = [
+            {
+                priceMin: 1,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 20,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 50,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            },
+            {
+                priceMin: 200,
+                priceMax: 10000,
+                tokenB: 5000,
+                tokenA: null
+            }
+        ]
         const creator = Investor.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
@@ -538,13 +695,13 @@ describe('Routing', () => {
         const creator = Investor.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
-        const poolA = questA.createPool() // Deposit A
+        const poolA = questA.createPool({ initialPositions }) // Deposit A
         globalState.quests.set('USDC', new UsdcToken())
         globalState.quests.set(questA.name, questA)
         globalState.pools.set(poolA.name, poolA)
 
         const questB = creator.createQuest('TEST_2')
-        const poolB = questB.createPool() // Deposit B
+        const poolB = questB.createPool({ initialPositions }) // Deposit B
         globalState.quests.set(questB.name, questB)
         globalState.pools.set(poolB.name, poolB)
         poolB.buy(555) // Buy TEST_2 (around 500)
@@ -574,13 +731,13 @@ describe('Routing', () => {
         const creator = Investor.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST_1')
-        const poolA = questA.createPool() // Deposit A
+        const poolA = questA.createPool({ initialPositions }) // Deposit A
         globalState.quests.set('USDC', new UsdcToken())
         globalState.quests.set(questA.name, questA)
         globalState.pools.set(poolA.name, poolA)
 
         const questB = creator.createQuest('TEST_2')
-        const poolB = questB.createPool() // Deposit B
+        const poolB = questB.createPool({ initialPositions }) // Deposit B
         globalState.quests.set(questB.name, questB)
         globalState.pools.set(poolB.name, poolB)
         poolB.buy(555) // Buy TEST_2 (around 500)
@@ -605,14 +762,14 @@ describe('Routing', () => {
         const creator = Investor.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST')
-        const poolA = questA.createPool() // Deposit A
+        const poolA = questA.createPool({ initialPositions }) // Deposit A
         globalState.quests.set('USDC', new UsdcToken())
         globalState.quests.set(questA.name, questA)
         globalState.pools.set(poolA.name, poolA)
         poolA.buy(5000)
 
         const questB = creator.createQuest('AGORA')
-        const poolB = questB.createPool() // Deposit B
+        const poolB = questB.createPool({ initialPositions }) // Deposit B
         globalState.quests.set(questB.name, questB)
         globalState.pools.set(poolB.name, poolB)
 
@@ -642,14 +799,14 @@ describe('Routing', () => {
         const creator = Investor.create('creator', 'creator', 10000)
 
         const questA = creator.createQuest('TEST')
-        const poolA = questA.createPool() // Deposit A
+        const poolA = questA.createPool({ initialPositions }) // Deposit A
         globalState.quests.set('USDC', new UsdcToken())
         globalState.quests.set(questA.name, questA)
         globalState.pools.set(poolA.name, poolA)
         poolA.buy(5000)
 
         const questB = creator.createQuest('AGORA')
-        const poolB = questB.createPool() // Deposit B
+        const poolB = questB.createPool({ initialPositions }) // Deposit B
         globalState.quests.set(questB.name, questB)
         globalState.pools.set(poolB.name, poolB)
 
