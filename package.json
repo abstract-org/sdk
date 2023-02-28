@@ -15,7 +15,7 @@
         "prebuild": "yarn clean",
         "build": "tsc --build --force tsconfig.build.json",
         "test:watch": "yarn jest --watch",
-        "semantic-release": "semantic-release --branches main"
+        "semantic-release": "semantic-release"
     },
     "dependencies": {
         "@faker-js/faker": "^7.6.0",
