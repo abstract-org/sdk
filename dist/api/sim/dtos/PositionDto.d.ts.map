@@ -1,0 +1,1 @@
+{"version":3,"file":"PositionDto.d.ts","sourceRoot":"","sources":["../../../../src/api/sim/dtos/PositionDto.ts"],"names":[],"mappings":"AAEA,qBAAa,WAAW;IACpB,EAAE,EAAE,MAAM,CAAA;IACV,OAAO,EAAE,MAAM,CAAA;IACf,SAAS,EAAE,MAAM,CAAA;IACjB,UAAU,EAAE,MAAM,CAAA;IAClB,WAAW,EAAE,MAAM,CAAA;IACnB,WAAW,EAAE,MAAM,CAAA;IACnB,UAAU,EAAE,IAAI,CAAA;gBAEJ,IAAI,KAAA;IAUhB,KAAK;;;;;;CAQR"}

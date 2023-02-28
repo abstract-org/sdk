@@ -1,0 +1,1 @@
+{"version":3,"file":"InvestorUploadDto.d.ts","sourceRoot":"","sources":["../../../../src/api/sim/dtos/InvestorUploadDto.ts"],"names":[],"mappings":"AAAA,qBAAa,iBAAiB;IAC1B,IAAI,EAAE,MAAM,CAAA;IACZ,IAAI,EAAE,MAAM,CAAA;IACZ,IAAI,EAAE,OAAO,CAAA;IACb,eAAe,EAAE,MAAM,CAAA;IACvB,UAAU,EAAE,IAAI,CAAA;gBAEJ,IAAI,KAAA;CAkBnB"}

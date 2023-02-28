@@ -1,0 +1,1 @@
+{"version":3,"file":"PositionUploadDto.d.ts","sourceRoot":"","sources":["../../../../src/api/sim/dtos/PositionUploadDto.ts"],"names":[],"mappings":"AAEA,qBAAa,iBAAiB;IAC1B,OAAO,EAAE,MAAM,CAAA;IACf,SAAS,EAAE,MAAM,CAAA;IACjB,UAAU,EAAE,MAAM,CAAA;IAClB,WAAW,EAAE,MAAM,CAAA;IACnB,WAAW,EAAE,MAAM,CAAA;IACnB,UAAU,EAAE,IAAI,CAAA;gBAEJ,IAAI,KAAA,EAAE,MAAM,KAAA;CAQ3B"}

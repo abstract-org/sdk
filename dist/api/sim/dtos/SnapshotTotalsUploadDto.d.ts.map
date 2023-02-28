@@ -1,0 +1,1 @@
+{"version":3,"file":"SnapshotTotalsUploadDto.d.ts","sourceRoot":"","sources":["../../../../src/api/sim/dtos/SnapshotTotalsUploadDto.ts"],"names":[],"mappings":"AAAA,qBAAa,uBAAuB;IAChC,WAAW,EAAE,MAAM,CAAA;IACnB,MAAM,EAAE,MAAM,CAAA;IACd,WAAW,EAAE,MAAM,CAAA;IACnB,SAAS,EAAE,MAAM,CAAA;IACjB,GAAG,EAAE,MAAM,CAAA;IACX,IAAI,EAAE,MAAM,CAAA;IACZ,IAAI,EAAE,MAAM,CAAA;gBAEA,IAAI,KAAA;CASnB"}

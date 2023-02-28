@@ -1,3 +1,10 @@
+## [1.5.4](https://github.com/abstract-org/sdk/compare/v1.5.3...v1.5.4) (2023-02-28)
+
+
+### Bug Fixes
+
+* **sr:** Configured assets and npm publishing ([9f312d5](https://github.com/abstract-org/sdk/commit/9f312d5dd9fc78d994a0462eb767fe977f54f24d))
+
 ## [1.5.3](https://github.com/abstract-org/sdk/compare/v1.5.2...v1.5.3) (2023-02-28)
 
 

@@ -1,0 +1,1 @@
+{"version":3,"file":"InvestorBalancesUploadDto.d.ts","sourceRoot":"","sources":["../../../../src/api/sim/dtos/InvestorBalancesUploadDto.ts"],"names":[],"mappings":"AAAA,qBAAa,yBAAyB;IAClC,WAAW,EAAE,MAAM,CAAA;IACnB,QAAQ,EAAE,MAAM,CAAA;IAChB,OAAO,EAAE,MAAM,CAAA;IACf,GAAG,EAAE,MAAM,CAAA;gBAEC,IAAI,KAAA;CAMnB"}

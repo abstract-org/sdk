@@ -1,0 +1,1 @@
+{"version":3,"file":"PoolUploadDto.d.ts","sourceRoot":"","sources":["../../../../src/api/sim/dtos/PoolUploadDto.ts"],"names":[],"mappings":"AAAA,qBAAa,aAAa;IACtB,IAAI,EAAE,MAAM,CAAA;IACZ,MAAM,EAAE,MAAM,CAAA;IACd,MAAM,EAAE,MAAM,CAAA;IACd,IAAI,EAAE,MAAM,CAAA;IACZ,IAAI,EAAE,MAAM,CAAA;IACZ,UAAU,EAAE,IAAI,CAAA;gBAEJ,IAAI,KAAA,EAAE,kBAAkB,KAAA;CAoBvC"}

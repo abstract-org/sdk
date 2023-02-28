@@ -1,0 +1,1 @@
+{"version":3,"file":"InvestorNavsUploadDto.d.ts","sourceRoot":"","sources":["../../../../src/api/sim/dtos/InvestorNavsUploadDto.ts"],"names":[],"mappings":"AAAA,qBAAa,qBAAqB;IAC9B,WAAW,EAAE,MAAM,CAAA;IACnB,QAAQ,EAAE,MAAM,CAAA;IAChB,SAAS,EAAE,MAAM,CAAA;IACjB,GAAG,EAAE,MAAM,CAAA;gBAEC,IAAI,KAAA;CAMnB"}

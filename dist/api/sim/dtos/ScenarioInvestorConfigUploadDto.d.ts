@@ -1,0 +1,41 @@
+export declare class ScenarioInvestorConfigUploadDto {
+    daily_spawn_probability: string;
+    inv_gen_alias: string;
+    inv_gen_name: string;
+    initial_balance: number;
+    buy_sell_period_days: number;
+    buy_single_perc: number;
+    include_single_name: string;
+    buy_sum_perc: number;
+    buy_quest_perc: number;
+    buy_gainer_perc: number;
+    buy_gainers_frequency: number;
+    exclude_single_name: string;
+    swap_inc_frequency: number;
+    swap_inc_dir: string;
+    swap_inc_sum_perc: number;
+    swap_inc_by_perc: number;
+    swap_dec_frequency: number;
+    swap_dec_dir: string;
+    swap_dec_sum_perc: number;
+    swap_dec_by_perc: number;
+    create_quest: string;
+    keep_creating_quests: string;
+    keep_creating_period_days: number;
+    keep_citing_probability: number;
+    keep_citing_sum_percentage: number;
+    keep_citing_price_higher_than: number;
+    keep_citing_pos_multiplier: number;
+    value_sell_period_days: number;
+    value_sell_amount: number;
+    smart_route_depth: number;
+    buy_single_amount: number;
+    buy_sum_amount: number;
+    swap_inc_sum_amount: number;
+    swap_dec_sum_amount: number;
+    value_sell_perc: number;
+    scenario_id: number;
+    global_swap_threshold: number;
+    constructor(investorConfig: any, scenarioId: any);
+}
+//# sourceMappingURL=ScenarioInvestorConfigUploadDto.d.ts.map
