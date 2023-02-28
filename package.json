@@ -15,7 +15,7 @@
         "prebuild": "yarn clean",
         "build": "tsc --build --force tsconfig.build.json",
         "test:watch": "yarn jest --watch",
-        "semantic-release": "semantic-release --branches main"
+        "semantic-release": "semantic-release"
     },
     "dependencies": {
         "@faker-js/faker": "^7.6.0",
@@ -25,6 +25,10 @@
         "lodash.set": "^4.3.2"
     },
     "devDependencies": {
+        "@semantic-release/changelog": "^6.0.2",
+        "@semantic-release/commit-analyzer": "^9.0.2",
+        "@semantic-release/git": "^10.0.1",
+        "@semantic-release/release-notes-generator": "^10.0.3",
         "@types/hashmap": "^2.3.1",
         "@types/jest": "^29.2.3",
         "@types/node": "^18.11.9",
@@ -47,10 +51,5 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/abstract-org/sdk.git"
-    },
-    "release": {
-        "branches": [
-            "main"
-        ]
     }
 }
