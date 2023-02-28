@@ -47,10 +47,5 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/abstract-org/sdk.git"
-    },
-    "release": {
-        "branches": [
-            "main"
-        ]
     }
 }
