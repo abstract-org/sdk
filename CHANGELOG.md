@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/abstract-org/sdk/compare/v1.5.2...v1.5.3) (2023-02-28)
+
+
+### Bug Fixes
+
+* **sr:** Removed skip CI ([dbd3454](https://github.com/abstract-org/sdk/commit/dbd3454cac10b30138fc009b8689ced57771fa34))
+
 ## [1.5.2](https://github.com/abstract-org/sdk/compare/v1.5.1...v1.5.2) (2023-02-28)
 
 
