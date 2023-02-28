@@ -5,7 +5,9 @@ name: 'publish sdk'
 
 on:
     push:
-        branches: [main, develop]
+        branches:
+            - main
+            - develop
 
 jobs:
     build:
