@@ -6,11 +6,17 @@ module.exports = {
     plugins: [
         '@semantic-release/commit-analyzer',
         '@semantic-release/release-notes-generator',
+        '@semantic-release/npm',
         '@semantic-release/changelog',
         [
             '@semantic-release/git',
             {
-                assets: ['CHANGELOG.md', 'package.json'],
+                assets: [
+                    'CHANGELOG.md',
+                    'README.md',
+                    'package.json',
+                    'dist/**'
+                ],
                 message:
                     'chore(release): ${nextRelease.version}\n\n${nextRelease.notes}'
             }
