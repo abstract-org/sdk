@@ -8,20 +8,18 @@ module.exports = {
         '@semantic-release/release-notes-generator',
         '@semantic-release/changelog',
         [
-            '@semantic-release/github',
+            '@semantic-release/npm',
             {
-                assets: [
-                    'CHANGELOG.md',
-                    'README.md',
-                    'package.json',
-                    'dist/**'
-                ],
-                releasedLabels: false,
-                addChannelOnGithubRelease: true,
-                message:
-                    'chore(release): ${nextRelease.version}\n\n${nextRelease.notes}'
+                npmPublish: true,
+                tarballDist: 'dist'
             }
         ],
-        '@semantic-release/npm'
+        [
+            '@semantic-release/github',
+            {
+                assets: 'dist/*.tgz',
+                addReleases: true
+            }
+        ]
     ]
 }
