@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "rootDir": "src",
+        "rootDir": "./",
         "outDir": "./dist",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -21,6 +21,6 @@
         "module": "CommonJS",
         "target": "ES2022"
     },
-    "include": ["src", "src/index.ts", "src/__tests__"],
+    "include": ["src", "src/index.ts", "__tests__"],
     "exclude": ["dist", "**/node_modules"]
 }

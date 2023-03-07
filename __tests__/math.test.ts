@@ -1,5 +1,5 @@
 import HashMap from 'hashmap'
-import { Wallet, UsdcToken, Router, Pool, Quest } from '../modules'
+import { Wallet, UsdcToken, Router, Pool, Quest } from '../src/modules'
 import {
     buySameLiqGiveT0GetT1,
     buySameLiqGiveT1GetT0,
@@ -8,7 +8,7 @@ import {
     oneShotGetSellCap,
     sellSameLiqGiveT0GetT1,
     sellSameLiqGiveT1GetT0
-} from '../utils/mathUtils'
+} from '../src/utils/mathUtils'
 import { getCP, getQP } from './helpers/getQuestPools'
 
 describe('Smart route math works', () => {
@@ -423,7 +423,6 @@ describe('Basic math works', () => {
             TST3,
             2
         )
-        console.log(priceRange)
 
         wallet.citeQuest(
             AGORA_TST3,
@@ -433,7 +432,7 @@ describe('Basic math works', () => {
             12000,
             priceRange.native
         )
-        console.log(AGORA_TST3)
+
         const { crossPool: AGORA_TST5 } = getCP(
             qTST5,
             qAGORA,
@@ -475,8 +474,6 @@ describe('Basic math works', () => {
         quests.set('USDC', new UsdcToken())
 
         const router = new Router(quests, pools)
-
-        console.log(router.smartSwap('USDC', qTST5.name, 2000))
     })
 
     it('After opening a position on drained cross pool it opens with correct price range', () => {})
