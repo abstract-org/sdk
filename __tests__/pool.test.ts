@@ -1,4 +1,4 @@
-import { hashmapToObj, p2pp } from '../src/utils/logicUtils'
+import { hashmapToObj, p2pp } from '../src/common/utils/logicUtils'
 import { getQP } from './helpers/getQuestPools'
 import { prepareCrossPools, preparePool } from './helpers/poolManager'
 

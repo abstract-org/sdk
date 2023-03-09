@@ -11,7 +11,7 @@ import {
 import { SupabaseClient, createClient } from '@supabase/supabase-js'
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { QueryFilterType } from '../types'
-import { ConstructorSimConfig } from '../api/sim/SimAPI'
+import { ConstructorSimConfig } from '../../api/sim/SimAPI'
 
 type TableNameType = 'pools' | 'quests' | 'wallets'
 

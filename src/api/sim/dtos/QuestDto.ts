@@ -1,4 +1,4 @@
-import { Quest, UsdcToken } from '../../../modules'
+import { Quest, UsdcToken } from '../../../common/modules'
 
 export class QuestDto {
     id: number

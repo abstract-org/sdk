@@ -6,13 +6,13 @@ import {
     QuestPersistenceService,
     WalletPersistenceService,
     SupabaseRepository
-} from './services'
+} from './common/services'
 import {
     IDataStoreRepository,
     IPoolPersistence,
     IQuestPersistence,
     IWalletPersistance
-} from './interfaces'
+} from './common/interfaces'
 
 const getPersistenceLayer = (
     repository
@@ -73,8 +73,8 @@ export class SimSdk {
     }
 }
 
-export * as LogicUtils from './utils/logicUtils'
-export * as MathUtils from './utils/mathUtils'
-export * as Modules from './modules'
-export * from './types'
-export * from './interfaces'
+export * as LogicUtils from './common/utils/logicUtils'
+export * as MathUtils from './common/utils/mathUtils'
+export * as Modules from './common/modules'
+export * from './common/types'
+export * from './common/interfaces'

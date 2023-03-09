@@ -1,4 +1,3 @@
-import { Hash } from 'crypto'
 import HashMap from 'hashmap'
 
 export const pp2p = (pricePoint) => {

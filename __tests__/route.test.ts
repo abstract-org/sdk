@@ -1,6 +1,12 @@
 import HashMap from 'hashmap'
-import { Wallet, UsdcToken, Router, Quest, TEMP_CONFIG } from '../src/modules'
-import { getPathActions, pp2p } from '../src/utils/logicUtils'
+import {
+    Wallet,
+    UsdcToken,
+    Router,
+    Quest,
+    TEMP_CONFIG
+} from '../src/common/modules'
+import { getPathActions, pp2p } from '../src/common/utils/logicUtils'
 import { getCP, getQP } from './helpers/getQuestPools'
 import { prepareCrossPools, preparePool } from './helpers/poolManager'
 

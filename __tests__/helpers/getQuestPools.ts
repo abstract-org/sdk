@@ -1,4 +1,4 @@
-import { Wallet, UsdcToken } from '../../src/modules'
+import { Wallet, UsdcToken } from '../../src/common/modules'
 
 export const getQP = (name, priceMax = 10000) => {
     const wallet = Wallet.create('INV', 'INV', 10000)

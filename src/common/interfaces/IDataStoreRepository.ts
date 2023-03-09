@@ -6,7 +6,8 @@ import {
     IWalletQueryUpdate,
     IQuestCreate,
     IQuestUpdate,
-    IPoolCreate, IPoolQueryUpdate
+    IPoolCreate,
+    IPoolQueryUpdate
 } from './index'
 import { QueryFilterType } from '../types'
 

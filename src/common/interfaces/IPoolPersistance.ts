@@ -8,9 +8,16 @@ export interface IPoolPersistence {
 
     getPoolsByType(type: PoolType, limit: number): Promise<Array<IPool>>
 
-    getPoolsByCitationsCount(citationCount: number, limit: number): Promise<Array<IPool>>
+    getPoolsByCitationsCount(
+        citationCount: number,
+        limit: number
+    ): Promise<Array<IPool>>
 
-    getPoolsByPriceRange(priceMin: number, priceMax: number, limit: number): Promise<IPool>
+    getPoolsByPriceRange(
+        priceMin: number,
+        priceMax: number,
+        limit: number
+    ): Promise<IPool>
 
     savePool(data: IPoolCreate): Promise<IPool>
 

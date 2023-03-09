@@ -1,4 +1,4 @@
-import { IAPI } from '../../interfaces'
+import { IAPI } from '../../common/interfaces'
 
 export interface ConstructorWeb3Config {
     rpcUrl: string
