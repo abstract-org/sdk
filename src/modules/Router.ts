@@ -52,7 +52,7 @@ export class Router {
      * @param {number} forcedPath
      * @returns {*[]|number[]}
      */
-    smartSwap(token0, token1, amountIn, smartRouteDepth = 1, forcedPath?: any) {
+    smartSwap(token0, token1, amountIn, smartRouteDepth = 3, forcedPath?: any) {
         if (this._DEBUG) {
             console.log(
                 `\n--- SMART ROUTE ${token0}/${token1}/${amountIn}---\n`
