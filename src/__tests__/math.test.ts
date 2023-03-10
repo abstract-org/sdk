@@ -15,7 +15,7 @@ describe('Smart route math works', () => {
     let quests: any = {}
     let pools: any = {}
     let router
-    const shouldDebugRouter = true
+    const shouldDebugRouter = false
 
     const createRouter = (questObj, poolsObj, isDbg = shouldDebugRouter) => {
         const poolsHashMap = new HashMap(

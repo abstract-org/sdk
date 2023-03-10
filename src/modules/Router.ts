@@ -52,7 +52,7 @@ export class Router {
      * @param {number} forcedPath
      * @returns {*[]|number[]}
      */
-    smartSwap(token0, token1, amountIn, smartRouteDepth = 1, forcedPath?: any) {
+    smartSwap(token0, token1, amountIn, smartRouteDepth = 3, forcedPath?: any) {
         if (this._DEBUG) {
             console.log(
                 `\n--- SMART ROUTE ${token0}/${token1}/${amountIn}---\n`
@@ -99,11 +99,13 @@ export class Router {
                     amountIn,
                     pricedPath.path
                 )
-                console.debug(
-                    'seeking proper amt in',
-                    properAmountIn,
-                    pricedPath.path
-                )
+                if (this._DEBUG) {
+                    console.debug(
+                        'seeking proper amt in',
+                        properAmountIn,
+                        pricedPath.path
+                    )
+                }
 
                 if (!isZero(properAmountIn)) {
                     // console.log('properAmountIn() > 0 loop', properAmountIn)

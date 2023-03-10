@@ -101,8 +101,6 @@ export class Investor {
     citeQuest(crossPool, priceMin = 1, priceMax = 10, token0Amt = 0, token1Amt = 0, native = false) {
         // Open "position" for value link pool
         const [totalIn, totalOut] = crossPool.openPosition(priceMin, priceMax, token0Amt, token1Amt, native);
-        console.log('totalIn, totalOut: ', [totalIn, totalOut]);
-        console.log('token0Amt, token1Amt: ', [token0Amt, token1Amt]);
         if (typeof token0Amt === 'undefined' ||
             typeof token1Amt === 'undefined' ||
             (token0Amt === 0 && token1Amt === 0)) {
