@@ -79,8 +79,7 @@ describe('smartSwap()', () => {
                 }))
             const router = createRouter(quests, pools, true)
             const amountIn = Math.round(Math.random() * 1000 + 1000)
-            const result = router.smartSwap(token0, token1, amountIn)
-            console.log('RESULT', result)
+            const result = router.smartSwap(token0, token1, amountIn, 3)
             const volumeTokensAfter = Object.values(pools)
                 .filter((p: Pool) => !p.isQuest())
                 .map((p: Pool) => ({
@@ -474,7 +473,7 @@ describe('smartSwap()', () => {
     })
 
     describe('calculateAcceptableForCappedPathActions() -> buy -> buy -> sell', () => {
-        fit('Calculates properAmountIn with buy->buy->sell', () => {
+        it('Calculates properAmountIn with buy->buy->sell', () => {
             const investor = Investor.create('INV', 'INV', 10000)
 
             const { pool: agoraPool, quest: agoraQuest } = getQP('AGORA')
