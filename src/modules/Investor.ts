@@ -164,8 +164,6 @@ export class Investor {
             native
         )
 
-        console.log('totalIn, totalOut: ', [totalIn, totalOut])
-        console.log('token0Amt, token1Amt: ', [token0Amt, token1Amt])
         if (
             typeof token0Amt === 'undefined' ||
             typeof token1Amt === 'undefined' ||

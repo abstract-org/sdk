@@ -36,7 +36,7 @@ export class Router {
      * @param {number} forcedPath
      * @returns {*[]|number[]}
      */
-    smartSwap(token0, token1, amountIn, smartRouteDepth = 1, forcedPath) {
+    smartSwap(token0, token1, amountIn, smartRouteDepth = 3, forcedPath) {
         if (this._DEBUG) {
             console.log(`\n--- SMART ROUTE ${token0}/${token1}/${amountIn}---\n`);
         }
@@ -62,7 +62,9 @@ export class Router {
             // Could be a replacement for drySwap - get anything above zero for available paths and trade it, otherwise exit trade
             for (const pricedPath of this._PRICED_PATHS) {
                 properAmountIn = this.getMaxAmountInForPath(amountIn, pricedPath.path);
-                console.debug('seeking proper amt in', properAmountIn, pricedPath.path);
+                if (this._DEBUG) {
+                    console.debug('seeking proper amt in', properAmountIn, pricedPath.path);
+                }
                 if (!isZero(properAmountIn)) {
                     // console.log('properAmountIn() > 0 loop', properAmountIn)
                     pathToSwap = pricedPath.path;
