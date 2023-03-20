@@ -2,16 +2,7 @@ import sha256 from 'crypto-js/sha256';
 import HashMap from 'hashmap';
 import { Pool } from './Pool';
 import { UsdcToken } from './UsdcToken';
-const TEMP_CONFIG = {
-    INITIAL_LIQUIDITY: [
-        {
-            priceMin: 1,
-            priceMax: 1000000,
-            tokenA: 0,
-            tokenB: 20000
-        }
-    ]
-};
+import { positionsDefault } from '../globals/positions.default';
 export class Quest {
     id; // make uuid
     hash;
@@ -48,7 +39,7 @@ export class Quest {
         this.pools.push(pool.name);
     }
     initializePoolPositions(pool, initialPositions) {
-        const initial = initialPositions || TEMP_CONFIG.INITIAL_LIQUIDITY;
+        const initial = initialPositions ? initialPositions : positionsDefault;
         initial.forEach((position) => {
             pool.openPosition(position.priceMin, position.priceMax, position.tokenA, position.tokenB);
             this.initialBalanceA += parseFloat(position.tokenA);
