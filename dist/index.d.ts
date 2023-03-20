@@ -7,4 +7,5 @@ export declare class SimSdk {
 export * as LogicUtils from './utils/logicUtils';
 export * as MathUtils from './utils/mathUtils';
 export * as Modules from './modules';
+export { positionsDefault } from './globals/positions.default';
 //# sourceMappingURL=index.d.ts.map
