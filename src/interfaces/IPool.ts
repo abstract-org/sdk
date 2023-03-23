@@ -15,6 +15,7 @@ export interface IPoolCreate {
     questRightHash: string
     type: PoolType
     kind: string
+    positions: IPosition[]
 }
 
 export interface IPool {
@@ -25,7 +26,7 @@ export interface IPool {
     name: string
     kind: string
     hash: string
-    positions: Array<IPosition>
+    positions: IPosition[]
     state: IPoolState
     hydratePositions(positions: object[]): void
     getPoolState(): IPoolState
