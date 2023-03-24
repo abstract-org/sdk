@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import { ConstructorSimConfig } from './api/sim/SimAPI'
-import { ConstructorWeb3Config } from './api/web3/Web3API'
+import { Web3ApiConfig } from './api/web3/Web3API'
 import {
     PoolPersistenceService,
     QuestPersistenceService,
@@ -40,7 +40,7 @@ const getPersistenceLayer = (
 export class SimSdk {
     static init(
         adapter: string = 'supabase',
-        config: ConstructorSimConfig | ConstructorWeb3Config
+        config: ConstructorSimConfig | Web3ApiConfig
     ): {
         PoolPersistence: IPoolPersistence
         QuestPersistence: IQuestPersistence

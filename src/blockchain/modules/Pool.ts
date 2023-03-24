@@ -2,76 +2,72 @@ import { ethers } from 'ethers'
 import {
     Position as UniswapV3Position,
     Pool as UniswapV3Pool,
-    nearestUsableTick
+    nearestUsableTick,
+    FeeAmount
 } from '@uniswap/v3-sdk'
 import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
 import { Percent, Token as UniswapV3Token } from '@uniswap/sdk-core'
 import TokenAbi from '@/blockchain/abi/SimpleToken.json'
 import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json'
 import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
+import { Web3ApiConfig } from '@/api/web3/Web3API'
 
 export const DEFAULT_TX_GAS_LIMIT = 100000000 // 0.1 GWei
-
+export const DEFAULT_POOL_FEE = FeeAmount.LOW
 export type TDeployParams = {
-    fee: number
+    fee?: number
     deployGasLimit?: number
 }
 
 export class Pool {
+    token0: string
+    token1: string
+    hash: string
+    poolContract: ethers.Contract = null
     private provider: ethers.providers.JsonRpcProvider
     private signer: ethers.Signer
     private contracts: TUniswapContracts
 
-    public token0: string
-    public token1: string
-    public hash: string
-    poolContractAddress?: string
     constructor() {}
-
-    // builds instance of this class (Pool entity)
 
     /**
      * @description builds instance of this class (Pool entity)
      * @example import Pool from '@/blockchain/Pool;
-     *          const someNewPool = Pool.create(t0,t1,apiConfig)
+     *          const someNewPool = Pool.create(t0address,t1address,apiConfig)
      *          someNewPool.deployPool()
      */
     static async create(
-        token0,
-        token1,
-        apiConfig: {
-            provider: ethers.providers.JsonRpcProvider
-            signer: ethers.Signer
-            contracts: TUniswapContracts
-        }
+        token0: string,
+        token1: string,
+        apiConfig: Web3ApiConfig
     ): Promise<Pool> {
-        const pool = new Pool()
+        const thisPool = new Pool()
         // let's rely on pre-configured with blockchain network instance of caller API (new ethers.providers.JsonRpcProvider(providerUrl))
-        pool.provider = apiConfig.provider
-
+        thisPool.provider = apiConfig.provider
         // get it from react-web3 wallet or pre-instantiate from .env PrivateKey
-        pool.signer = apiConfig.signer
-
+        thisPool.signer = apiConfig.signer
         // pre-defined UniswapV3Contracts
-        pool.contracts = apiConfig.contracts
+        thisPool.contracts = apiConfig.contracts
 
-        pool.token0 = token0
-        pool.token1 = token1
+        thisPool.token0 = token0
+        thisPool.token1 = token1
         const token0Bytes = ethers.utils.arrayify(token0)
         const token1Bytes = ethers.utils.arrayify(token1)
         const concatenatedBytes = ethers.utils.concat([
             token0Bytes,
             token1Bytes
         ])
-        pool.hash = ethers.utils.sha256(concatenatedBytes)
-        // pool.deployPool()
-        return pool
+        thisPool.hash = ethers.utils.sha256(concatenatedBytes)
+        thisPool.poolContract = await thisPool.deployPool()
+
+        return thisPool
     }
 
-    async deployPool(params: TDeployParams): Promise<string> {
+    async deployPool(params: TDeployParams = {}): Promise<ethers.Contract> {
         const deployer = this.signer
         const sqrtPrice = encodePriceSqrt(1, 1)
-        const fee = params.fee
+        const fee = params.fee || DEFAULT_POOL_FEE
+        const gasLimit = params.deployGasLimit || DEFAULT_TX_GAS_LIMIT
         const factory = this.contracts.factory
         const positionManager = this.contracts.positionManager
 
@@ -88,9 +84,7 @@ export class Pool {
                     this.token1,
                     fee,
                     sqrtPrice,
-                    {
-                        gasLimit: params.deployGasLimit || DEFAULT_TX_GAS_LIMIT
-                    }
+                    { gasLimit }
                 )
 
             await tx.wait()
@@ -105,34 +99,35 @@ export class Pool {
         }
 
         console.log('## Pool deployed on address:', poolAddress)
-        this.poolContractAddress = poolAddress
-
-        return poolAddress
-    }
-
-    async addPosition() {
-        const pool = new ethers.Contract(
-            this.poolContractAddress,
+        return new ethers.Contract(
+            poolAddress,
             IUniswapV3PoolABI.abi,
             this.signer
         )
+    }
 
-        const mintParams = await this.getPositionMintParams(pool)
+    async openPosition(
+        min: number,
+        max: number,
+        token0amount: number,
+        token1amount: number
+    ) {
+        const mintParams = await this.getPositionMintParams()
         const positionMintTx = await this.contracts.positionManager
             .connect(this.signer)
             .mint(mintParams, {
                 gasLimit: ethers.utils.hexlify(1000000)
             })
 
-        // await expect(positionMintTx).to.emit(UniswapContracts.positionManager, 'IncreaseLiquidity');
+        await positionMintTx.wait() // expect positionManager emit event 'IncreaseLiquidity' after positionMintTx
     }
 
-    // fetches existing v3 UniswapV3pool getPool and returns it's address
-    async getPool(
+    // fetches existing v3 UniswapV3pool getPool and returns it's contract
+    async getPoolContract(
         token0: string,
         token1: string,
         fee: number
-    ): Promise<string> {
+    ): Promise<ethers.Contract> {
         const token0Address = ethers.utils.getAddress(token0)
         const token1Address = ethers.utils.getAddress(token1)
 
@@ -150,13 +145,7 @@ export class Pool {
         return poolAddress
     }
 
-    async swap(amount) {
-        const pool = new ethers.Contract(
-            String(process.env.WETH_TEST_TOKEN_POOL_ADDRESS),
-            IUniswapV3PoolABI.abi,
-            this.signer
-        )
-
+    async swap(amount, native: boolean = false) {
         // approving spending gas for router
         const approvalAmount = ethers.utils.parseUnits('1000', 18).toString()
         await Promise.all([
@@ -168,7 +157,7 @@ export class Pool {
                 .approve(this.contracts.router.address, approvalAmount)
         ])
 
-        const poolImmutables = await Pool.getPoolImmutables(pool)
+        const poolImmutables = await this.getPoolImmutables()
         const amountIn = ethers.utils.parseUnits(String(amount), 18).toString()
 
         // calc param amountOutMinimum
@@ -191,14 +180,20 @@ export class Pool {
             sqrtPriceLimitX96: 0 // TODO: shouldn't be 0 in production
         }
 
-        console.debug('--- pool.liquidity before swap:', await pool.liquidity())
+        console.debug(
+            '--- pool.liquidity before swap:',
+            await this.poolContract.liquidity()
+        )
         await this.contracts.router
             .connect(this.signer)
             .exactInputSingle(swapParams, {
                 gasLimit: ethers.utils.hexlify(5000000)
             })
 
-        console.debug('--- pool.liquidity after swap:', await pool.liquidity())
+        console.debug(
+            '--- pool.liquidity after swap:',
+            await this.poolContract.liquidity()
+        )
     }
 
     // async swapExactInput(
@@ -233,12 +228,12 @@ export class Pool {
     //     return tx
     // }
 
-    static async getPoolStateData(pool) {
+    async getPoolStateData() {
         const [tickSpacing, fee, liquidity, slot0] = await Promise.all([
-            pool.tickSpacing(),
-            pool.fee(),
-            pool.liquidity(),
-            pool.slot0()
+            this.poolContract.tickSpacing(),
+            this.poolContract.fee(),
+            this.poolContract.liquidity(),
+            this.poolContract.slot0()
         ])
 
         return {
@@ -250,11 +245,11 @@ export class Pool {
         }
     }
 
-    static async getPoolImmutables(pool) {
+    async getPoolImmutables() {
         const [token0, token1, fee] = await Promise.all([
-            pool.token0(),
-            pool.token1(),
-            pool.fee()
+            this.poolContract.token0(),
+            this.poolContract.token1(),
+            this.poolContract.fee()
         ])
 
         return {
@@ -264,27 +259,12 @@ export class Pool {
         }
     }
 
-    async getPositionMintParams(pool) {
-        const poolData = await Pool.getPoolStateData(pool)
-        const poolImmutables = await Pool.getPoolImmutables(pool)
+    async getPositionMintParams() {
+        const poolData = await this.getPoolStateData()
         const { tick, tickSpacing, fee, liquidity, sqrtPriceX96 } = poolData
-        const network = await this.provider.getNetwork()
 
-        const token0Instance = new UniswapV3Token(
-            network.chainId,
-            poolImmutables.token0,
-            await this.getToken0Contract().connect(this.signer).decimals(),
-            await this.getToken0Contract().connect(this.signer).symbol(),
-            await this.getToken0Contract().connect(this.signer).name()
-        )
-        const token1Instance = new UniswapV3Token(
-            network.chainId,
-            poolImmutables.token1,
-            await this.getToken1Contract().connect(this.signer).decimals(),
-            await this.getToken1Contract().connect(this.signer).symbol(),
-            await this.getToken1Contract().connect(this.signer).name()
-        )
-
+        const token0Instance = await this.constructUniswapV3token(this.token0)
+        const token1Instance = await this.constructUniswapV3token(this.token1)
         const tokensPool = new UniswapV3Pool(
             token0Instance,
             token1Instance,
@@ -294,26 +274,24 @@ export class Pool {
             tick
         )
 
+        const tickLower = nearestUsableTick(tick, tickSpacing) - tickSpacing * 2
+        const tickUpper = nearestUsableTick(tick, tickSpacing) + tickSpacing * 2
+        const liquidityAmount = '0.1'
         const position = new UniswapV3Position({
             pool: tokensPool,
-            liquidity: ethers.utils.parseEther('0.1').toString(), // TODO: check if auto-cast to BigintIsh works fine
-            tickLower: nearestUsableTick(tick, tickSpacing) - tickSpacing * 2,
-            tickUpper: nearestUsableTick(tick, tickSpacing) + tickSpacing * 2
+            liquidity: ethers.utils.parseEther(liquidityAmount).toString(), // TODO: check if auto-cast to BigintIsh works fine
+            tickLower,
+            tickUpper
         })
 
         const approvalAmount = ethers.utils.parseUnits('1000', 18).toString()
-
-        await Promise.all([
-            this.getToken0Contract()
-                .connect(this.signer)
-                .approve(
-                    this.contracts.positionManager.address,
-                    approvalAmount
-                ),
-            this.getToken1Contract()
-                .connect(this.signer)
-                .approve(this.contracts.positionManager.address, approvalAmount)
-        ])
+        const token0approveTx = this.getToken0Contract()
+            .connect(this.signer)
+            .approve(this.contracts.positionManager.address, approvalAmount)
+        const token1approveTx = this.getToken1Contract()
+            .connect(this.signer)
+            .approve(this.contracts.positionManager.address, approvalAmount)
+        await Promise.all([token0approveTx, token1approveTx])
 
         const { amount0: amount0Desired, amount1: amount1Desired } =
             position.mintAmounts
@@ -325,8 +303,8 @@ export class Pool {
             token0: this.token0,
             token1: this.token1,
             fee,
-            tickLower: nearestUsableTick(tick, tickSpacing) - tickSpacing * 2,
-            tickUpper: nearestUsableTick(tick, tickSpacing) + tickSpacing * 2,
+            tickLower,
+            tickUpper,
             amount0Desired: amount0Desired.toString(),
             amount1Desired: amount1Desired.toString(),
             amount0Min: amount0Min.toString(),
@@ -339,90 +317,33 @@ export class Pool {
         return params
     }
 
+    constructTokenContract(tokenAddress, tokenAbi = TokenAbi.abi) {
+        return new ethers.Contract(tokenAddress, tokenAbi, this.signer)
+    }
+
     getToken0Contract() {
-        return new ethers.Contract(this.token0, TokenAbi.abi, this.signer)
+        return this.constructTokenContract(this.token0)
     }
 
     getToken1Contract() {
-        return new ethers.Contract(this.token1, TokenAbi.abi, this.signer)
+        return this.constructTokenContract(this.token1)
+    }
+
+    async constructUniswapV3token(tokenAddress: string) {
+        const network = await this.provider.getNetwork()
+        const tokenContract = this.constructTokenContract(tokenAddress)
+        const [decimals, symbol, name] = await Promise.all([
+            tokenContract.connect(this.signer).decimals(),
+            tokenContract.connect(this.signer).symbol(),
+            tokenContract.connect(this.signer).name()
+        ])
+
+        return new UniswapV3Token(
+            network.chainId,
+            tokenAddress,
+            decimals,
+            symbol,
+            name
+        )
     }
 }
-
-// method which deploys Uniswap v3 Pool if it does not exist yet on blockchain
-// async _bad_deployPool1(fee: number, tickSpacing: number): Promise<string> {
-//     const token0Address = this.token0
-//     const token1Address = this.token1
-//
-//     const tx = await this.contracts.UniswapV3Factory.connect(
-//         this.signer
-//     ).createPool(token0Address, token1Address, fee)
-//
-//     const receipt = await tx.wait()
-//     const event = receipt.events?.find((e) => e.event === 'PoolCreated')
-//
-//     if (!event) {
-//         throw new Error('Failed to create UniswapV3pool')
-//     }
-//
-//     const poolAddress = event.args?.UniswapV3pool
-//     if (!poolAddress) {
-//         throw new Error('Pool address not found')
-//     }
-//
-//     const pool = new UniswapV3Pool(
-//         token0Address,
-//         token1Address,
-//         fee,
-//         tickSpacing,
-//         poolAddress,
-//         this.provider
-//     )
-//     this.UniswapV3pool = pool
-//
-//     return poolAddress
-// }
-
-//openPosition
-//swap
-
-// async exactInputSingleSwap(
-//     tokenIn: string,
-//     tokenOut: string,
-//     fee: number,
-//     recipient: string,
-//     amountIn: ethers.BigNumber,
-//     amountOutMinimum: ethers.BigNumber,
-//     sqrtPriceLimitX96: ethers.BigNumber
-// ): Promise<ethers.ContractTransaction> {
-
-// creates and returns Uniswap v3 position instance
-// createPosition(
-//     token0: string,
-//     token1: string,
-//     fee: number,
-//     tickLower: number,
-//     tickUpper: number,
-//     amount0Desired: ethers.BigNumber,
-//     amount1Desired: ethers.BigNumber,
-//     amount0Min: ethers.BigNumber,
-//     amount1Min: ethers.BigNumber,
-//     recipient: string
-// ): UniswapV3Position {
-//     const token0Address = ethers.utils.getAddress(token0)
-//     const token1Address = ethers.utils.getAddress(token1)
-//     const tickSpacing = TickMath.getTickSpacing()
-//
-//     if (!this.UniswapV3pool) {
-//         throw new Error('Pool instance not created yet')
-//     }
-//
-//     const position = UniswapV3Token.fromAmounts(
-//         this.UniswapV3pool,
-//         amount0Desired,
-//         amount1Desired,
-//         tickLower,
-//         tickUpper
-//     )
-//
-//     return position
-// }

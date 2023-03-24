@@ -2,25 +2,19 @@ import { Pool } from '@/blockchain/modules/Pool'
 import { ethers } from 'ethers'
 import { initializeUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
 import dotenv from 'dotenv'
-import * as process from 'process'
 dotenv.config()
-
-jest.setTimeout(30000)
 
 const token0 = String(process.env.TEST_TOKEN_ADDRESS)
 const token1 = String(process.env.WETH_ADDRESS)
 const providerUrl = String(process.env.PROVIDER_URL)
 const privateKey = String(process.env.TEST_PRIVATE_KEY)
 
-describe('Pool', () => {
+describe('blockchain Pool entity', () => {
     let pool: Pool
 
     beforeAll(async () => {
         const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl)
         const signer = new ethers.Wallet(privateKey, provider)
-        console.log(provider.connection)
-        // console.log(await signer.getChainId())
-        const nw = await provider.getBalance(signer.address)
         const contracts = initializeUniswapContracts(signer)
         pool = await Pool.create(token0, token1, {
             provider,
@@ -36,37 +30,36 @@ describe('Pool', () => {
     })
 
     test('deployPool() should deploy a new pool or return an existing one', async () => {
-        const deployParams = {
-            fee: 3000,
-            deployGasLimit: 500000
-        }
+        const deployParams = {}
 
-        const poolAddress = await pool.deployPool(deployParams)
-        expect(poolAddress).toBeDefined()
-        expect(pool.poolContractAddress).toBe(poolAddress)
+        const deployResult = await pool.deployPool(deployParams)
+        expect(deployResult).toBeDefined()
+        expect(pool.poolContract.getAddress()).toBe(deployResult.getAddress())
     })
 
-    test('addPosition() should add a new position to the pool', async () => {
-        await expect(pool.addPosition()).resolves.not.toThrow()
+    test('openPosition() should add a new position to the pool', async () => {
+        await expect(
+            pool.openPosition(1, 1000000, 0, 5000)
+        ).resolves.not.toThrow()
     })
 
     test('getPool() should get the pool address', async () => {
         const fee = 3000
-        const poolAddress = await pool.getPool(token0, token1, fee)
+        const poolAddress = await pool.getPoolContract(token0, token1, fee)
         expect(poolAddress).toBeDefined()
-        expect(poolAddress).toBe(pool.poolContractAddress)
+        expect(poolAddress).toBe(pool.poolContract.getAddress())
     })
 
     test('getPool() should throw an error if the pool is not found', async () => {
-        const invalidToken = '0xInvalidTokenAddress'
+        const invalidToken = ethers.constants.AddressZero
         const fee = 3000
-        await expect(pool.getPool(invalidToken, token1, fee)).rejects.toThrow(
-            'Pool not found'
-        )
+        await expect(
+            pool.getPoolContract(invalidToken, token1, fee)
+        ).rejects.toThrow('Pool not found')
     })
 
     test('swap() should perform a swap between token0 and token1', async () => {
-        const amount = 0.1
+        const amount = '0.1'
         await expect(pool.swap(amount)).resolves.not.toThrow()
     })
 })
