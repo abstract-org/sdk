@@ -30,6 +30,9 @@
         "module": "CommonJS",
         "target": "ES2022"
     },
-    "include": ["src/**/*", "__tests__/**/*"],
+    "include": [
+        "src/**/*",
+        "__tests__/**/*"
+    ],
     "exclude": ["dist", "**/node_modules"]
 }
