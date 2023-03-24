@@ -49,6 +49,7 @@ export class Pool {
     posOwners = []
 
     type = 'value-link'
+    kind = null
     private dryState: IPoolState | object = {}
 
     /**

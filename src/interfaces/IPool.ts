@@ -1,5 +1,5 @@
 import { PoolType } from '../types'
-import { IPosition } from './IPosition'
+import { IPositionLiquidity, IPosition } from './IPosition'
 import { IPoolState } from './IPoolState'
 
 export interface IPoolQueryUpdate {
@@ -14,8 +14,8 @@ export interface IPoolCreate {
     questLeftHash: string
     questRightHash: string
     type: PoolType
-    kind: string
-    positions: IPosition[]
+    kind?: string
+    positions: IPositionLiquidity[]
 }
 
 export interface IPool {

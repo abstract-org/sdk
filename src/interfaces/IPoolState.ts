@@ -1,11 +1,25 @@
 export interface IPoolState {
-    curPrice: number;
-    curLeft: number;
-    curRight: number;
-    curPP: number;
-    curLiq: number;
-    questLeftPrice: number;
-    questRightPrice: number;
-    questLeftVolume: number;
-    questRightVolume: number;
+    curPrice: number
+    curLeft: number
+    curRight: number
+    curPP: number
+    curLiq: number
+    questLeftPrice: number
+    questRightPrice: number
+    questLeftVolume: number
+    questRightVolume: number
+}
+
+export interface PoolStatePopulated {
+    pool_id: number
+    block_id?: number
+    cur_price: number
+    cur_liq: number
+    cur_right: number | string
+    cur_left: number | string
+    cur_pp: number | string
+    quest_left_volume: number
+    quest_right_volume: number
+    quest_left_price: number
+    quest_right_price: number
 }
