@@ -1,7 +1,7 @@
 import HashMap from 'hashmap'
 
 import { getPathActions, isZero } from '../utils/logicUtils'
-import { Graph } from './Graph'
+import Graph from './Graph'
 import {
     buySameLiqGiveT0GetT1,
     buySameLiqGiveT1GetT0,
@@ -9,12 +9,12 @@ import {
     sellSameLiqGiveT0GetT1,
     sellSameLiqGiveT1GetT0
 } from '../utils/mathUtils'
-import { Pool } from './Pool'
-import { Quest } from './Quest'
+import Pool from './Pool'
+import Quest from './Quest'
 
 const ERR_MARGIN = 0.0000000001
 
-export class Router {
+export default class Router {
     _cachedPools = new HashMap<string, Pool>()
     _cachedQuests = new HashMap<string, Quest>()
     _shouldScanPaths = true

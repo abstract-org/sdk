@@ -2,12 +2,12 @@ import sha256 from 'crypto-js/sha256'
 import Hex from 'crypto-js/enc-hex'
 import HashMap from 'hashmap'
 
-import { Pool } from './Pool'
-import { Quest } from './Quest'
+import Pool from './Pool'
+import Quest from './Quest'
 import { isE10Zero, p2pp } from '../utils/logicUtils'
 import { IWallet } from '../interfaces'
 
-export class Wallet {
+export default class Wallet {
     id: number = NaN
     hash = null
     type = null

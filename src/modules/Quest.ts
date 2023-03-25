@@ -2,8 +2,8 @@ import sha256 from 'crypto-js/sha256'
 import Hex from 'crypto-js/enc-hex'
 import HashMap from 'hashmap'
 
-import { Pool } from './Pool'
-import { UsdcToken } from './UsdcToken'
+import Pool from './Pool'
+import UsdcToken from './UsdcToken'
 import { IQuest } from '../interfaces'
 
 export const TEMP_CONFIG = {
@@ -35,7 +35,7 @@ export const TEMP_CONFIG = {
     ]
 }
 
-export class Quest {
+export default class Quest {
     id
     hash
     name

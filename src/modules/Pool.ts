@@ -2,8 +2,9 @@ import sha256 from 'crypto-js/sha256'
 import Hex from 'crypto-js/enc-hex'
 import HashMap from 'hashmap'
 import { isE10Zero, isNearZero, isZero, p2pp, pp2p } from '../utils/logicUtils'
-import { Quest } from './Quest'
+import Quest from './Quest'
 import { IPoolState } from '../interfaces'
+import { IPositionLiquidity } from '../interfaces/IPosition'
 
 const TEMP_CONFIG = {
     PRICE_MIN: 0,
@@ -13,14 +14,7 @@ const TEMP_CONFIG = {
     JOURNAL_SELL: false
 }
 
-interface Position {
-    liquidity?: number
-    left?: number
-    pp?: number
-    right?: number
-}
-
-export class Pool {
+export default class Pool {
     id: number
     name: string
     hash: string
@@ -154,7 +148,7 @@ export class Pool {
         this.pos.forEach((position, point) => {
             // setting priceMin liquidity positions
             if (point < price && price <= position.right && liquidity > 0) {
-                let newPosition: Position = {}
+                let newPosition: IPositionLiquidity | any = {}
                 if (this.pos.has(price)) {
                     newPosition = this.pos.get(price)
                     newPosition.liquidity += liquidity
@@ -184,7 +178,7 @@ export class Pool {
                 position.left <= price &&
                 liquidity < 0
             ) {
-                let newPosition: Position = {}
+                let newPosition: IPositionLiquidity | any = {}
 
                 if (this.pos.has(price)) {
                     newPosition = this.pos.get(price)
@@ -226,7 +220,7 @@ export class Pool {
             return
         }
 
-        let newPosition: Position = {}
+        let newPosition: IPositionLiquidity | any = {}
         const point = this.pos.get(price)
         const removeAllLiq = Math.abs(liquidity) >= Math.abs(point.liquidity)
 

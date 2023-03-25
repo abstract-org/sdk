@@ -1,4 +1,4 @@
-export class Graph {
+export default class Graph {
     limitPathSize: number
     vertices: number
     adjList: Map<string, Array<any>>
