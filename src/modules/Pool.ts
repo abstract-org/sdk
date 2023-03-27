@@ -113,6 +113,16 @@ export class Pool {
         })
     }
 
+    convertPosValue(value: any): number {
+        if (value === null || value === '-Infinity') {
+            return -Infinity
+        } else if (value === 'Infinity') {
+            return Infinity
+        } else {
+            return Number(value)
+        }
+    }
+
     hydratePositions(positions) {
         let priceMin = Infinity
 
@@ -121,22 +131,15 @@ export class Pool {
                 const pos: any = Object.fromEntries(
                     Object.entries(position).map(([key, value]) => [
                         key,
-                        value === '-Infinity'
-                            ? -Infinity
-                            : value === 'Infinity'
-                            ? Infinity
-                            : value
+                        this.convertPosValue(value)
                     ])
                 )
 
-                pos.pp = Number(pos.pp)
-
                 this.pos.set(pos.pp, {
-                    left: Number(pos.left),
-                    right: Number(pos.right),
+                    left: pos.left,
+                    right: pos.right,
                     pp: pos.pp,
-                    liquidity: Number(pos.liquidity),
-                    creator_hash: pos.creator_hash
+                    liquidity: pos.liquidity
                 })
 
                 if (

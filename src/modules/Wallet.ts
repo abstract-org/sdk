@@ -286,6 +286,21 @@ export class Wallet {
             }
         }
 
+        if (crossPool.curPrice === 0) {
+            let allLiquidityZero = true
+
+            for (const position of crossPool.pos.values()) {
+                if (position.liquidity !== 0) {
+                    allLiquidityZero = false
+                    break
+                }
+            }
+
+            if (allLiquidityZero) {
+                crossPool.curPrice = min
+            }
+        }
+
         // Left it here to test if it's still an issue or not
         console.assert(
             min < max,

@@ -548,7 +548,7 @@ export class Router {
      * @param {number} depth
      * @returns {[]|*[]}
      */
-    findPoolsFor(tokenName, maxDepth?: number, depth = 1) {
+    findPoolsFor(tokenName, maxDepth?: number, depth: number = 1) {
         let results = this._processTokenForPath(tokenName)
 
         if (depth >= maxDepth && this._shouldScanPaths) {

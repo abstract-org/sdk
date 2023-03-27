@@ -14,7 +14,7 @@ export class WrapperService {
     ): Pool {
         // Create a new Pool instance using the static create method.
         const poolConstructor = {
-            tokenleft: questLeftInstance,
+            tokenLeft: questLeftInstance,
             initialPositions: null,
             startingPrice: null
         }
