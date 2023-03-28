@@ -7,6 +7,7 @@ import { SimpleToken, SimpleFactory } from '@/blockchain/typechain-types'
 import ERC20_ABI from '@/blockchain/abi/ERC20ABI.json'
 import SimpleTokenABI from '@/blockchain/abi/SimpleToken.json'
 import { Pool } from '@/blockchain/modules/Pool'
+import { Web3ApiConfig } from '@/api/web3/Web3API'
 
 export const TEMP_CONFIG = {
     INITIAL_LIQUIDITY: [
@@ -44,6 +45,7 @@ export class Quest {
     content: string
     hash: string
     tokenContract: ethers.Contract
+    defaultToken: ethers.Contract
     creator_hash: string
 
     private provider: ethers.providers.JsonRpcProvider
@@ -54,11 +56,7 @@ export class Quest {
         name: string,
         kind: string,
         content: string,
-        apiConfig: {
-            provider: ethers.providers.JsonRpcProvider
-            signer: ethers.Signer
-            contracts: TUniswapContracts
-        }
+        apiConfig: Web3ApiConfig
     ): Promise<Quest> {
         const thisToken = new Quest()
         thisToken.name = name
@@ -71,6 +69,7 @@ export class Quest {
         // pre-defined UniswapV3Contracts
         thisToken.contracts = apiConfig.contracts
         thisToken.creator_hash = await apiConfig.signer.getAddress()
+        thisToken.defaultToken = apiConfig.defaultToken
 
         thisToken.tokenContract = await thisToken.deployToken(20000)
 
@@ -150,16 +149,15 @@ export class Quest {
     }
 
     async createPool({
-        tokenLeft = null,
-        initialPositions = null
-    } = {}): Promise<Pool> {
-        // like in simulator version const tokenLeftInstance = tokenLeft || new UsdcToken()
-        const defaultToken = await this.getDefaultTokenContract()
-        const tokenLeftAddress = tokenLeft || defaultToken.getAddress()
+        tokenLeft,
+        initialPositions
+    }: { tokenLeft?: Quest; initialPositions?: any } = {}): Promise<Pool> {
+        const tokenLeftContract =
+            tokenLeft?.tokenContract || this.getDefaultTokenContract()
 
         const pool = await Pool.create(
-            tokenLeft.getAddress(),
-            this.tokenContract.getAddress(),
+            tokenLeftContract.address,
+            this.tokenContract.address,
             this.getApiConfig()
         )
 
@@ -183,15 +181,16 @@ export class Quest {
         }
     }
 
-    async getDefaultTokenContract(): Promise<ethers.Contract> {
-        return
+    getDefaultTokenContract(): ethers.Contract {
+        return this.defaultToken
     }
 
     getApiConfig() {
         return {
             provider: this.provider,
             signer: this.signer,
-            contracts: this.contracts
+            contracts: this.contracts,
+            defaultToken: this.defaultToken
         }
     }
 }

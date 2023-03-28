@@ -13,7 +13,7 @@ import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts
 import { Web3ApiConfig } from '@/api/web3/Web3API'
 import { NonceManager } from "@ethersproject/experimental";
 
-export const DEFAULT_TX_GAS_LIMIT = 10000000
+export const DEFAULT_TX_GAS_LIMIT = 2000000 // 0.002 GWei
 export const DEFAULT_POOL_FEE = FeeAmount.LOW
 export type TDeployParams = {
     fee: number;

@@ -5,24 +5,27 @@ import {
     initializeUniswapContracts,
     TUniswapContracts
 } from '@/blockchain/utils/initializeUniswapContracts'
+import { initializeDefaultToken } from '@/blockchain/utils/initializeDefaultToken'
 import { Quest } from '@/blockchain/modules'
 
 export interface Web3ApiConfig {
     provider: ethers.providers.JsonRpcProvider
     signer: ethers.Signer
     contracts: TUniswapContracts
+    defaultToken: ethers.Contract
 }
 
 const providerUrl = String(process.env.PROVIDER_URL)
 const privateKey = String(process.env.TEST_PRIVATE_KEY)
 const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl)
 const signer = new ethers.Wallet(privateKey, provider)
-const contracts = initializeUniswapContracts(signer)
 const DEFAULT_CONFIG: Web3ApiConfig = {
     provider,
     signer,
-    contracts
+    contracts: initializeUniswapContracts(signer),
+    defaultToken: initializeDefaultToken(signer)
 }
+
 export default class Web3API implements IAPI {
     constructor(private config: Web3ApiConfig) {}
 
