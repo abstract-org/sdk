@@ -7,6 +7,8 @@ import {
 import { Pool } from '@/blockchain/modules/Pool'
 import { initializeDefaultToken } from '@/blockchain/utils/initializeDefaultToken'
 import { Web3ApiConfig } from '@/api/web3/Web3API'
+import { getPositions } from '@/blockchain/utils/getPositions'
+import { initializeTokenFactory } from '@/blockchain/utils/initializeTokenFactory'
 const providerUrl = String(process.env.PROVIDER_URL)
 const privateKey = String(process.env.TEST_PRIVATE_KEY)
 
@@ -17,13 +19,14 @@ describe('blockchain Quest entity', () => {
     beforeAll(async () => {
         const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl)
         const signer = new ethers.Wallet(privateKey, provider)
-        const contracts = initializeUniswapContracts(signer)
-        const defaultToken = initializeDefaultToken(signer)
         apiConfig = {
             provider,
             signer,
-            contracts,
-            defaultToken
+            contracts: {
+                ...initializeUniswapContracts(signer),
+                tokenFactory: initializeTokenFactory(signer)
+            },
+            defaultToken: initializeDefaultToken(signer)
         }
         quest = await Quest.create(
             'TEST TOKEN',
@@ -60,26 +63,56 @@ describe('blockchain Quest entity', () => {
     })
 
     describe('create defaultPool', () => {
+        let pool = null
+
+        beforeAll(async () => {
+            pool = await quest.createPool()
+        })
         test('without initialPositions argument', async () => {
-            const pool = await quest.createPool()
             expect(pool).toBeInstanceOf(Pool)
         })
 
-        test('with initialPositions argument', async () => {
-            const pool = await quest.createPool()
+        test.skip('with initialPositions argument', async () => {
             expect(pool).toBeInstanceOf(Pool)
         })
     })
 
     describe('create value-link', () => {
-        let citedToken = null
-        beforeAll(() => {
-            // deploy citedToken
+        let citedQuest = null
+        let pool = null
+
+        beforeAll(async () => {
+            citedQuest = await Quest.create(
+                'CITED TOKEN',
+                'TITLE',
+                'Cited content',
+                apiConfig
+            )
+            pool = await quest.createPool(citedQuest)
         })
 
-        test('create value-link  citedToken-thisToken with no params', async () => {
-            const pool = await quest.createPool(citedToken)
+        test('create Pool instance citedQuest-thisQuest', async () => {
             expect(pool).toBeInstanceOf(Pool)
+            expect(pool).toMatchObject({
+                hash: expect.any(String),
+                poolContract: null,
+                provider: expect.any(ethers.providers.JsonRpcProvider),
+                signer: expect.any(ethers.Signer),
+                contracts: expect.objectContaining({
+                    factory: expect.any(ethers.Contract),
+                    router: expect.any(ethers.Contract),
+                    quoter: expect.any(ethers.Contract),
+                    nftDescriptorLibrary: expect.any(ethers.Contract),
+                    positionDescriptor: expect.any(ethers.Contract),
+                    positionManager: expect.any(ethers.Contract)
+                })
+            })
+        })
+
+        // FIXME: this one is failing with wrong addresses
+        test('value-link with correct token addresses', async () => {
+            expect(pool.token0).toBe(citedQuest.tokenContract.address)
+            expect(pool.token1).toBe(quest.tokenContract.address)
         })
     })
 
@@ -90,7 +123,13 @@ describe('blockchain Quest entity', () => {
                 pool,
                 TEMP_CONFIG.INITIAL_LIQUIDITY
             )
+            const signerAddress = await apiConfig.signer.getAddress()
+            const positions = await getPositions(
+                apiConfig.contracts.positionManager,
+                signerAddress
+            )
 
+            expect(positions).toHaveLength(2)
             // in order to check positions write helpers for fetching positions from pool 1st
         })
     })

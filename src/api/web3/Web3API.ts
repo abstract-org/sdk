@@ -7,11 +7,12 @@ import {
 } from '@/blockchain/utils/initializeUniswapContracts'
 import { initializeDefaultToken } from '@/blockchain/utils/initializeDefaultToken'
 import { Quest } from '@/blockchain/modules'
+import { initializeTokenFactory } from '@/blockchain/utils/initializeTokenFactory'
 
 export interface Web3ApiConfig {
     provider: ethers.providers.JsonRpcProvider
     signer: ethers.Signer
-    contracts: TUniswapContracts
+    contracts: TUniswapContracts & { tokenFactory: ethers.Contract }
     defaultToken: ethers.Contract
 }
 
@@ -22,7 +23,10 @@ const signer = new ethers.Wallet(privateKey, provider)
 const DEFAULT_CONFIG: Web3ApiConfig = {
     provider,
     signer,
-    contracts: initializeUniswapContracts(signer),
+    contracts: {
+        ...initializeUniswapContracts(signer),
+        tokenFactory: initializeTokenFactory(signer)
+    },
     defaultToken: initializeDefaultToken(signer)
 }
 

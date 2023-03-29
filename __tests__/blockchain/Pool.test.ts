@@ -9,6 +9,7 @@ import { initializeDefaultToken } from '@/blockchain/utils/initializeDefaultToke
 import { Web3ApiConfig } from '@/api/web3/Web3API'
 import { FeeAmount } from '@uniswap/v3-sdk'
 import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
+import { initializeTokenFactory } from '@/blockchain/utils/initializeTokenFactory'
 
 dotenv.config()
 
@@ -24,13 +25,14 @@ describe('blockchain Pool entity', () => {
     beforeAll(async () => {
         const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl)
         const signer = new ethers.Wallet(privateKey, provider)
-        const contracts = initializeUniswapContracts(signer)
-        const defaultToken = initializeDefaultToken(signer)
         apiConfig = {
             provider,
             signer,
-            contracts,
-            defaultToken
+            contracts: {
+                ...initializeUniswapContracts(signer),
+                tokenFactory: initializeTokenFactory(signer)
+            },
+            defaultToken: initializeDefaultToken(signer)
         }
         pool = await Pool.create(token0, token1, apiConfig)
     })
@@ -75,7 +77,7 @@ describe('blockchain Pool entity', () => {
     })
 
     test('openPosition() should add a new position to the pool', async () => {
-        await pool.openPosition('0.1');
+        await pool.openPosition('0.1')
     })
 
     test('getPool() should get the pool address', async () => {

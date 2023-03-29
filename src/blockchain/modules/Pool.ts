@@ -28,7 +28,7 @@ export class Pool {
     poolContract: ethers.Contract = null
     private provider: ethers.providers.JsonRpcProvider
     private signer: ethers.Signer
-    private contracts: TUniswapContracts
+    private contracts: TUniswapContracts & { tokenFactory: ethers.Contract }
 
     baseNonce: number
     nonceOffset: number = 0
@@ -54,7 +54,6 @@ export class Pool {
         thisPool.signer = apiConfig.signer
         // pre-defined UniswapV3Contracts
         thisPool.contracts = apiConfig.contracts
-
         thisPool.token0 = token0
         thisPool.token1 = token1
         const token0Bytes = ethers.utils.arrayify(token0)
