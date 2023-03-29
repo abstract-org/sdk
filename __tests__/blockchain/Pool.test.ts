@@ -2,6 +2,8 @@ import { Pool } from '@/blockchain/modules/Pool'
 import { ethers } from 'ethers'
 import { initializeUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
 import dotenv from 'dotenv'
+import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
+
 dotenv.config()
 
 const token0 = String(process.env.TEST_TOKEN_ADDRESS)
@@ -30,24 +32,29 @@ describe('blockchain Pool entity', () => {
     })
 
     test('deployPool() should deploy a new pool or return an existing one', async () => {
-        const deployParams = {}
+        const fee = 500
+        await pool.deployPool({
+            fee,
+            sqrtPrice: encodePriceSqrt(1, 1)
+        })
 
-        const deployResult = await pool.deployPool(deployParams)
-        expect(deployResult).toBeDefined()
-        expect(pool.poolContract.getAddress()).toBe(deployResult.getAddress())
+        const poolImmutables = await pool.getPoolImmutables()
+
+        expect(pool.poolContract.address).toBeDefined()
+        expect(poolImmutables.token0).toBe(pool.token0)
+        expect(poolImmutables.token1).toBe(pool.token1)
+        expect(poolImmutables.fee).toBe(fee)
     })
 
     test('openPosition() should add a new position to the pool', async () => {
-        await expect(
-            pool.openPosition(1, 1000000, 0, 5000)
-        ).resolves.not.toThrow()
+        await pool.openPosition('0.1');
     })
 
     test('getPool() should get the pool address', async () => {
-        const fee = 3000
+        const fee = 500
         const poolAddress = await pool.getPoolContract(token0, token1, fee)
         expect(poolAddress).toBeDefined()
-        expect(poolAddress).toBe(pool.poolContract.getAddress())
+        expect(poolAddress).toBe(pool.poolContract.address)
     })
 
     test('getPool() should throw an error if the pool is not found', async () => {
