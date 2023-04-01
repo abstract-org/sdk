@@ -1,16 +1,24 @@
 import sha256 from 'crypto-js/sha256'
 import Hex from 'crypto-js/enc-hex'
 import HashMap from 'hashmap'
-import { isE10Zero, isNearZero, isZero, p2pp, pp2p } from '../utils/logicUtils'
+import {
+    isE10Zero,
+    isNearZero,
+    isZero,
+    p2pp,
+    pp2p,
+    roundNumber
+} from '../utils/logicUtils'
 import { Quest } from './Quest'
 import { IPoolState } from '../interfaces'
 
 const TEMP_CONFIG = {
     PRICE_MIN: 0,
     PRICE_MAX: 1000000.00001,
-    JOURNAL: false,
-    JOURNAL_BUY: false,
-    JOURNAL_SELL: false
+    JOURNAL: true,
+    JOURNAL_BUY: true,
+    JOURNAL_SELL: true,
+    ROUND_NUMS: 10
 }
 
 interface Position {
@@ -350,7 +358,10 @@ export class Pool {
                 this.curLeft = toPP.left
                 this.curRight = toPP.right
                 this.curLiq = newLiq <= 0 ? 0 : toPP.liquidity
-                this.curPrice = pp2p(toPP.pp)
+                this.curPrice = roundNumber(
+                    pp2p(toPP.pp),
+                    TEMP_CONFIG.ROUND_NUMS
+                )
                 this.questLeftPrice = 1 / this.curPrice
                 this.questRightPrice = this.curPrice
             }
@@ -549,9 +560,25 @@ export class Pool {
                             : 'nextPricePoint'
                     }, capping at ${arrivedAtSqrtPrice}`
                 )
-                this.curLiq += this.pos.get(nextPricePoint).liquidity * 1
-                this.curRight = this.pos.get(nextPricePoint).right
-                this.curLeft = this.pos.get(nextPricePoint).left
+
+                const np = this.pos.get(nextPricePoint)
+
+                if (!np) {
+                    console.error(
+                        'Failed to determine next position during buy',
+                        this
+                    )
+
+                    if (TEMP_CONFIG.JOURNAL && TEMP_CONFIG.JOURNAL_BUY) {
+                        journal.forEach((iteration) => {
+                            console.log(iteration.join('\n'))
+                        })
+                    }
+                }
+
+                this.curLiq += np.liquidity * 1
+                this.curRight = np.right
+                this.curLeft = np.left
                 this.curPP = nextPricePoint
                 journal[i].push(`Next liquidity: ${this.curLiq}`)
                 journal[i].push(
@@ -589,7 +616,10 @@ export class Pool {
                 `Amount1 (curLiq * (1/arrivedAtSqrtPrice - 1/sqrt(curPrice))):\n ${amount1UntilNextPrice}`
             )
             journal[i].push('---')
-            this.curPrice = arrivedAtSqrtPrice ** 2
+            this.curPrice = roundNumber(
+                arrivedAtSqrtPrice ** 2,
+                TEMP_CONFIG.ROUND_NUMS
+            )
             this.questRightPrice = this.curPrice
             this.questLeftPrice = 1 / this.curPrice
 
@@ -642,15 +672,22 @@ export class Pool {
 
         let nextPricePoint = this.curRight
         let nextPriceTarget
+        let transformedNextPricePoint = roundNumber(
+            Math.sqrt(pp2p(nextPricePoint)),
+            TEMP_CONFIG.ROUND_NUMS
+        )
         let curLiq
-        let arrivedAtSqrtPrice = Math.sqrt(2 ** this.curRight)
+        let arrivedAtSqrtPrice = roundNumber(
+            Math.sqrt(2 ** this.curRight),
+            TEMP_CONFIG.ROUND_NUMS
+        )
 
         let journal = []
         let i = 0
 
         while (
             amount > 0 &&
-            arrivedAtSqrtPrice === Math.sqrt(pp2p(nextPricePoint)) &&
+            arrivedAtSqrtPrice === transformedNextPricePoint &&
             this.curPP > p2pp(TEMP_CONFIG.PRICE_MIN)
         ) {
             journal[i] = []
@@ -725,6 +762,20 @@ export class Pool {
                 )
 
                 const np = this.pos.get(nextPricePoint)
+
+                if (!np) {
+                    console.error(
+                        'Failed to determine next position during sell',
+                        this
+                    )
+
+                    if (TEMP_CONFIG.JOURNAL && TEMP_CONFIG.JOURNAL_SELL) {
+                        journal.forEach((iteration) => {
+                            console.log(iteration.join('\n'))
+                        })
+                    }
+                }
+
                 journal[i].push(
                     `Next position: liq: ${np.liquidity} left: ${np.left} pp: ${np.pp} right: ${np.right}`
                 )
@@ -775,7 +826,10 @@ export class Pool {
             )
             journal[i].push('---')
 
-            this.curPrice = arrivedAtSqrtPrice ** 2
+            this.curPrice = roundNumber(
+                arrivedAtSqrtPrice ** 2,
+                TEMP_CONFIG.ROUND_NUMS
+            )
             this.questRightPrice = this.curPrice
             this.questLeftPrice = 1 / this.curPrice
 

@@ -8,6 +8,7 @@ export class WrapperService {
         type: string,
         kind: string,
         hash?: string,
+        id?: number,
         existingPositions?: IPositionLiquidity[],
         startingPrice?: number,
         initialPositions?: DefaultLiquidityPosition[]
@@ -35,6 +36,10 @@ export class WrapperService {
 
         if (hash) {
             pool.hash = hash
+        }
+
+        if (id) {
+            pool.id = id
         }
 
         if (existingPositions) {

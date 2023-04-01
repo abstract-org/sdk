@@ -1,6 +1,11 @@
 import { Hash } from 'crypto'
 import HashMap from 'hashmap'
 
+export const roundNumber = (num, decimals) => {
+    const factor = 10 ** decimals
+    return Math.round(num * factor) / factor
+}
+
 export const pp2p = (pricePoint) => {
     return 2 ** pricePoint
 }
