@@ -89,6 +89,7 @@ describe('blockchain Quest entity', () => {
                 apiConfig
             )
             pool = await quest.createPool(citedQuest)
+            await pool.deployPool()
         })
 
         test('create Pool instance citedQuest-thisQuest', async () => {
