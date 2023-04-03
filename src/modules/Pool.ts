@@ -2,12 +2,12 @@ import sha256 from 'crypto-js/sha256'
 import Hex from 'crypto-js/enc-hex'
 import HashMap from 'hashmap'
 import {
+    findNearestKey,
     isE10Zero,
     isNearZero,
     isZero,
     p2pp,
-    pp2p,
-    roundNumber
+    pp2p
 } from '../utils/logicUtils'
 import { Quest } from './Quest'
 import { IPoolState } from '../interfaces'
@@ -15,7 +15,7 @@ import { IPoolState } from '../interfaces'
 const TEMP_CONFIG = {
     PRICE_MIN: 0,
     PRICE_MAX: 1000000.00001,
-    JOURNAL: true,
+    JOURNAL: false,
     JOURNAL_BUY: true,
     JOURNAL_SELL: true,
     ROUND_NUMS: 10
@@ -358,10 +358,7 @@ export class Pool {
                 this.curLeft = toPP.left
                 this.curRight = toPP.right
                 this.curLiq = newLiq <= 0 ? 0 : toPP.liquidity
-                this.curPrice = roundNumber(
-                    pp2p(toPP.pp),
-                    TEMP_CONFIG.ROUND_NUMS
-                )
+                this.curPrice = pp2p(toPP.pp)
                 this.questLeftPrice = 1 / this.curPrice
                 this.questRightPrice = this.curPrice
             }
@@ -561,7 +558,8 @@ export class Pool {
                     }, capping at ${arrivedAtSqrtPrice}`
                 )
 
-                const np = this.pos.get(nextPricePoint)
+                const nearestKey = findNearestKey(this.pos, nextPricePoint)
+                const np = this.pos.get(nearestKey)
 
                 if (!np) {
                     console.error(
@@ -616,10 +614,7 @@ export class Pool {
                 `Amount1 (curLiq * (1/arrivedAtSqrtPrice - 1/sqrt(curPrice))):\n ${amount1UntilNextPrice}`
             )
             journal[i].push('---')
-            this.curPrice = roundNumber(
-                arrivedAtSqrtPrice ** 2,
-                TEMP_CONFIG.ROUND_NUMS
-            )
+            this.curPrice = arrivedAtSqrtPrice ** 2
             this.questRightPrice = this.curPrice
             this.questLeftPrice = 1 / this.curPrice
 
@@ -672,22 +667,15 @@ export class Pool {
 
         let nextPricePoint = this.curRight
         let nextPriceTarget
-        let transformedNextPricePoint = roundNumber(
-            Math.sqrt(pp2p(nextPricePoint)),
-            TEMP_CONFIG.ROUND_NUMS
-        )
         let curLiq
-        let arrivedAtSqrtPrice = roundNumber(
-            Math.sqrt(2 ** this.curRight),
-            TEMP_CONFIG.ROUND_NUMS
-        )
+        let arrivedAtSqrtPrice = Math.sqrt(2 ** this.curRight)
 
         let journal = []
         let i = 0
 
         while (
             amount > 0 &&
-            arrivedAtSqrtPrice === transformedNextPricePoint &&
+            arrivedAtSqrtPrice === Math.sqrt(2 ** nextPricePoint) &&
             this.curPP > p2pp(TEMP_CONFIG.PRICE_MIN)
         ) {
             journal[i] = []
@@ -761,7 +749,8 @@ export class Pool {
                     })`
                 )
 
-                const np = this.pos.get(nextPricePoint)
+                const nearestKey = findNearestKey(this.pos, nextPricePoint)
+                const np = this.pos.get(nearestKey)
 
                 if (!np) {
                     console.error(
@@ -799,6 +788,10 @@ export class Pool {
                 journal[i].push('!!! ---')
                 journal[i].push(`WILL MOVE TO NEXT POSITION: ${nextPricePoint}`)
                 journal[i].push('!!! ---')
+            } else {
+                journal[i].push('!!! ---')
+                journal[i].push(`Staying with the same liquidity ${curLiq}`)
+                journal[i].push('!!! ---')
             }
 
             journal[i].push(
@@ -826,10 +819,7 @@ export class Pool {
             )
             journal[i].push('---')
 
-            this.curPrice = roundNumber(
-                arrivedAtSqrtPrice ** 2,
-                TEMP_CONFIG.ROUND_NUMS
-            )
+            this.curPrice = arrivedAtSqrtPrice ** 2
             this.questRightPrice = this.curPrice
             this.questLeftPrice = 1 / this.curPrice
 

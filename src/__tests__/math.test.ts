@@ -49,7 +49,7 @@ describe('Smart route math works', () => {
         pools.D = poolD
     })
 
-    it('oneShotGetBuyCap() / oneShotGetSellCap()', () => {
+    fit('oneShotGetBuyCap() / oneShotGetSellCap()', () => {
         const wallet = Wallet.create('INV', 'INV', 10000)
 
         pools.A.buy(25000)
@@ -108,6 +108,7 @@ describe('Smart route math works', () => {
 
         // flipping the pool
         pools.A.sell(1000000000)
+        console.log(pools.A)
         const [_liq5, _price5, _next5] = pools.A.getNearestActiveLiq(true)
         expect(oneShotGetBuyCap(_liq5, _price5, _next5)).toEqual([
             17378.057832830727, 3885.8518631132183
