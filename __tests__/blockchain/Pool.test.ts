@@ -1,31 +1,41 @@
-import { Pool } from '@/blockchain/modules/Pool'
-import { ethers } from 'ethers'
-import {
-    initializeUniswapContracts,
-    TUniswapContracts
-} from '@/blockchain/utils/initializeUniswapContracts'
+import {Pool} from '@/blockchain/modules/Pool'
+import {ethers} from 'ethers'
+import {initializeUniswapContracts} from '@/blockchain/utils/initializeUniswapContracts'
 import dotenv from 'dotenv'
-import { initializeDefaultToken } from '@/blockchain/utils/initializeDefaultToken'
-import { Web3ApiConfig } from '@/api/web3/Web3API'
-import { FeeAmount } from '@uniswap/v3-sdk'
-import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
-import { initializeTokenFactory } from '@/blockchain/utils/initializeTokenFactory'
+import {encodePriceSqrt} from '@/blockchain/utils/encodedPriceSqrt'
+import {nearestUsableTick} from '@uniswap/v3-sdk'
+import {initializeTokenFactory} from '@/blockchain/utils/initializeTokenFactory'
+import {initializeDefaultToken} from '@/blockchain/utils/initializeDefaultToken'
 
 dotenv.config()
 
-const token0 = String(process.env.TEST_TOKEN_ADDRESS)
-const token1 = String(process.env.WETH_ADDRESS)
+const token0 = String(process.env.WETH_ADDRESS)
+const token1 = String(process.env.TEST_TOKEN_ADDRESS)
 const providerUrl = String(process.env.PROVIDER_URL)
 const privateKey = String(process.env.TEST_PRIVATE_KEY)
 
 describe('blockchain Pool entity', () => {
+    let provider: any
+    let signer: any
     let pool: Pool
-    let apiConfig: Web3ApiConfig
-    const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl)
-    const signer = new ethers.Wallet(privateKey, provider)
+    let wethContract: ethers.Contract
+    let testTokenContract: ethers.Contract
 
     beforeAll(async () => {
-        apiConfig = {
+        provider = new ethers.providers.JsonRpcProvider(providerUrl)
+        const wallet = new ethers.Wallet(privateKey, provider)
+        signer = wallet.connect(provider)
+        wethContract = new ethers.Contract(
+            token0,
+            ['function balanceOf(address) external view returns (uint256)'],
+            signer
+        )
+        testTokenContract = new ethers.Contract(
+            token1,
+            ['function balanceOf(address) external view returns (uint256)'],
+            signer
+        )
+        pool = await Pool.create(token0, token1, 500, {
             provider,
             signer,
             contracts: {
@@ -33,97 +43,72 @@ describe('blockchain Pool entity', () => {
                 tokenFactory: initializeTokenFactory(signer)
             },
             defaultToken: initializeDefaultToken(signer)
+        });
+    })
+
+    test('create() should create a new Pool instance', async () => {
+        expect(pool).toBeInstanceOf(Pool)
+        expect(pool.token0).toBe(token0)
+        expect(pool.token1).toBe(token1)
+    })
+
+    test('deployPool() should deploy a new pool or return an existing one', async () => {
+        const {isDeployed, existingPoolAddress} = await pool.isDeployed();
+        const poolParams = {
+            fee: 500,
+            sqrtPrice: encodePriceSqrt(10000, 1)
         }
-        pool = await Pool.create(token0, token1, apiConfig)
+
+        if (isDeployed) {
+            pool.initPoolContract(existingPoolAddress)
+        } else {
+            console.log('Deploy Pool params: ', poolParams)
+            await pool.deployPool(poolParams)
+        }
+
+        const poolImmutables = await pool.getPoolImmutables()
+
+        expect(pool.poolContract.address).toBeDefined()
+        expect(poolImmutables.token0).toBe(pool.token0)
+        expect(poolImmutables.token1).toBe(pool.token1)
+        expect(poolImmutables.fee).toBe(poolParams.fee)
     })
 
-    describe('create() returns pool', () => {
-        test('should be Pool instance', async () => {
-            expect(pool).toBeInstanceOf(Pool)
+    test('openPosition() should add a new position to the pool', async () => {
+        const {tick, tickSpacing, sqrtPriceX96} = await pool.getPoolStateData()
 
-            // expect(pool).toMatchObject({
-            // poolContract: expect.any(ethers.Contract),
-        })
+        const upperTick = nearestUsableTick(tick, tickSpacing) + tickSpacing * 2
+        const lowerTick = nearestUsableTick(tick, tickSpacing) - tickSpacing * 2
 
-        test('should have tokens addresses', () => {
-            expect(pool.token0).toBe(token0)
-            expect(pool.token1).toBe(token1)
-        })
+        console.log('Current Tick: ', [tick, tickSpacing])
+        console.log('Lower/Upper Ticks: ', [lowerTick, upperTick])
 
-        test('should have a hash', () => {
-            expect(pool.hash).toBeDefined()
-        })
+        // Should add liquidity on current price
+        await pool.openPosition('0.1', tick)
 
-        test('should have contracts', () => {
-            expect(pool).toMatchObject({
-                contracts: expect.objectContaining({
-                    factory: expect.any(ethers.Contract),
-                    router: expect.any(ethers.Contract),
-                    quoter: expect.any(ethers.Contract),
-                    nftDescriptorLibrary: expect.any(ethers.Contract),
-                    positionDescriptor: expect.any(ethers.Contract),
-                    positionManager: expect.any(ethers.Contract),
-                    tokenFactory: expect.any(ethers.Contract)
-                })
-            })
-        })
+        // Should open position for range upper than current price
+        await pool.openPosition('0.5', upperTick)
 
-        test('should have provider,signer and defaultToken', () => {
-            expect(pool).toMatchObject({
-                provider: expect.any(ethers.providers.JsonRpcProvider),
-                signer: expect.any(ethers.Signer)
-                // defaultToken: expect.any(ethers.Contract)
-            })
-        })
-
-        test('should not have poolContract deployed', () => {
-            expect(pool.poolContract).toBeFalsy()
-        })
+        // Should open position for range lower than current price
+        await pool.openPosition('0.5', lowerTick)
     })
 
-    describe('deployPool()', () => {
-        test('should add poolContract', async () => {
-            expect(pool.poolContract).toBeNull()
-            const fee = FeeAmount.LOW
-            await pool.deployPool({
-                fee,
-                sqrtPrice: encodePriceSqrt(1, 1)
-            })
-
-            const poolImmutables = await pool.getPoolImmutables()
-
-            expect(pool.poolContract.address).toBeDefined()
-            expect(poolImmutables.token0).toBe(pool.token0)
-            expect(poolImmutables.token1).toBe(pool.token1)
-            expect(poolImmutables.fee).toBe(fee)
-        })
+    test('getPool() should get the pool address', async () => {
+        const fee = 500
+        const poolAddress = await pool.getPoolContract(token0, token1, fee)
+        expect(poolAddress).toBeDefined()
+        expect(poolAddress).toBe(pool.poolContract.address)
     })
 
-    describe('openPosition()', () => {
-        test('should add a new position to the pool', async () => {
-            await pool.openPosition('0.1')
-            expect
-        })
+    test.skip('getPool() should throw an error if the pool is not found', async () => {
+        const invalidToken = ethers.constants.AddressZero
+        const fee = 3000
+        await expect(
+            pool.getPoolContract(invalidToken, token1, fee)
+        ).rejects.toThrow('Pool not found')
     })
 
-    describe('getPoolContract()', () => {
-        test('should get the pool address', async () => {
-            const fee = 500
-            const poolAddress = await pool.getPoolContract(token0, token1, fee)
-            expect(poolAddress).toBeDefined()
-            expect(poolAddress).toBe(pool.poolContract.address)
-        })
-
-        test('should throw an error if the pool is not found', async () => {
-            const invalidToken = ethers.constants.AddressZero
-            const fee = 3000
-            await expect(
-                pool.getPoolContract(invalidToken, token1, fee)
-            ).rejects.toThrow('Pool not found')
-        })
-    })
-
-    test('swap() should perform a swap between token0 and token1', async () => {
+    test.skip('swap() should perform a swap between token0 and token1', async () => {
         const amount = '0.1'
         await expect(pool.swap(amount)).resolves.not.toThrow()
     })

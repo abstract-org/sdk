@@ -3,17 +3,19 @@ import {
     Position as UniswapV3Position,
     Pool as UniswapV3Pool,
     nearestUsableTick,
-    FeeAmount
+    FeeAmount,
+    TickMath,
+    FullMath
 } from '@uniswap/v3-sdk'
+import JSBI from 'jsbi'
 import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
 import { Percent, Token as UniswapV3Token } from '@uniswap/sdk-core'
 import TokenAbi from '@/blockchain/abi/SimpleToken.json'
 import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json'
 import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
 import { Web3ApiConfig } from '@/api/web3/Web3API'
-import { NonceManager } from "@ethersproject/experimental";
 
-export const DEFAULT_TX_GAS_LIMIT = 2000000 // 0.002 GWei
+export const DEFAULT_TX_GAS_LIMIT = 10000000
 export const DEFAULT_POOL_FEE = FeeAmount.LOW
 export type TDeployParams = {
     fee: number;
@@ -24,6 +26,7 @@ export type TDeployParams = {
 export class Pool {
     token0: string
     token1: string
+    fee: number
     hash: string
     poolContract: ethers.Contract = null
     private provider: ethers.providers.JsonRpcProvider
@@ -45,6 +48,7 @@ export class Pool {
     static async create(
         token0: string,
         token1: string,
+        fee: number,
         apiConfig: Web3ApiConfig
     ): Promise<Pool> {
         const thisPool = new Pool()
@@ -54,8 +58,10 @@ export class Pool {
         thisPool.signer = apiConfig.signer
         // pre-defined UniswapV3Contracts
         thisPool.contracts = apiConfig.contracts
+
         thisPool.token0 = token0
         thisPool.token1 = token1
+        thisPool.fee = fee
         const token0Bytes = ethers.utils.arrayify(token0)
         const token1Bytes = ethers.utils.arrayify(token1)
         const concatenatedBytes = ethers.utils.concat([
@@ -67,65 +73,61 @@ export class Pool {
         return thisPool
     }
 
-    async deployPool(params: TDeployParams): Promise<ethers.Contract> {
-        const nonce = await this.provider.getTransactionCount(await this.signer.getAddress());
-        const deployer = this.signer
-        const fee = params.fee || DEFAULT_POOL_FEE
-        const gasLimit = params.deployGasLimit || DEFAULT_TX_GAS_LIMIT
-        const factory = this.contracts.factory
-        const positionManager = this.contracts.positionManager
-
-        const existingPoolAddress = await factory
-            .connect(deployer)
-            .getPool(this.token0, this.token1, fee)
-
-        let poolAddress
-        if (existingPoolAddress === ethers.constants.AddressZero) {
-            const tx = await positionManager
-                .connect(deployer)
-                .createAndInitializePoolIfNecessary(
-                    this.token0,
-                    this.token1,
-                    fee,
-                    params.sqrtPrice,
-                    { gasLimit, nonce: nonce + 1 }
-                )
-
-            await tx.wait()
-
-            poolAddress = await factory
-                .connect(deployer)
-                .getPool(this.token0, this.token1, fee, {
-                    gasLimit: ethers.utils.hexlify(1000000),
-                    nonce: nonce + 1
-                })
-        } else {
-            poolAddress = existingPoolAddress
-        }
-
-        console.log('## Pool deployed on address:', poolAddress)
-        const poolContract = new ethers.Contract(
-            poolAddress,
+    initPoolContract(contractAddress: string) {
+        this.poolContract = new ethers.Contract(
+            contractAddress,
             IUniswapV3PoolABI.abi,
             this.signer
         )
-
-        this.poolContract = poolContract
-
-        return poolContract
     }
 
-    async openPosition(liquidityAmount: string) {
-        const nonce = await this.provider.getTransactionCount(await this.signer.getAddress());
-        console.log('openPosition:  ', nonce)
+    async isDeployed() {
+        const existingPoolAddress = await this.contracts.factory
+            .connect(this.signer)
+            .getPool(this.token0, this.token1, this.fee)
+        const isDeployed = existingPoolAddress !== ethers.constants.AddressZero
 
-        const mintParams = await this.getPositionMintParams(liquidityAmount)
+        return {
+            existingPoolAddress,
+            isDeployed
+        }
+    }
+
+    async deployPool(params: TDeployParams) {
+        const fee = params.fee || DEFAULT_POOL_FEE
+        const gasLimit = params.deployGasLimit || DEFAULT_TX_GAS_LIMIT
+        const { factory, positionManager } = this.contracts
+
+        let poolAddress
+        const tx = await positionManager
+            .connect(this.signer)
+            .createAndInitializePoolIfNecessary(
+                this.token0,
+                this.token1,
+                fee,
+                params.sqrtPrice,
+                { gasLimit }
+            )
+
+        await tx.wait()
+
+        poolAddress = await factory
+            .connect(this.signer)
+            .getPool(this.token0, this.token1, fee)
+
+        console.log('## Pool deployed on address:', poolAddress)
+
+        this.initPoolContract(poolAddress)
+    }
+
+    async openPosition(liquidityAmount: string, priceTick?: number) {
+        const mintParams = await this.getPositionMintParams(liquidityAmount, priceTick)
+
 
         const positionMintTx = await this.contracts.positionManager
-            .connect(this.signer)
+            .connect(await this.signer)
             .mint(mintParams, {
-                gasLimit: ethers.utils.hexlify(1000000),
-                nonce: nonce + 2
+                gasLimit: ethers.utils.hexlify(1000000)
             })
 
         await positionMintTx.wait() // expect positionManager emit event 'IncreaseLiquidity' after positionMintTx
@@ -179,8 +181,8 @@ export class Pool {
                 0
             )
         const swapParams = {
-            tokenIn: poolImmutables.token0,
-            tokenOut: poolImmutables.token1,
+            tokenIn: poolImmutables.token1,
+            tokenOut: poolImmutables.token0,
             fee: poolImmutables.fee,
             recipient: this.signer.getAddress(),
             deadline: Math.floor(Date.now() / 1000) * 60,
@@ -268,7 +270,22 @@ export class Pool {
         }
     }
 
-    async getPositionMintParams(positionLiquidityAmount: string) {
+    async tickToPrice() {
+
+    }
+
+    async priceFromTick(tick: number, inputAmount: number, decimals: number) {
+        const sqrtRatioX96 = TickMath.getSqrtRatioAtTick(tick)
+        const ratioX192 = JSBI.multiply(sqrtRatioX96, sqrtRatioX96)
+        const baseAmount = JSBI.BigInt(inputAmount * (10 ** decimals))
+        const shift = JSBI.leftShift(JSBI.BigInt(1), JSBI.BigInt(192))
+
+        const quoteAmount = FullMath.mulDivRoundingUp(ratioX192, baseAmount, shift)
+
+        // console.log(quoteAmount.toString() / (10**decimals));
+    }
+
+    async getPositionMintParams(positionLiquidityAmount: string, positionTick?: number) {
         const poolData = await this.getPoolStateData()
         const { tick, tickSpacing, fee, liquidity, sqrtPriceX96 } = poolData
 
@@ -283,8 +300,10 @@ export class Pool {
             tick
         )
 
-        const tickLower = nearestUsableTick(tick, tickSpacing) - tickSpacing * 2
-        const tickUpper = nearestUsableTick(tick, tickSpacing) + tickSpacing * 2
+        const usableTick = positionTick ? positionTick : tick;
+
+        const tickLower = nearestUsableTick(usableTick, tickSpacing) - tickSpacing * 2
+        const tickUpper = nearestUsableTick(usableTick, tickSpacing) + tickSpacing * 2
         const position = new UniswapV3Position({
             pool: tokensPool,
             liquidity: ethers.utils.parseEther(positionLiquidityAmount).toString(), // TODO: check if auto-cast to BigintIsh works fine
@@ -304,8 +323,8 @@ export class Pool {
         const { amount0: amount0Desired, amount1: amount1Desired } =
             position.mintAmounts
 
-        const { amount0: amount0Min, amount1: amount1Min } =
-            position.mintAmountsWithSlippage(new Percent(50, 10_000))
+        // const { amount0: amount0Min, amount1: amount1Min } =
+        //     position.mintAmountsWithSlippage(new Percent(50, 10_000))
 
         const params = {
             token0: this.token0,
@@ -315,8 +334,8 @@ export class Pool {
             tickUpper,
             amount0Desired: amount0Desired.toString(),
             amount1Desired: amount1Desired.toString(),
-            amount0Min: amount0Min.toString(),
-            amount1Min: amount1Min.toString(),
+            amount0Min: 0,
+            amount1Min: 0,
             recipient: this.signer.getAddress(),
             deadline: Math.floor(Date.now() / 1000) * 60
         }
@@ -356,10 +375,10 @@ export class Pool {
     }
 
     getNonce() {
-        const result = this.baseNonce + this.nonceOffset;
+        const result = this.baseNonce + this.nonceOffset
 
-        this.nonceOffset += 1;
+        this.nonceOffset += 1
 
-        return result;
+        return result
     }
 }
