@@ -1,28 +1,20 @@
-import {Pool} from '@/blockchain/modules/Pool'
-import {ethers} from 'ethers'
-import {initializeUniswapContracts} from '@/blockchain/utils/initializeUniswapContracts'
-import { Pool } from '@/blockchain/modules/Pool'
-import lodash from 'lodash'
 import { ethers } from 'ethers'
-import {
-    initializeUniswapContracts,
-    TUniswapContracts
-} from '@/blockchain/utils/initializeUniswapContracts'
-import dotenv from 'dotenv'
-import {encodePriceSqrt} from '@/blockchain/utils/encodedPriceSqrt'
-import {nearestUsableTick} from '@uniswap/v3-sdk'
-import {initializeTokenFactory} from '@/blockchain/utils/initializeTokenFactory'
-import {initializeDefaultToken} from '@/blockchain/utils/initializeDefaultToken'
-import { initializeDefaultToken } from '@/blockchain/utils/initializeDefaultToken'
+import lodash from 'lodash'
+import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk'
 import { Web3ApiConfig } from '@/api/web3/Web3API'
-import { FeeAmount } from '@uniswap/v3-sdk'
-import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
-import { initializeTokenFactory } from '@/blockchain/utils/initializeTokenFactory'
+import { Pool } from '@/blockchain/modules/Pool'
+import {
+    initializeTokenFactory,
+    initializeDefaultToken,
+    initializeUniswapContracts,
+    encodePriceSqrt
+} from '@/blockchain/utils'
 import {
     getPositions,
     getPositionsByIds
 } from '@/blockchain/utils/getPositions'
 
+import dotenv from 'dotenv'
 dotenv.config()
 
 const token0 = String(process.env.WETH_ADDRESS)
@@ -36,6 +28,7 @@ describe('blockchain Pool entity', () => {
     let pool: Pool
     let wethContract: ethers.Contract
     let testTokenContract: ethers.Contract
+    let apiConfig: Web3ApiConfig
 
     beforeAll(async () => {
         provider = new ethers.providers.JsonRpcProvider(providerUrl)
@@ -51,7 +44,7 @@ describe('blockchain Pool entity', () => {
             ['function balanceOf(address) external view returns (uint256)'],
             signer
         )
-        pool = await Pool.create(token0, token1, 500, {
+        apiConfig = {
             provider,
             signer,
             contracts: {
@@ -59,7 +52,8 @@ describe('blockchain Pool entity', () => {
                 tokenFactory: initializeTokenFactory(signer)
             },
             defaultToken: initializeDefaultToken(signer)
-        });
+        }
+        pool = await Pool.create(token0, token1, FeeAmount.LOW, apiConfig)
     })
 
     describe('create() returns pool', () => {
@@ -108,7 +102,7 @@ describe('blockchain Pool entity', () => {
 
     describe('deployPool()', () => {
         test('should add poolContract', async () => {
-            const { isDeployed, existingPoolAddress } = await pool.isDeployed();
+            const { isDeployed, existingPoolAddress } = await pool.isDeployed()
             const poolParams = {
                 fee: FeeAmount.LOW,
                 sqrtPrice: encodePriceSqrt(10000, 1)
@@ -132,10 +126,13 @@ describe('blockchain Pool entity', () => {
 
     describe('openPosition()', () => {
         test('openPosition() should add a new position to the pool', async () => {
-            const {tick, tickSpacing, sqrtPriceX96} = await pool.getPoolStateData()
+            const { tick, tickSpacing, sqrtPriceX96 } =
+                await pool.getPoolStateData()
 
-            const upperTick = nearestUsableTick(tick, tickSpacing) + tickSpacing * 2
-            const lowerTick = nearestUsableTick(tick, tickSpacing) - tickSpacing * 2
+            const upperTick =
+                nearestUsableTick(tick, tickSpacing) + tickSpacing * 2
+            const lowerTick =
+                nearestUsableTick(tick, tickSpacing) - tickSpacing * 2
 
             console.log('Current Tick: ', [tick, tickSpacing])
             console.log('Lower/Upper Ticks: ', [lowerTick, upperTick])
@@ -151,7 +148,7 @@ describe('blockchain Pool entity', () => {
         })
     })
 
-    describe('openPosition()', () => {
+    describe('Fn:openPosition()', () => {
         beforeEach(async () => {
             await pool.deployPool({
                 fee: FeeAmount.LOWEST,
