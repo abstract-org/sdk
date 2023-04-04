@@ -25,6 +25,22 @@ export const getPositions = async (
     return result
 }
 
+export const getPositionsByIds = async (
+    positionManagerContract: ethers.Contract,
+    ownerAddress: string
+): Promise<Record<string, PositionInfo>> => {
+    const positionIds = await getPositionIds(
+        positionManagerContract,
+        ownerAddress
+    )
+    let result = {}
+    for (const posId of positionIds) {
+        result[posId] = await getPositionInfo(posId, positionManagerContract)
+    }
+
+    return result
+}
+
 async function getPositionIds(
     positionManagerContract: ethers.Contract,
     ownerAddress: string

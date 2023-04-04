@@ -1,4 +1,4 @@
-import { ethers, Contract } from 'ethers'
+import { ethers, Contract, BigNumber } from 'ethers'
 import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
 import Hex from 'crypto-js/enc-hex'
 import sha256 from 'crypto-js/sha256'
@@ -7,6 +7,8 @@ import ERC20_ABI from '@/blockchain/abi/ERC20ABI.json'
 import SimpleTokenABI from '@/blockchain/abi/SimpleToken.json'
 import { Pool } from '@/blockchain/modules/Pool'
 import { Web3ApiConfig } from '@/api/web3/Web3API'
+import { FeeAmount } from '@uniswap/v3-sdk'
+import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
 
 export const TEMP_CONFIG = {
     INITIAL_LIQUIDITY: [
@@ -129,6 +131,10 @@ export class Quest {
             this.tokenContract.address,
             this.getApiConfig()
         )
+        await pool.deployPool({
+            fee: FeeAmount.LOWEST,
+            sqrtPrice: encodePriceSqrt(1, 1)
+        })
 
         if (initialPositions) {
             await this.initializePoolPositions(pool, initialPositions)
@@ -142,7 +148,7 @@ export class Quest {
             initialPositions || TEMP_CONFIG.INITIAL_LIQUIDITY
         for (const positionData of initialPositionsList) {
             await pool.openPosition(
-                'liquidityAmount'
+                ''
                 // positionData.priceMin,
                 // positionData.priceMax,
                 // positionData.tokenA,

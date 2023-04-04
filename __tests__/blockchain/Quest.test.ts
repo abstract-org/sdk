@@ -60,6 +60,52 @@ describe('blockchain Quest entity', () => {
             expect(symbol).toBeTruthy()
             expect(typeof symbol).toBe('string')
         })
+
+        test('Deployer received 20k tokens in their wallet', async () => {
+            const defaultMintedAmount = ethers.utils.parseEther('20000')
+            const walletAddress = quest.getApiConfig().signer.getAddress()
+            const balance = await quest.tokenContract.balanceOf(walletAddress)
+            expect(balance).toEqual(defaultMintedAmount)
+        })
+    })
+
+    describe('token exchange', () => {
+        let otherSigner: ethers.Signer
+
+        beforeEach(() => {
+            const otherProvider = new ethers.providers.StaticJsonRpcProvider(
+                providerUrl
+            )
+            otherProvider.pollingInterval = 50
+            otherSigner = ethers.Wallet.createRandom().connect(
+                apiConfig.provider
+            )
+        })
+
+        it('should transfer tokens to another wallet', async () => {
+            const token = quest.tokenContract
+            const ownerAddress = quest.getApiConfig().signer.getAddress()
+            const recipientAddress = otherSigner.getAddress()
+            const ownerBalanceBefore = await token.balanceOf(ownerAddress)
+            const recipientBalanceBefore = await token.balanceOf(
+                recipientAddress
+            )
+            const transferAmount = ethers.utils.parseEther(
+                String(Math.floor(Math.random() * 100))
+            )
+            await token.transfer(recipientAddress, transferAmount)
+
+            const ownerBalanceAfter = await token.balanceOf(ownerAddress)
+            const recipientBalanceAfter = await token.balanceOf(
+                recipientAddress
+            )
+            expect(ownerBalanceAfter).toEqual(
+                ownerBalanceBefore.sub(transferAmount)
+            )
+            expect(recipientBalanceAfter).toEqual(
+                recipientBalanceBefore.add(transferAmount)
+            )
+        })
     })
 
     describe('create defaultPool', () => {
@@ -68,6 +114,7 @@ describe('blockchain Quest entity', () => {
         beforeAll(async () => {
             pool = await quest.createPool()
         })
+
         test('without initialPositions argument', async () => {
             expect(pool).toBeInstanceOf(Pool)
         })
