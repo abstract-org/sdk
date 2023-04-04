@@ -21,6 +21,15 @@ describe('blockchain Pool entity', () => {
     let wethContract: ethers.Contract
     let testTokenContract: ethers.Contract
 
+    async function printBalances() {
+        const [wethBalance, testTokenBalance] = await Promise.all([
+            wethContract.connect(signer).balanceOf(signer.address),
+            testTokenContract.connect(signer).balanceOf(signer.address),
+        ]);
+
+        console.table([['Weth', ethers.utils.formatEther(wethBalance)], ['TestToken', ethers.utils.formatEther(testTokenBalance)]]);
+    }
+
     beforeAll(async () => {
         provider = new ethers.providers.JsonRpcProvider(providerUrl)
         const wallet = new ethers.Wallet(privateKey, provider)
@@ -83,14 +92,18 @@ describe('blockchain Pool entity', () => {
         console.log('Current Tick: ', [tick, tickSpacing])
         console.log('Lower/Upper Ticks: ', [lowerTick, upperTick])
 
+        await printBalances();
+
         // Should add liquidity on current price
-        await pool.openPosition('0.1', tick)
+        await pool.openPosition('1', tick)
 
         // Should open position for range upper than current price
-        await pool.openPosition('0.5', upperTick)
+        await pool.openSingleSidedPosition('1', lowerTick, 'token1')
 
         // Should open position for range lower than current price
-        await pool.openPosition('0.5', lowerTick)
+        await pool.openSingleSidedPosition('1', upperTick, 'token0');
+
+        await printBalances();
     })
 
     test('getPool() should get the pool address', async () => {

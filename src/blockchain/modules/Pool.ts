@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from 'ethers'
+import {BigNumber, ethers} from 'ethers'
 import {
     Position as UniswapV3Position,
     Pool as UniswapV3Pool,
@@ -8,12 +8,12 @@ import {
     FullMath
 } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
-import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
-import { Percent, Token as UniswapV3Token } from '@uniswap/sdk-core'
+import {encodePriceSqrt} from '@/blockchain/utils/encodedPriceSqrt'
+import {Percent, Token as UniswapV3Token} from '@uniswap/sdk-core'
 import TokenAbi from '@/blockchain/abi/SimpleToken.json'
 import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json'
-import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
-import { Web3ApiConfig } from '@/api/web3/Web3API'
+import {TUniswapContracts} from '@/blockchain/utils/initializeUniswapContracts'
+import {Web3ApiConfig} from '@/api/web3/Web3API'
 
 export const DEFAULT_TX_GAS_LIMIT = 10000000
 export const DEFAULT_POOL_FEE = FeeAmount.LOW
@@ -96,7 +96,7 @@ export class Pool {
     async deployPool(params: TDeployParams) {
         const fee = params.fee || DEFAULT_POOL_FEE
         const gasLimit = params.deployGasLimit || DEFAULT_TX_GAS_LIMIT
-        const { factory, positionManager } = this.contracts
+        const {factory, positionManager} = this.contracts
 
         let poolAddress
         const tx = await positionManager
@@ -106,7 +106,7 @@ export class Pool {
                 this.token1,
                 fee,
                 params.sqrtPrice,
-                { gasLimit }
+                {gasLimit}
             )
 
         await tx.wait()
@@ -118,6 +118,19 @@ export class Pool {
         console.log('## Pool deployed on address:', poolAddress)
 
         this.initPoolContract(poolAddress)
+    }
+
+    async openSingleSidedPosition(amount: string, priceTick: number, side: 'token0' | 'token1') {
+        const mintParams = await this.getSingleSidedMintParams(amount, priceTick, side)
+
+
+        const positionMintTx = await this.contracts.positionManager
+            .connect(await this.signer)
+            .mint(mintParams, {
+                gasLimit: ethers.utils.hexlify(1000000)
+            })
+
+        await positionMintTx.wait();
     }
 
     async openPosition(liquidityAmount: string, priceTick?: number) {
@@ -285,9 +298,20 @@ export class Pool {
         // console.log(quoteAmount.toString() / (10**decimals));
     }
 
-    async getPositionMintParams(positionLiquidityAmount: string, positionTick?: number) {
+    async approvePositionManager() {
+        const approvalAmount = ethers.utils.parseUnits('1000', 18).toString()
+        const token0approveTx = await this.getToken0Contract()
+            .connect(this.signer)
+            .approve(this.contracts.positionManager.address, approvalAmount)
+        const token1approveTx = await this.getToken1Contract()
+            .connect(this.signer)
+            .approve(this.contracts.positionManager.address, approvalAmount)
+        await Promise.all([token0approveTx.wait(), token1approveTx.wait()])
+    }
+
+    async getSingleSidedMintParams(amount: string, positionTick: number, side: 'token0' | 'token1') {
         const poolData = await this.getPoolStateData()
-        const { tick, tickSpacing, fee, liquidity, sqrtPriceX96 } = poolData
+        const {tick, tickSpacing, fee, liquidity, sqrtPriceX96} = poolData
 
         const token0Instance = await this.constructUniswapV3token(this.token0)
         const token1Instance = await this.constructUniswapV3token(this.token1)
@@ -301,26 +325,27 @@ export class Pool {
         )
 
         const usableTick = positionTick ? positionTick : tick;
-
         const tickLower = nearestUsableTick(usableTick, tickSpacing) - tickSpacing * 2
         const tickUpper = nearestUsableTick(usableTick, tickSpacing) + tickSpacing * 2
-        const position = new UniswapV3Position({
+
+        const basePositionParams = {
             pool: tokensPool,
-            liquidity: ethers.utils.parseEther(positionLiquidityAmount).toString(), // TODO: check if auto-cast to BigintIsh works fine
             tickLower,
-            tickUpper
+            tickUpper,
+            useFullPrecision: true
+        };
+
+        const position = side === 'token0' ? UniswapV3Position.fromAmount0({
+            ...basePositionParams,
+            amount0: ethers.utils.parseEther(amount).toString()
+        }) : UniswapV3Position.fromAmount1({
+            ...basePositionParams,
+            amount1: ethers.utils.parseEther(amount).toString()
         })
 
-        const approvalAmount = ethers.utils.parseUnits('1000', 18).toString()
-        const token0approveTx = await this.getToken0Contract()
-            .connect(this.signer)
-            .approve(this.contracts.positionManager.address, approvalAmount)
-        const token1approveTx = await this.getToken1Contract()
-            .connect(this.signer)
-            .approve(this.contracts.positionManager.address, approvalAmount)
-        await Promise.all([token0approveTx.wait(), token1approveTx.wait()])
+        await this.approvePositionManager();
 
-        const { amount0: amount0Desired, amount1: amount1Desired } =
+        const {amount0: amount0Desired, amount1: amount1Desired} =
             position.mintAmounts
 
         // const { amount0: amount0Min, amount1: amount1Min } =
@@ -336,7 +361,59 @@ export class Pool {
             amount1Desired: amount1Desired.toString(),
             amount0Min: 0,
             amount1Min: 0,
-            recipient: this.signer.getAddress(),
+            recipient: await this.signer.getAddress(),
+            deadline: Math.floor(Date.now() / 1000) * 60
+        }
+        console.log('positionMintParamsSingleSided:', params)
+
+        return params
+    }
+
+    async getPositionMintParams(positionLiquidityAmount: string, positionTick?: number) {
+        const poolData = await this.getPoolStateData()
+        const {tick, tickSpacing, fee, liquidity, sqrtPriceX96} = poolData
+
+        const token0Instance = await this.constructUniswapV3token(this.token0)
+        const token1Instance = await this.constructUniswapV3token(this.token1)
+        const tokensPool = new UniswapV3Pool(
+            token0Instance,
+            token1Instance,
+            fee,
+            sqrtPriceX96.toString(),
+            liquidity.toString(),
+            tick
+        )
+
+        const usableTick = positionTick ? positionTick : tick;
+        const tickLower = nearestUsableTick(usableTick, tickSpacing) - tickSpacing * 2
+        const tickUpper = nearestUsableTick(usableTick, tickSpacing) + tickSpacing * 2
+
+        const position = new UniswapV3Position({
+            pool: tokensPool,
+            liquidity: ethers.utils.parseEther(positionLiquidityAmount).toString(), // TODO: check if auto-cast to BigintIsh works fine
+            tickLower,
+            tickUpper
+        })
+
+        await this.approvePositionManager();
+
+        const {amount0: amount0Desired, amount1: amount1Desired} =
+            position.mintAmounts
+
+        // const { amount0: amount0Min, amount1: amount1Min } =
+        //     position.mintAmountsWithSlippage(new Percent(50, 10_000))
+
+        const params = {
+            token0: this.token0,
+            token1: this.token1,
+            fee,
+            tickLower,
+            tickUpper,
+            amount0Desired: amount0Desired.toString(),
+            amount1Desired: amount1Desired.toString(),
+            amount0Min: 0,
+            amount1Min: 0,
+            recipient: await this.signer.getAddress(),
             deadline: Math.floor(Date.now() / 1000) * 60
         }
         console.log('positionMintParams:', params)
