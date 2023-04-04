@@ -18,9 +18,9 @@ import { Web3ApiConfig } from '@/api/web3/Web3API'
 export const DEFAULT_TX_GAS_LIMIT = 10000000
 export const DEFAULT_POOL_FEE = FeeAmount.LOW
 export type TDeployParams = {
-    fee: number;
-    sqrtPrice: BigNumber;
-    deployGasLimit?: number;
+    fee: number
+    sqrtPrice: BigNumber
+    deployGasLimit?: number
 }
 
 export class Pool {
@@ -36,8 +36,7 @@ export class Pool {
     baseNonce: number
     nonceOffset: number = 0
 
-    constructor() {
-    }
+    constructor() {}
 
     /**
      * @description builds instance of this class (Pool entity)
@@ -375,10 +374,10 @@ export class Pool {
     }
 
     getNonce() {
-        const result = this.baseNonce + this.nonceOffset
+        const result = this.baseNonce + this.nonceOffset;
 
-        this.nonceOffset += 1
+        this.nonceOffset += 1;
 
-        return result
+        return result;
     }
 }
