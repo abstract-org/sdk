@@ -23,7 +23,7 @@ const token1 = String(process.env.TEST_TOKEN_ADDRESS)
 const providerUrl = String(process.env.PROVIDER_URL)
 const privateKey = String(process.env.TEST_PRIVATE_KEY)
 
-describe('blockchain Pool entity', () => {
+describe('Blockchain/Modules/Pool', () => {
     let provider: any
     let signer: any
     let pool: Pool
@@ -69,7 +69,7 @@ describe('blockchain Pool entity', () => {
         pool = await Pool.create(token0, token1, FeeAmount.LOW, apiConfig)
     })
 
-    describe('create() returns pool', () => {
+    describe('Pool.create()', () => {
         test('should be Pool instance', async () => {
             expect(pool).toBeInstanceOf(Pool)
 
@@ -113,12 +113,12 @@ describe('blockchain Pool entity', () => {
         })
     })
 
-    describe('deployPool()', () => {
+    describe('Pool.deployPool()', () => {
         test('should add poolContract', async () => {
             const { isDeployed, existingPoolAddress } = await pool.isDeployed()
             const poolParams = {
                 fee: FeeAmount.LOW,
-                sqrtPrice: encodePriceSqrt(10000, 1)
+                sqrtPrice: encodePriceSqrt(100, 1)
             }
 
             if (isDeployed) {
@@ -135,106 +135,129 @@ describe('blockchain Pool entity', () => {
             expect(poolImmutables.token1).toBe(pool.token1)
             expect(poolImmutables.fee).toBe(poolParams.fee)
         })
+
+        test('should get the pool address', async () => {
+            const fee = 500
+            const poolAddress = await pool.getPoolContract(token0, token1, fee)
+            expect(poolAddress).toBeDefined()
+            expect(poolAddress).toBe(pool.poolContract.address)
+        })
+
+        test('should throw an error if the pool is not found', async () => {
+            const invalidToken = ethers.constants.AddressZero
+            const fee = 3000
+            await expect(
+                pool.getPoolContract(invalidToken, token1, fee)
+            ).rejects.toThrow('Pool not found')
+        })
     })
 
-    describe('openPosition()', () => {
-        test('openPosition() should add a new position to the pool', async () => {
+    describe.skip('Fn:openPosition()', () => {
+        beforeEach(async () => {
+            await pool.deployPool({
+                fee: FeeAmount.LOWEST,
+                sqrtPrice: encodePriceSqrt(1, 1)
+            })
+        })
+
+        test('should add a one position to the pool', async () => {
+            const signerAddress = await apiConfig.signer.getAddress()
+            const positionsBefore = await getPositions(
+                apiConfig.contracts.positionManager,
+                signerAddress
+            )
+
+            await pool.openPosition('0.1')
+            const positionsAfter = await getPositions(
+                apiConfig.contracts.positionManager,
+                signerAddress
+            )
+
+            expect(positionsAfter.length).toBe(positionsBefore.length + 1)
+        })
+
+        test('should add correct liquidity', async () => {
+            const signerAddress = await apiConfig.signer.getAddress()
+            const positionsBefore = await getPositionsByIds(
+                apiConfig.contracts.positionManager,
+                signerAddress
+            )
+            const addedLiquidity = '0.1'
+
+            await pool.openPosition(addedLiquidity)
+            const positionsAfter = await getPositionsByIds(
+                apiConfig.contracts.positionManager,
+                signerAddress
+            )
+            const changedPositions = lodash.differenceWith(
+                lodash.toPairs(positionsAfter),
+                lodash.toPairs(positionsBefore),
+                ([key1], [key2]) => key1 === key2
+            )
+            console.log(changedPositions)
+            expect(changedPositions[0].liquidity).toBe(addedLiquidity)
+        })
+    })
+
+    describe('Pool.openPosition()', () => {
+        beforeEach(async () => {
+            await printBalances()
+        })
+        test('Opens position in current tick', async () => {
             const { tick, tickSpacing, sqrtPriceX96 } =
                 await pool.getPoolStateData()
 
-            const upperTick =
-                nearestUsableTick(tick, tickSpacing) + tickSpacing * 2
-            const lowerTick =
-                nearestUsableTick(tick, tickSpacing) - tickSpacing * 2
-
             console.log('Current Tick: ', [tick, tickSpacing])
-            console.log('Lower/Upper Ticks: ', [lowerTick, upperTick])
-
-            await printBalances()
 
             // Should add liquidity on current price
             await pool.openPosition('1', tick)
+        })
+
+        test('Opens single position in lower range', async () => {
+            const { tick, tickSpacing } = await pool.getPoolStateData()
+
+            const lowerTick =
+                nearestUsableTick(tick, tickSpacing) - tickSpacing * 4
+
+            console.log('Current Tick: ', [tick, tickSpacing])
+            console.log('Lower Tick: ', lowerTick)
 
             // Should open position for range upper than current price
-            await pool.openSingleSidedPosition('1', lowerTick, 'token1')
+            await pool.openSingleSidedPosition('1000', lowerTick, 'token1')
+        })
+        test('Opens single sided position in upper range', async () => {
+            const { tick, tickSpacing } = await pool.getPoolStateData()
 
-            // Should open position for range lower than current price
+            const upperTick =
+                nearestUsableTick(tick, tickSpacing) + tickSpacing * 4
+
+            console.log('Current Tick: ', [tick, tickSpacing])
+            console.log('Upper Tick: ', upperTick)
+
+            // Should open position for range upper than current price
             await pool.openSingleSidedPosition('1', upperTick, 'token0')
+        })
+    })
 
+    describe('Swaps', () => {
+        beforeEach(async () => {
+            const liquidity = await pool.poolContract.liquidity();
+            console.log(
+                'Pool.liquidity:',
+                ethers.utils.formatUnits(liquidity.toString(), "ether")
+            )
             await printBalances()
-        })
-
-        describe.skip('Fn:openPosition()', () => {
-            beforeEach(async () => {
-                await pool.deployPool({
-                    fee: FeeAmount.LOWEST,
-                    sqrtPrice: encodePriceSqrt(1, 1)
-                })
-            })
-
-            test('should add a one position to the pool', async () => {
-                const signerAddress = await apiConfig.signer.getAddress()
-                const positionsBefore = await getPositions(
-                    apiConfig.contracts.positionManager,
-                    signerAddress
-                )
-
-                await pool.openPosition('0.1')
-                const positionsAfter = await getPositions(
-                    apiConfig.contracts.positionManager,
-                    signerAddress
-                )
-
-                expect(positionsAfter.length).toBe(positionsBefore.length + 1)
-            })
-
-            test('should add correct liquidity', async () => {
-                const signerAddress = await apiConfig.signer.getAddress()
-                const positionsBefore = await getPositionsByIds(
-                    apiConfig.contracts.positionManager,
-                    signerAddress
-                )
-                const addedLiquidity = '0.1'
-
-                await pool.openPosition(addedLiquidity)
-                const positionsAfter = await getPositionsByIds(
-                    apiConfig.contracts.positionManager,
-                    signerAddress
-                )
-                const changedPositions = lodash.differenceWith(
-                    lodash.toPairs(positionsAfter),
-                    lodash.toPairs(positionsBefore),
-                    ([key1], [key2]) => key1 === key2
-                )
-                console.log(changedPositions)
-                expect(changedPositions[0].liquidity).toBe(addedLiquidity)
-            })
-        })
-
-        describe('getPoolContract()', () => {
-            test('should get the pool address', async () => {
-                const fee = 500
-                const poolAddress = await pool.getPoolContract(
-                    token0,
-                    token1,
-                    fee
-                )
-                expect(poolAddress).toBeDefined()
-                expect(poolAddress).toBe(pool.poolContract.address)
-            })
-
-            test('should throw an error if the pool is not found', async () => {
-                const invalidToken = ethers.constants.AddressZero
-                const fee = 3000
-                await expect(
-                    pool.getPoolContract(invalidToken, token1, fee)
-                ).rejects.toThrow('Pool not found')
-            })
-        })
-
-        test.skip('swap() should perform a swap between token0 and token1', async () => {
+        });
+        test('swapExactInputSingle()', async () => {
             const amount = '0.1'
-            await expect(pool.swap(amount)).resolves.not.toThrow()
+
+            await pool.swapExactInputSingle(amount)
+        })
+
+        test('swapExactInputSingle() in reverse', async () => {
+            const amount = '1'
+            await pool.swapExactInputSingle(amount, false)
+
         })
     })
 })

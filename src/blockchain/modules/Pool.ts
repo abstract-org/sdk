@@ -1,4 +1,4 @@
-import {BigNumber, ethers} from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import {
     Position as UniswapV3Position,
     Pool as UniswapV3Pool,
@@ -8,12 +8,12 @@ import {
     FullMath
 } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
-import {encodePriceSqrt} from '@/blockchain/utils/encodedPriceSqrt'
-import {Percent, Token as UniswapV3Token} from '@uniswap/sdk-core'
+import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
+import { Percent, Token as UniswapV3Token } from '@uniswap/sdk-core'
 import TokenAbi from '@/blockchain/abi/SimpleToken.json'
 import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json'
-import {TUniswapContracts} from '@/blockchain/utils/initializeUniswapContracts'
-import {Web3ApiConfig} from '@/api/web3/Web3API'
+import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
+import { Web3ApiConfig } from '@/api/web3/Web3API'
 
 export const DEFAULT_TX_GAS_LIMIT = 10000000
 export const DEFAULT_POOL_FEE = FeeAmount.LOW
@@ -95,7 +95,7 @@ export class Pool {
     async deployPool(params: TDeployParams) {
         const fee = params.fee || DEFAULT_POOL_FEE
         const gasLimit = params.deployGasLimit || DEFAULT_TX_GAS_LIMIT
-        const {factory, positionManager} = this.contracts
+        const { factory, positionManager } = this.contracts
 
         let poolAddress
         const tx = await positionManager
@@ -105,7 +105,7 @@ export class Pool {
                 this.token1,
                 fee,
                 params.sqrtPrice,
-                {gasLimit}
+                { gasLimit }
             )
 
         await tx.wait()
@@ -119,9 +119,16 @@ export class Pool {
         this.initPoolContract(poolAddress)
     }
 
-    async openSingleSidedPosition(amount: string, priceTick: number, side: 'token0' | 'token1') {
-        const mintParams = await this.getSingleSidedMintParams(amount, priceTick, side)
-
+    async openSingleSidedPosition(
+        amount: string,
+        priceTick: number,
+        side: 'token0' | 'token1'
+    ) {
+        const mintParams = await this.getSingleSidedMintParams(
+            amount,
+            priceTick,
+            side
+        )
 
         const positionMintTx = await this.contracts.positionManager
             .connect(await this.signer)
@@ -129,12 +136,34 @@ export class Pool {
                 gasLimit: ethers.utils.hexlify(1000000)
             })
 
-        await positionMintTx.wait();
+        await positionMintTx.wait()
+    }
+
+    async openPositionFromAmounts(
+        amount0: string,
+        amount1: string,
+        priceTick?: number
+    ) {
+        const mintParams = await this.getAmountsMintParams(
+            amount0,
+            amount1,
+            priceTick
+        )
+
+        const positionMintTx = await this.contracts.positionManager
+            .connect(await this.signer)
+            .mint(mintParams, {
+                gasLimit: ethers.utils.hexlify(1000000)
+            })
+
+        await positionMintTx.wait()
     }
 
     async openPosition(liquidityAmount: string, priceTick?: number) {
-        const mintParams = await this.getPositionMintParams(liquidityAmount, priceTick)
-
+        const mintParams = await this.getPositionMintParams(
+            liquidityAmount,
+            priceTick
+        )
 
         const positionMintTx = await this.contracts.positionManager
             .connect(await this.signer)
@@ -168,55 +197,39 @@ export class Pool {
         return poolAddress
     }
 
-    async swap(amount, native: boolean = false) {
+    async swapExactInputSingle(amount: string, direct: boolean = true) {
         // approving spending gas for router
-        const approvalAmount = ethers.utils.parseUnits('1000', 18).toString()
-        await Promise.all([
-            this.getToken0Contract()
-                .connect(this.signer)
-                .approve(this.contracts.router.address, approvalAmount),
-            this.getToken1Contract()
-                .connect(this.signer)
-                .approve(this.contracts.router.address, approvalAmount)
-        ])
+        await this.approveRouter()
 
         const poolImmutables = await this.getPoolImmutables()
-        const amountIn = ethers.utils.parseUnits(String(amount), 18).toString()
+        const amountIn = ethers.utils.parseEther(amount).toString()
 
         // calc param amountOutMinimum
         const quotedAmountOut =
             await this.contracts.quoter.callStatic.quoteExactInputSingle(
-                poolImmutables.token0,
-                poolImmutables.token1,
+                direct ? poolImmutables.token0 : poolImmutables.token1,
+                direct ? poolImmutables.token1 : poolImmutables.token0,
                 poolImmutables.fee,
                 amountIn,
                 0
             )
+
         const swapParams = {
-            tokenIn: poolImmutables.token1,
-            tokenOut: poolImmutables.token0,
+            tokenIn: direct ? poolImmutables.token0 : poolImmutables.token1,
+            tokenOut: direct ? poolImmutables.token1 : poolImmutables.token0,
             fee: poolImmutables.fee,
-            recipient: this.signer.getAddress(),
+            recipient: await this.signer.getAddress(),
             deadline: Math.floor(Date.now() / 1000) * 60,
             amountIn: amountIn,
             amountOutMinimum: quotedAmountOut.toString(), // shouldn't be 0 in production
             sqrtPriceLimitX96: 0 // TODO: shouldn't be 0 in production
         }
 
-        console.debug(
-            '--- pool.liquidity before swap:',
-            await this.poolContract.liquidity()
-        )
         await this.contracts.router
             .connect(this.signer)
             .exactInputSingle(swapParams, {
-                gasLimit: ethers.utils.hexlify(5000000)
+                gasLimit: ethers.utils.hexlify(3000000)
             })
-
-        console.debug(
-            '--- pool.liquidity after swap:',
-            await this.poolContract.liquidity()
-        )
     }
 
     // async swapExactInput(
@@ -282,19 +295,32 @@ export class Pool {
         }
     }
 
-    async tickToPrice() {
-
-    }
+    async tickToPrice() {}
 
     async priceFromTick(tick: number, inputAmount: number, decimals: number) {
         const sqrtRatioX96 = TickMath.getSqrtRatioAtTick(tick)
         const ratioX192 = JSBI.multiply(sqrtRatioX96, sqrtRatioX96)
-        const baseAmount = JSBI.BigInt(inputAmount * (10 ** decimals))
+        const baseAmount = JSBI.BigInt(inputAmount * 10 ** decimals)
         const shift = JSBI.leftShift(JSBI.BigInt(1), JSBI.BigInt(192))
 
-        const quoteAmount = FullMath.mulDivRoundingUp(ratioX192, baseAmount, shift)
+        const quoteAmount = FullMath.mulDivRoundingUp(
+            ratioX192,
+            baseAmount,
+            shift
+        )
 
         // console.log(quoteAmount.toString() / (10**decimals));
+    }
+
+    async approveRouter() {
+        const approvalAmount = ethers.utils.parseUnits('1000', 18).toString()
+        const token0approveTx = await this.getToken0Contract()
+            .connect(this.signer)
+            .approve(this.contracts.router.address, approvalAmount)
+        const token1approveTx = await this.getToken1Contract()
+            .connect(this.signer)
+            .approve(this.contracts.router.address, approvalAmount)
+        await Promise.all([token0approveTx.wait(), token1approveTx.wait()])
     }
 
     async approvePositionManager() {
@@ -308,9 +334,13 @@ export class Pool {
         await Promise.all([token0approveTx.wait(), token1approveTx.wait()])
     }
 
-    async getSingleSidedMintParams(amount: string, positionTick: number, side: 'token0' | 'token1') {
+    async getAmountsMintParams(
+        amount0: string,
+        amount1: string,
+        positionTick?: number
+    ) {
         const poolData = await this.getPoolStateData()
-        const {tick, tickSpacing, fee, liquidity, sqrtPriceX96} = poolData
+        const { tick, tickSpacing, fee, liquidity, sqrtPriceX96 } = poolData
 
         const token0Instance = await this.constructUniswapV3token(this.token0)
         const token1Instance = await this.constructUniswapV3token(this.token1)
@@ -323,28 +353,72 @@ export class Pool {
             tick
         )
 
-        const usableTick = positionTick ? positionTick : tick;
-        const tickLower = nearestUsableTick(usableTick, tickSpacing) - tickSpacing * 2
-        const tickUpper = nearestUsableTick(usableTick, tickSpacing) + tickSpacing * 2
+        const usableTick = positionTick ? positionTick : tick
+        const tickLower =
+            nearestUsableTick(usableTick, tickSpacing) - tickSpacing * 2
+        const tickUpper =
+            nearestUsableTick(usableTick, tickSpacing) + tickSpacing * 2
 
         const basePositionParams = {
             pool: tokensPool,
             tickLower,
             tickUpper,
             useFullPrecision: true
-        };
+        }
 
-        const position = side === 'token0' ? UniswapV3Position.fromAmount0({
+        return UniswapV3Position.fromAmounts({
             ...basePositionParams,
-            amount0: ethers.utils.parseEther(amount).toString()
-        }) : UniswapV3Position.fromAmount1({
-            ...basePositionParams,
-            amount1: ethers.utils.parseEther(amount).toString()
+            amount0: ethers.utils.parseEther(amount0).toString(),
+            amount1: ethers.utils.parseEther(amount1).toString()
         })
+    }
 
-        await this.approvePositionManager();
+    async getSingleSidedMintParams(
+        amount: string,
+        positionTick: number,
+        side: 'token0' | 'token1'
+    ) {
+        const poolData = await this.getPoolStateData()
+        const { tick, tickSpacing, fee, liquidity, sqrtPriceX96 } = poolData
 
-        const {amount0: amount0Desired, amount1: amount1Desired} =
+        const token0Instance = await this.constructUniswapV3token(this.token0)
+        const token1Instance = await this.constructUniswapV3token(this.token1)
+        const tokensPool = new UniswapV3Pool(
+            token0Instance,
+            token1Instance,
+            fee,
+            sqrtPriceX96.toString(),
+            liquidity.toString(),
+            tick
+        )
+
+        const usableTick = positionTick ? positionTick : tick
+        const tickLower =
+            nearestUsableTick(usableTick, tickSpacing) - tickSpacing * 2
+        const tickUpper =
+            nearestUsableTick(usableTick, tickSpacing) + tickSpacing * 2
+
+        const basePositionParams = {
+            pool: tokensPool,
+            tickLower,
+            tickUpper,
+            useFullPrecision: true
+        }
+
+        const position =
+            side === 'token0'
+                ? UniswapV3Position.fromAmount0({
+                      ...basePositionParams,
+                      amount0: ethers.utils.parseEther(amount).toString()
+                  })
+                : UniswapV3Position.fromAmount1({
+                      ...basePositionParams,
+                      amount1: ethers.utils.parseEther(amount).toString()
+                  })
+
+        await this.approvePositionManager()
+
+        const { amount0: amount0Desired, amount1: amount1Desired } =
             position.mintAmounts
 
         // const { amount0: amount0Min, amount1: amount1Min } =
@@ -368,9 +442,12 @@ export class Pool {
         return params
     }
 
-    async getPositionMintParams(positionLiquidityAmount: string, positionTick?: number) {
+    async getPositionMintParams(
+        positionLiquidityAmount: string,
+        positionTick?: number
+    ) {
         const poolData = await this.getPoolStateData()
-        const {tick, tickSpacing, fee, liquidity, sqrtPriceX96} = poolData
+        const { tick, tickSpacing, fee, liquidity, sqrtPriceX96 } = poolData
 
         const token0Instance = await this.constructUniswapV3token(this.token0)
         const token1Instance = await this.constructUniswapV3token(this.token1)
@@ -383,20 +460,24 @@ export class Pool {
             tick
         )
 
-        const usableTick = positionTick ? positionTick : tick;
-        const tickLower = nearestUsableTick(usableTick, tickSpacing) - tickSpacing * 2
-        const tickUpper = nearestUsableTick(usableTick, tickSpacing) + tickSpacing * 2
+        const usableTick = positionTick ? positionTick : tick
+        const tickLower =
+            nearestUsableTick(usableTick, tickSpacing) - tickSpacing * 2
+        const tickUpper =
+            nearestUsableTick(usableTick, tickSpacing) + tickSpacing * 2
 
         const position = new UniswapV3Position({
             pool: tokensPool,
-            liquidity: ethers.utils.parseEther(positionLiquidityAmount).toString(), // TODO: check if auto-cast to BigintIsh works fine
+            liquidity: ethers.utils
+                .parseEther(positionLiquidityAmount)
+                .toString(), // TODO: check if auto-cast to BigintIsh works fine
             tickLower,
             tickUpper
         })
 
-        await this.approvePositionManager();
+        await this.approvePositionManager()
 
-        const {amount0: amount0Desired, amount1: amount1Desired} =
+        const { amount0: amount0Desired, amount1: amount1Desired } =
             position.mintAmounts
 
         // const { amount0: amount0Min, amount1: amount1Min } =
@@ -451,10 +532,10 @@ export class Pool {
     }
 
     getNonce() {
-        const result = this.baseNonce + this.nonceOffset;
+        const result = this.baseNonce + this.nonceOffset
 
-        this.nonceOffset += 1;
+        this.nonceOffset += 1
 
-        return result;
+        return result
     }
 }
