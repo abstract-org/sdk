@@ -35,6 +35,7 @@ export class Pool {
 
     baseNonce: number
     nonceOffset: number = 0
+    static DEFAULT_POOL_FEE: number = FeeAmount.LOW
 
     constructor() {}
 
@@ -93,7 +94,7 @@ export class Pool {
     }
 
     async deployPool(params: TDeployParams) {
-        const fee = params.fee || DEFAULT_POOL_FEE
+        const fee = params.fee || Pool.DEFAULT_POOL_FEE
         const gasLimit = params.deployGasLimit || DEFAULT_TX_GAS_LIMIT
         const { factory, positionManager } = this.contracts
 
