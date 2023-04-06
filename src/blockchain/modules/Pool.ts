@@ -14,6 +14,7 @@ import TokenAbi from '@/blockchain/abi/SimpleToken.json'
 import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json'
 import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
 import { Web3ApiConfig } from '@/api/web3/Web3API'
+import { estimateGasAmount } from '@/blockchain/utils/estimateGasAmount'
 
 export const DEFAULT_TX_GAS_LIMIT = 10000000
 export const DEFAULT_POOL_FEE = FeeAmount.LOW
@@ -98,15 +99,26 @@ export class Pool {
         const { factory, positionManager } = this.contracts
 
         let poolAddress
+
+        const createPoolParams = [
+            this.token0,
+            this.token1,
+            fee,
+            params.sqrtPrice
+        ]
+
+        await estimateGasAmount(
+            this.provider,
+            positionManager,
+            'createAndInitializePoolIfNecessary',
+            ...createPoolParams
+        )
+
         const tx = await positionManager
             .connect(this.signer)
-            .createAndInitializePoolIfNecessary(
-                this.token0,
-                this.token1,
-                fee,
-                params.sqrtPrice,
-                { gasLimit }
-            )
+            .createAndInitializePoolIfNecessary(...createPoolParams, {
+                gasLimit
+            })
 
         await tx.wait()
 
@@ -130,6 +142,13 @@ export class Pool {
             side
         )
 
+        await estimateGasAmount(
+            this.provider,
+            this.contracts.positionManager,
+            'mint',
+            mintParams
+        )
+
         const positionMintTx = await this.contracts.positionManager
             .connect(await this.signer)
             .mint(mintParams, {
@@ -150,6 +169,13 @@ export class Pool {
             priceTick
         )
 
+        await estimateGasAmount(
+            this.provider,
+            this.contracts.positionManager,
+            'mint',
+            mintParams
+        )
+
         const positionMintTx = await this.contracts.positionManager
             .connect(await this.signer)
             .mint(mintParams, {
@@ -163,6 +189,13 @@ export class Pool {
         const mintParams = await this.getPositionMintParams(
             liquidityAmount,
             priceTick
+        )
+
+        await estimateGasAmount(
+            this.provider,
+            this.contracts.positionManager,
+            'mint',
+            mintParams
         )
 
         const positionMintTx = await this.contracts.positionManager
@@ -224,6 +257,13 @@ export class Pool {
             amountOutMinimum: quotedAmountOut.toString(), // shouldn't be 0 in production
             sqrtPriceLimitX96: 0 // TODO: shouldn't be 0 in production
         }
+
+        await estimateGasAmount(
+            this.provider,
+            this.contracts.router,
+            'exactInputSingle',
+            swapParams
+        )
 
         await this.contracts.router
             .connect(this.signer)
