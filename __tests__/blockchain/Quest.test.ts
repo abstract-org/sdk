@@ -12,7 +12,7 @@ import { initializeTokenFactory } from '@/blockchain/utils/initializeTokenFactor
 const providerUrl = String(process.env.PROVIDER_URL)
 const privateKey = String(process.env.TEST_PRIVATE_KEY)
 
-describe('blockchain Quest entity', () => {
+describe('Blockchain/Modules/Quest', () => {
     let apiConfig: Web3ApiConfig
     let quest: Quest
 
@@ -36,7 +36,7 @@ describe('blockchain Quest entity', () => {
         )
     })
 
-    describe('create()', () => {
+    describe('Quest.create()', () => {
         test('Quest should be created successfully', async () => {
             expect(quest).toBeInstanceOf(Quest)
             expect(quest.name).toBe('TEST TOKEN')
@@ -69,7 +69,7 @@ describe('blockchain Quest entity', () => {
         })
     })
 
-    describe('token exchange', () => {
+    describe('Quest token exchange', () => {
         let otherSigner: ethers.Signer
 
         beforeEach(() => {
@@ -108,7 +108,7 @@ describe('blockchain Quest entity', () => {
         })
     })
 
-    describe('create defaultPool', () => {
+    describe('Quest.createPool() default', () => {
         let pool = null
 
         beforeAll(async () => {
@@ -124,7 +124,7 @@ describe('blockchain Quest entity', () => {
         })
     })
 
-    describe('create value-link', () => {
+    describe('Quest.createPool() value-link', () => {
         let citedQuest = null
         let pool = null
 
@@ -164,7 +164,7 @@ describe('blockchain Quest entity', () => {
         })
     })
 
-    describe('initializePoolPositions', () => {
+    describe('Quest.initializePoolPositions()', () => {
         test('Quest should initialize pool positions', async () => {
             const pool = await quest.createPool()
             await quest.initializePoolPositions(

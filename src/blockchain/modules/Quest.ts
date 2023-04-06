@@ -121,14 +121,20 @@ export class Quest {
 
     async createPool({
         tokenLeft,
-        initialPositions
-    }: { tokenLeft?: Quest; initialPositions?: any } = {}): Promise<Pool> {
+        initialPositions,
+        fee
+    }: {
+        tokenLeft?: Quest
+        initialPositions?: any
+        fee?: number
+    } = {}): Promise<Pool> {
         const tokenLeftContract =
             tokenLeft?.tokenContract || this.getDefaultTokenContract()
 
         const pool = await Pool.create(
             tokenLeftContract.address,
             this.tokenContract.address,
+            fee || Pool.DEFAULT_POOL_FEE,
             this.getApiConfig()
         )
         await pool.deployPool({
