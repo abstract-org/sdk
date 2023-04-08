@@ -21,7 +21,7 @@ export const DEFAULT_POOL_FEE = FeeAmount.LOW
 export type TDeployParams = {
     fee: number
     sqrtPrice: BigNumber
-    deployGasLimit?: number
+    deployGasLimit?: number | string
 }
 
 export class Pool {
@@ -126,8 +126,6 @@ export class Pool {
         poolAddress = await factory
             .connect(this.signer)
             .getPool(this.token0, this.token1, fee)
-
-        console.log('## Pool deployed on address:', poolAddress)
 
         this.initPoolContract(poolAddress)
     }

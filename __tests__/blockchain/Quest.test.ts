@@ -9,6 +9,7 @@ import { initializeDefaultToken } from '@/blockchain/utils/initializeDefaultToke
 import { Web3ApiConfig } from '@/api/web3/Web3API'
 import { getPositions } from '@/blockchain/utils/getPositions'
 import { initializeTokenFactory } from '@/blockchain/utils/initializeTokenFactory'
+
 const providerUrl = String(process.env.PROVIDER_URL)
 const privateKey = String(process.env.TEST_PRIVATE_KEY)
 
@@ -29,10 +30,13 @@ describe('Blockchain/Modules/Quest', () => {
             defaultToken: initializeDefaultToken(signer)
         }
         quest = await Quest.create(
-            'TEST TOKEN',
-            'TITLE',
-            'Test content',
-            apiConfig
+            100000,
+            apiConfig,
+            {
+                name: 'TEST TOKEN',
+                kind: 'TITLE',
+                content: 'Test content'
+            }
         )
     })
 
@@ -62,7 +66,7 @@ describe('Blockchain/Modules/Quest', () => {
         })
 
         test('Deployer received 20k tokens in their wallet', async () => {
-            const defaultMintedAmount = ethers.utils.parseEther('20000')
+            const defaultMintedAmount = ethers.utils.parseEther('100000')
             const walletAddress = quest.getApiConfig().signer.getAddress()
             const balance = await quest.tokenContract.balanceOf(walletAddress)
             expect(balance).toEqual(defaultMintedAmount)
@@ -130,10 +134,13 @@ describe('Blockchain/Modules/Quest', () => {
 
         beforeAll(async () => {
             citedQuest = await Quest.create(
-                'CITED TOKEN',
-                'TITLE',
-                'Cited content',
-                apiConfig
+                100000,
+                apiConfig,
+                {
+                    name: 'CITED TOKEN',
+                    kind: 'TITLE',
+                    content: 'Cited content'
+                }
             )
             pool = await quest.createPool(citedQuest)
             await pool.deployPool()

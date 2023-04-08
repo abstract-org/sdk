@@ -54,29 +54,39 @@ export class Quest {
     private contracts: TUniswapContracts & { tokenFactory: ethers.Contract }
 
     static async create(
-        name: string,
-        kind: string,
-        content: string,
-        apiConfig: Web3ApiConfig
+        supply: number,
+        apiConfig: Web3ApiConfig,
+        metadata?: {
+            name: string
+            kind: string
+            content: string
+        }
     ): Promise<Quest> {
         const thisToken = new Quest()
-        thisToken.name = name
-        thisToken.kind = kind
-        thisToken.content = content
-        thisToken.hash = Hex.stringify(sha256(name))
+        if (metadata) {
+            thisToken.name = metadata.name
+            thisToken.kind = metadata.kind
+            thisToken.content = metadata.content
+            thisToken.hash = Hex.stringify(sha256(metadata.name))
+        }
+
         thisToken.provider = apiConfig.provider
         thisToken.signer = apiConfig.signer
         thisToken.contracts = apiConfig.contracts
         thisToken.creator_hash = await apiConfig.signer.getAddress()
         thisToken.defaultToken = apiConfig.defaultToken
 
-        thisToken.tokenContract = await thisToken.deployToken(20000)
+        thisToken.tokenContract = await thisToken.deployToken(supply)
 
         return thisToken
     }
 
     async deployToken(mintAmount?: number) {
         return this.createToken(mintAmount || DEFAULT_TOTAL_SUPPLY)
+    }
+
+    async getBalanceOf(address: string) {
+        return await this.tokenContract.connect(this.signer).balanceOf(address);
     }
 
     async createToken(
@@ -104,7 +114,6 @@ export class Quest {
         }
 
         const tokenAddress = tokenCreatedEvent.args[0]
-        console.log('SimpleToken deployed to:', tokenAddress)
 
         return new ethers.Contract(
             tokenAddress,
