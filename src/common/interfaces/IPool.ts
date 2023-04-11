@@ -1,5 +1,5 @@
 import { PoolType } from '../types'
-import { IPosition } from './IPosition'
+import { IPositionLiquidity, IPosition } from './IPosition'
 import { IPoolState } from './IPoolState'
 
 export interface IPoolQueryUpdate {
@@ -14,7 +14,8 @@ export interface IPoolCreate {
     questLeftHash: string
     questRightHash: string
     type: PoolType
-    kind: string
+    kind?: string
+    positions: IPositionLiquidity[]
 }
 
 export interface IPool {
@@ -25,7 +26,7 @@ export interface IPool {
     name: string
     kind: string
     hash: string
-    positions: Array<IPosition>
+    positions: IPosition[]
     state: IPoolState
     hydratePositions(positions: object[]): void
     getPoolState(): IPoolState

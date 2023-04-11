@@ -2,7 +2,9 @@ import {
     IPoolPersistence,
     IDataStoreRepository,
     IPool,
-    IPoolCreate
+    IPoolCreate,
+    IPoolState,
+    PoolStatePopulated
 } from '../interfaces'
 import { PoolType, QueryFilterType } from '../types'
 
@@ -56,5 +58,11 @@ export class PoolPersistenceService implements IPoolPersistence {
 
     async updatePool(poolId: number, data: IPool): Promise<IPool> {
         return await this.dataStoreRepository.updatePool(poolId, data)
+    }
+
+    async createPoolState(
+        data: PoolStatePopulated
+    ): Promise<PoolStatePopulated> {
+        return await this.dataStoreRepository.createPoolState(data)
     }
 }

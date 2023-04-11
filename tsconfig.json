@@ -27,7 +27,7 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noEmit": false,
-        "module": "CommonJS",
+        "module": "ES2022",
         "target": "ES2022"
     },
     "include": [

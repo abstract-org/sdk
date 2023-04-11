@@ -1,7 +1,14 @@
 import sha256 from 'crypto-js/sha256'
 import Hex from 'crypto-js/enc-hex'
 import HashMap from 'hashmap'
-import { isE10Zero, isNearZero, isZero, p2pp, pp2p } from '../utils/logicUtils'
+import {
+    findNearestKey,
+    isE10Zero,
+    isNearZero,
+    isZero,
+    p2pp,
+    pp2p
+} from '../utils/logicUtils'
 import { Quest } from './Quest'
 import { IPoolState } from '../interfaces'
 
@@ -9,8 +16,9 @@ const TEMP_CONFIG = {
     PRICE_MIN: 0,
     PRICE_MAX: 1000000.00001,
     JOURNAL: false,
-    JOURNAL_BUY: false,
-    JOURNAL_SELL: false
+    JOURNAL_BUY: true,
+    JOURNAL_SELL: true,
+    ROUND_NUMS: 10
 }
 
 interface Position {
@@ -49,6 +57,7 @@ export class Pool {
     posOwners = []
 
     type = 'value-link'
+    kind = null
     private dryState: IPoolState | object = {}
 
     /**
@@ -112,6 +121,16 @@ export class Pool {
         })
     }
 
+    convertPosValue(value: any): number {
+        if (value === null || value === '-Infinity') {
+            return -Infinity
+        } else if (value === 'Infinity') {
+            return Infinity
+        } else {
+            return Number(value)
+        }
+    }
+
     hydratePositions(positions) {
         let priceMin = Infinity
 
@@ -120,22 +139,15 @@ export class Pool {
                 const pos: any = Object.fromEntries(
                     Object.entries(position).map(([key, value]) => [
                         key,
-                        value === '-Infinity'
-                            ? -Infinity
-                            : value === 'Infinity'
-                            ? Infinity
-                            : value
+                        this.convertPosValue(value)
                     ])
                 )
 
-                pos.pp = Number(pos.pp)
-
                 this.pos.set(pos.pp, {
-                    left: Number(pos.left),
-                    right: Number(pos.right),
+                    left: pos.left,
+                    right: pos.right,
                     pp: pos.pp,
-                    liquidity: Number(pos.liquidity),
-                    creator_hash: pos.creator_hash
+                    liquidity: pos.liquidity
                 })
 
                 if (
@@ -545,9 +557,26 @@ export class Pool {
                             : 'nextPricePoint'
                     }, capping at ${arrivedAtSqrtPrice}`
                 )
-                this.curLiq += this.pos.get(nextPricePoint).liquidity * 1
-                this.curRight = this.pos.get(nextPricePoint).right
-                this.curLeft = this.pos.get(nextPricePoint).left
+
+                const nearestKey = findNearestKey(this.pos, nextPricePoint)
+                const np = this.pos.get(nearestKey)
+
+                if (!np) {
+                    console.error(
+                        'Failed to determine next position during buy',
+                        this
+                    )
+
+                    if (TEMP_CONFIG.JOURNAL && TEMP_CONFIG.JOURNAL_BUY) {
+                        journal.forEach((iteration) => {
+                            console.log(iteration.join('\n'))
+                        })
+                    }
+                }
+
+                this.curLiq += np.liquidity * 1
+                this.curRight = np.right
+                this.curLeft = np.left
                 this.curPP = nextPricePoint
                 journal[i].push(`Next liquidity: ${this.curLiq}`)
                 journal[i].push(
@@ -646,7 +675,7 @@ export class Pool {
 
         while (
             amount > 0 &&
-            arrivedAtSqrtPrice === Math.sqrt(pp2p(nextPricePoint)) &&
+            arrivedAtSqrtPrice === Math.sqrt(2 ** nextPricePoint) &&
             this.curPP > p2pp(TEMP_CONFIG.PRICE_MIN)
         ) {
             journal[i] = []
@@ -720,7 +749,22 @@ export class Pool {
                     })`
                 )
 
-                const np = this.pos.get(nextPricePoint)
+                const nearestKey = findNearestKey(this.pos, nextPricePoint)
+                const np = this.pos.get(nearestKey)
+
+                if (!np) {
+                    console.error(
+                        'Failed to determine next position during sell',
+                        this
+                    )
+
+                    if (TEMP_CONFIG.JOURNAL && TEMP_CONFIG.JOURNAL_SELL) {
+                        journal.forEach((iteration) => {
+                            console.log(iteration.join('\n'))
+                        })
+                    }
+                }
+
                 journal[i].push(
                     `Next position: liq: ${np.liquidity} left: ${np.left} pp: ${np.pp} right: ${np.right}`
                 )
@@ -743,6 +787,10 @@ export class Pool {
                 )
                 journal[i].push('!!! ---')
                 journal[i].push(`WILL MOVE TO NEXT POSITION: ${nextPricePoint}`)
+                journal[i].push('!!! ---')
+            } else {
+                journal[i].push('!!! ---')
+                journal[i].push(`Staying with the same liquidity ${curLiq}`)
                 journal[i].push('!!! ---')
             }
 

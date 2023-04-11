@@ -420,7 +420,7 @@ describe('Routing', () => {
         const results1 = router.smartSwap('USDC', 'TEST_2', 2500000)
 
         expect(results1[0]).toBeCloseTo(-2500000)
-        expect(results1[1]).toBeCloseTo(7696.4, 0) // !!!!!!!!!! WAS: 7238
+        expect(results1[1]).toBeCloseTo(7718.6, 0) // !!!!!!!!!! WAS: 7238
     })
 
     it('Swaps USDC for D through a long chain with enough token supply', () => {
@@ -456,7 +456,7 @@ describe('Routing', () => {
         const res1 = router.smartSwap('USDC', 'AGORA_D', 25000)
 
         expect(res1[0]).toBeCloseTo(-25000)
-        expect(res1[1]).toBeCloseTo(3483.2, 0) // was 3852 // was 3948 // was 2967
+        expect(res1[1]).toBeCloseTo(3637, 0) // was 3852 // was 3948 // was 2967
     })
 
     it('Swaps USDC for D through a long chain with different crosspool supplies', () => {
@@ -597,7 +597,7 @@ describe('Routing', () => {
         const results = router.smartSwap('USDC', 'TEST_2', amount)
 
         expect(results[0]).toBeCloseTo(-100)
-        expect(results[1]).toBeCloseTo(79.6, 0) // was: 92.97
+        expect(results[1]).toBeCloseTo(92.92, 0) // was: 92.97
     })
 
     it('Smart route for token through cited cross pool', () => {

@@ -7,7 +7,8 @@ import {
     IQuestCreate,
     IQuestUpdate,
     IPoolCreate,
-    IPoolQueryUpdate
+    IPoolQueryUpdate,
+    PoolStatePopulated
 } from './index'
 import { QueryFilterType } from '../types'
 
@@ -42,4 +43,6 @@ export interface IDataStoreRepository {
     createQuest(data: IQuestCreate): Promise<IQuest>
 
     updateQuest(id: number, data: Partial<IQuestUpdate>): Promise<IQuest>
+
+    createPoolState(data: PoolStatePopulated): Promise<PoolStatePopulated>
 }

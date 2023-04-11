@@ -1,5 +1,25 @@
 import HashMap from 'hashmap'
 
+export const findNearestKey = (map, target, tolerance = 1e-10) => {
+    let nearestKey = null
+    let nearestDistance = Infinity
+
+    for (const key of map.keys()) {
+        const distance = Math.abs(key - target)
+        if (distance < nearestDistance && distance <= tolerance) {
+            nearestDistance = distance
+            nearestKey = key
+        }
+    }
+
+    return nearestKey
+}
+
+export const roundNumber = (num, decimals) => {
+    const factor = 10 ** decimals
+    return Math.round(num * factor) / factor
+}
+
 export const pp2p = (pricePoint) => {
     return 2 ** pricePoint
 }

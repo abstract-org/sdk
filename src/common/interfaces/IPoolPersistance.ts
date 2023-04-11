@@ -1,5 +1,6 @@
 import { IPool, IPoolCreate, IPoolQueryUpdate } from './IPool'
 import { PoolType } from '../types'
+import { PoolStatePopulated } from './IPoolState'
 
 export interface IPoolPersistence {
     getPools(poolHashes: Array<string>): Promise<Array<IPool>>
@@ -22,4 +23,6 @@ export interface IPoolPersistence {
     savePool(data: IPoolCreate): Promise<IPool>
 
     updatePool(questId: number, data: IPoolQueryUpdate): Promise<IPool>
+
+    createPoolState(data: PoolStatePopulated): Promise<PoolStatePopulated>
 }

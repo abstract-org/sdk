@@ -52,7 +52,7 @@ export class Router {
      * @param {number} forcedPath
      * @returns {*[]|number[]}
      */
-    smartSwap(token0, token1, amountIn, smartRouteDepth = 1, forcedPath?: any) {
+    smartSwap(token0, token1, amountIn, smartRouteDepth = 3, forcedPath?: any) {
         if (this._DEBUG) {
             console.log(
                 `\n--- SMART ROUTE ${token0}/${token1}/${amountIn}---\n`
@@ -548,7 +548,7 @@ export class Router {
      * @param {number} depth
      * @returns {[]|*[]}
      */
-    findPoolsFor(tokenName, maxDepth?: number, depth = 1) {
+    findPoolsFor(tokenName, maxDepth?: number, depth: number = 1) {
         let results = this._processTokenForPath(tokenName)
 
         if (depth >= maxDepth && this._shouldScanPaths) {

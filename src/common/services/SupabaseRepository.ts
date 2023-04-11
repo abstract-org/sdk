@@ -6,14 +6,15 @@ import {
     IQuestCreate,
     IQueryOptions,
     IPoolCreate,
-    IPoolQueryUpdate
+    IPoolQueryUpdate,
+    PoolStatePopulated
 } from '../interfaces'
 import { SupabaseClient, createClient } from '@supabase/supabase-js'
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { QueryFilterType } from '../types'
 import { ConstructorSimConfig } from '../../api/sim/SimAPI'
 
-type TableNameType = 'pools' | 'quests' | 'wallets'
+type TableNameType = 'pools' | 'quests' | 'wallets' | 'pool_states'
 
 export class SupabaseRepository implements IDataStoreRepository {
     client: SupabaseClient
@@ -24,6 +25,12 @@ export class SupabaseRepository implements IDataStoreRepository {
 
     async createPool(data: IPoolCreate): Promise<IPool> {
         return await this.create<IPool, IPoolCreate>('pools', data)
+    }
+
+    async createPoolState(
+        data: PoolStatePopulated
+    ): Promise<PoolStatePopulated> {
+        return await this.create<PoolStatePopulated, any>('pool_states', data)
     }
 
     async updatePool(id: number, data: IPoolQueryUpdate): Promise<IPool> {
