@@ -295,4 +295,12 @@ describe('CrossPool Swap', () => {
 
         await crossPoolAB.swapExactInputSingle(amount)
     })
+
+    test('Should swap exactInput by path', async () => {
+        const amount = '0.1'
+        const path = [wethAddress, tokenAAddress, tokenBAddress]
+        const fees = [500, 500]
+
+        await wethTokenAPool.swapExactInputPath(amount, path, fees)
+    })
 })
