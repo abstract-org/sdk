@@ -19,6 +19,7 @@
     },
     "dependencies": {
         "@ethersproject/abi": "^5.7.0",
+        "@ethersproject/experimental": "^5.7.0",
         "@ethersproject/providers": "^5.7.2",
         "@faker-js/faker": "^7.6.0",
         "@supabase/supabase-js": "^2.2.1",

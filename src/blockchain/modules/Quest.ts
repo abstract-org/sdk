@@ -1,12 +1,14 @@
-import { ethers, Contract } from 'ethers'
+import { ethers, Contract, BigNumber } from 'ethers'
 import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
-import { ContractFactory } from 'ethers'
 import Hex from 'crypto-js/enc-hex'
 import sha256 from 'crypto-js/sha256'
 import { SimpleToken, SimpleFactory } from '@/blockchain/typechain-types'
 import ERC20_ABI from '@/blockchain/abi/ERC20ABI.json'
 import SimpleTokenABI from '@/blockchain/abi/SimpleToken.json'
 import { Pool } from '@/blockchain/modules/Pool'
+import { Web3ApiConfig } from '@/api/web3/Web3API'
+import { FeeAmount } from '@uniswap/v3-sdk'
+import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
 
 export const TEMP_CONFIG = {
     INITIAL_LIQUIDITY: [
@@ -44,103 +46,80 @@ export class Quest {
     content: string
     hash: string
     tokenContract: ethers.Contract
+    defaultToken: ethers.Contract
     creator_hash: string
 
     private provider: ethers.providers.JsonRpcProvider
     private signer: ethers.Signer
-    private contracts: TUniswapContracts
+    private contracts: TUniswapContracts & { tokenFactory: ethers.Contract }
 
     static async create(
-        name: string,
-        kind: string,
-        content: string,
-        apiConfig: {
-            provider: ethers.providers.JsonRpcProvider
-            signer: ethers.Signer
-            contracts: TUniswapContracts
+        supply: number,
+        apiConfig: Web3ApiConfig,
+        metadata?: {
+            name: string
+            kind: string
+            content: string
         }
     ): Promise<Quest> {
         const thisToken = new Quest()
-        thisToken.name = name
-        thisToken.kind = kind
-        thisToken.content = content
-        thisToken.hash = Hex.stringify(sha256(name))
+        if (metadata) {
+            thisToken.name = metadata.name
+            thisToken.kind = metadata.kind
+            thisToken.content = metadata.content
+            thisToken.hash = Hex.stringify(sha256(metadata.name))
+        }
+
         thisToken.provider = apiConfig.provider
-        // get it from react-web3 wallet or pre-instantiate from .env PrivateKey
         thisToken.signer = apiConfig.signer
-        // pre-defined UniswapV3Contracts
         thisToken.contracts = apiConfig.contracts
         thisToken.creator_hash = await apiConfig.signer.getAddress()
+        thisToken.defaultToken = apiConfig.defaultToken
 
-        thisToken.tokenContract = await thisToken.deployToken(20000)
+        thisToken.tokenContract = await thisToken.deployToken(supply)
 
         return thisToken
     }
 
     async deployToken(mintAmount?: number) {
-        return this.deploySimpleToken(mintAmount || DEFAULT_TOTAL_SUPPLY)
+        return this.createToken(mintAmount || DEFAULT_TOTAL_SUPPLY)
     }
 
-    async deploySimpleToken(
-        mintAmount: number = DEFAULT_TOTAL_SUPPLY
-    ): Promise<ethers.Contract> {
-        const SimpleTokenFactory: ContractFactory = new ethers.ContractFactory(
-            SimpleTokenABI.abi,
-            SimpleTokenABI.bytecode,
-            this.signer
-        )
-        const initialSupply = ethers.utils.parseUnits(String(mintAmount), 18)
-        const simpleToken: SimpleToken = <SimpleToken>(
-            await SimpleTokenFactory.deploy(
-                this.name,
-                this.getTokenSymbol(),
-                initialSupply,
-                this.signer.getAddress()
-            )
-        )
-        await simpleToken.deployed()
-        console.log('SimpleToken deployed to:', simpleToken.address)
-
-        return new ethers.Contract(
-            simpleToken.address,
-            SimpleTokenABI.abi,
-            this.signer
-        )
+    async getBalanceOf(address: string) {
+        return await this.tokenContract.connect(this.signer).balanceOf(address);
     }
 
-    // @deprecated
-    async deployERC20Token(
+    async createToken(
         mintAmount: number = DEFAULT_TOTAL_SUPPLY
     ): Promise<ethers.Contract> {
         const initialSupply = ethers.utils.parseUnits(String(mintAmount), 18)
-        const ERC20TokenFactory = new ethers.ContractFactory(
-            ERC20_ABI.abi,
-            ERC20_ABI.bytecode,
-            this.signer
-        )
-        const ERC20Token = await ERC20TokenFactory.deploy(
+        const ownerAddress = await this.signer.getAddress()
+        const tx = await this.contracts.tokenFactory.createToken(
+            this.name,
             this.getTokenSymbol(),
             initialSupply,
-            this.signer.getAddress()
-        )
-        await ERC20Token.deployTransaction.wait()
-
-        const tokenContract = ERC20Token.connect(this.signer)
-
-        // Mint `supplyAmount` tokens to the signer's address
-        const mintTransaction = await tokenContract
-            .connect(this.signer)
-            .mint(this.signer.getAddress(), initialSupply)
-        await mintTransaction.wait()
-
-        console.log(
-            '## minted [',
-            mintAmount,
-            '] tokens to wallet:',
-            this.signer.getAddress()
+            ownerAddress
         )
 
-        return tokenContract
+        const receipt = await tx.wait()
+
+        const tokenCreatedEvent = receipt.events?.find(
+            (event) =>
+                event.event === 'tokenCreated' &&
+                event.args[1].toString() === ownerAddress
+        )
+
+        if (!tokenCreatedEvent) {
+            throw new Error('Token creation event not found')
+        }
+
+        const tokenAddress = tokenCreatedEvent.args[0]
+
+        return new ethers.Contract(
+            tokenAddress,
+            SimpleTokenABI.abi,
+            this.signer
+        )
     }
 
     getTokenSymbol() {
@@ -150,18 +129,27 @@ export class Quest {
     }
 
     async createPool({
-        tokenLeft = null,
-        initialPositions = null
+        tokenLeft,
+        initialPositions,
+        fee
+    }: {
+        tokenLeft?: Quest
+        initialPositions?: any
+        fee?: number
     } = {}): Promise<Pool> {
-        // like in simulator version const tokenLeftInstance = tokenLeft || new UsdcToken()
-        const defaultToken = await this.getDefaultTokenContract()
-        const tokenLeftAddress = tokenLeft || defaultToken.getAddress()
+        const tokenLeftContract =
+            tokenLeft?.tokenContract || this.getDefaultTokenContract()
 
         const pool = await Pool.create(
-            tokenLeft.getAddress(),
-            this.tokenContract.getAddress(),
+            tokenLeftContract.address,
+            this.tokenContract.address,
+            fee || Pool.DEFAULT_POOL_FEE,
             this.getApiConfig()
         )
+        await pool.deployPool({
+            fee: FeeAmount.LOWEST,
+            sqrtPrice: encodePriceSqrt(1, 1)
+        })
 
         if (initialPositions) {
             await this.initializePoolPositions(pool, initialPositions)
@@ -175,23 +163,25 @@ export class Quest {
             initialPositions || TEMP_CONFIG.INITIAL_LIQUIDITY
         for (const positionData of initialPositionsList) {
             await pool.openPosition(
-                positionData.priceMin,
-                positionData.priceMax,
-                positionData.tokenA,
-                positionData.tokenB
+                ''
+                // positionData.priceMin,
+                // positionData.priceMax,
+                // positionData.tokenA,
+                // positionData.tokenB
             )
         }
     }
 
-    async getDefaultTokenContract(): Promise<ethers.Contract> {
-        return
+    getDefaultTokenContract(): ethers.Contract {
+        return this.defaultToken
     }
 
     getApiConfig() {
         return {
             provider: this.provider,
             signer: this.signer,
-            contracts: this.contracts
+            contracts: this.contracts,
+            defaultToken: this.defaultToken
         }
     }
 }

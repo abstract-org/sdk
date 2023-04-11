@@ -1,29 +1,39 @@
 import { IAPI } from '@/common/interfaces' // TODO: should implement universal Interface
-import { Pool } from '@/blockchain/modules/Pool'
+import { Pool, TDeployParams } from '@/blockchain/modules/Pool'
 import { ethers } from 'ethers'
 import {
     initializeUniswapContracts,
     TUniswapContracts
 } from '@/blockchain/utils/initializeUniswapContracts'
+import { initializeDefaultToken } from '@/blockchain/utils/initializeDefaultToken'
 import { Quest } from '@/blockchain/modules'
+import { initializeTokenFactory } from '@/blockchain/utils/initializeTokenFactory'
+import { FeeAmount } from '@uniswap/v3-sdk'
+import { AuthApiError } from '@supabase/supabase-js'
 
 export interface Web3ApiConfig {
     provider: ethers.providers.JsonRpcProvider
     signer: ethers.Signer
-    contracts: TUniswapContracts
+    contracts: TUniswapContracts & { tokenFactory: ethers.Contract }
+    defaultToken: ethers.Contract
 }
 
 const providerUrl = String(process.env.PROVIDER_URL)
 const privateKey = String(process.env.TEST_PRIVATE_KEY)
 const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl)
 const signer = new ethers.Wallet(privateKey, provider)
-const contracts = initializeUniswapContracts(signer)
 const DEFAULT_CONFIG: Web3ApiConfig = {
     provider,
     signer,
-    contracts
+    contracts: {
+        ...initializeUniswapContracts(signer),
+        tokenFactory: initializeTokenFactory(signer)
+    },
+    defaultToken: initializeDefaultToken(signer)
 }
-export default class Web3API implements IAPI {
+
+// export default class Web3API implements IAPI {
+export default class Web3API {
     constructor(private config: Web3ApiConfig) {}
 
     async createQuest(
@@ -35,13 +45,26 @@ export default class Web3API implements IAPI {
     }
 
     // deploys UniswapV3 pool and returns Pool entity
-    async createPool(token0: string, token1: string): Promise<Pool> {
-        return Pool.create(token0, token1, this.config)
+    async createPool(
+        token0: string,
+        token1: string,
+        opts: TDeployParams
+    ): Promise<Pool> {
+        const pool = await Pool.create(token0, token1, this.config)
+        const deployParams = {
+            fee: opts.fee,
+            sqrtPrice: opts.sqrtPrice,
+            deployGasLimit: opts.deployGasLimit
+        }
+        await pool.deployPool(deployParams)
+
+        return pool
     }
 
     async openPoolPosition(pool: Pool, initialValues) {
         const { min, max, tokenA, tokenB } = initialValues
-        return pool.openPosition(min, max, tokenA, tokenB)
+        const positionParams = [min, max, tokenA, tokenB].join(',')
+        return pool.openPosition(positionParams)
     }
 
     async swap(pool: Pool, amount: number, zeroForOne: boolean) {
@@ -49,7 +72,6 @@ export default class Web3API implements IAPI {
     }
 
     citeQuest(questId: number, userId: string): boolean {
-        // alternate implementation details
         return true
     }
 }

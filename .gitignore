@@ -83,3 +83,4 @@ typings/
 .vscode
 
 src/typechain-types
+.env.test
