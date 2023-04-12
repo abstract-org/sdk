@@ -15,6 +15,7 @@ import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/UniswapV3Poo
 import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
 import { Web3ApiConfig } from '@/api/web3/Web3API'
 import { estimateGasAmount } from '@/blockchain/utils/estimateGasAmount'
+import { addressComparator } from '@/blockchain/utils/addressComparator'
 
 export const DEFAULT_TX_GAS_LIMIT = 10000000
 export const DEFAULT_POOL_FEE = FeeAmount.LOW
@@ -29,6 +30,7 @@ export class Pool {
     token1: string
     fee: number
     hash: string
+    isReversed: boolean
     poolContract: ethers.Contract = null
     private provider: ethers.providers.JsonRpcProvider
     private signer: ethers.Signer
@@ -59,9 +61,12 @@ export class Pool {
         thisPool.signer = apiConfig.signer
         // pre-defined UniswapV3Contracts
         thisPool.contracts = apiConfig.contracts
+        const [left, right] = [token0, token1].sort(addressComparator)
 
-        thisPool.token0 = token0
-        thisPool.token1 = token1
+        thisPool.isReversed = left !== token0
+
+        thisPool.token0 = left
+        thisPool.token1 = right
         thisPool.fee = fee
         const token0Bytes = ethers.utils.arrayify(token0)
         const token1Bytes = ethers.utils.arrayify(token1)
