@@ -196,7 +196,7 @@ describe('CrossPool', () => {
         })
 
         test('Should swap exactInput by path', async () => {
-            const amount = '0.1'
+            const amount = '0.01'
             const path = [wethAddress, tokenAAddress, tokenBAddress]
             const fees = [500, 500]
 
