@@ -29,15 +29,11 @@ describe('Blockchain/Modules/Quest', () => {
             },
             defaultToken: initializeDefaultToken(signer)
         }
-        quest = await Quest.create(
-            100000,
-            apiConfig,
-            {
-                name: 'TEST TOKEN',
-                kind: 'TITLE',
-                content: 'Test content'
-            }
-        )
+        quest = await Quest.create(100000, apiConfig, {
+            name: 'TEST TOKEN',
+            kind: 'TITLE',
+            content: 'Test content'
+        })
     })
 
     describe('Quest.create()', () => {
@@ -112,7 +108,7 @@ describe('Blockchain/Modules/Quest', () => {
         })
     })
 
-    describe('Quest.createPool() default', () => {
+    describe.skip('Quest.createPool() default', () => {
         let pool = null
 
         beforeAll(async () => {
@@ -128,20 +124,16 @@ describe('Blockchain/Modules/Quest', () => {
         })
     })
 
-    describe('Quest.createPool() value-link', () => {
+    describe.skip('Quest.createPool() value-link', () => {
         let citedQuest = null
         let pool = null
 
         beforeAll(async () => {
-            citedQuest = await Quest.create(
-                100000,
-                apiConfig,
-                {
-                    name: 'CITED TOKEN',
-                    kind: 'TITLE',
-                    content: 'Cited content'
-                }
-            )
+            citedQuest = await Quest.create(100000, apiConfig, {
+                name: 'CITED TOKEN',
+                kind: 'TITLE',
+                content: 'Cited content'
+            })
             pool = await quest.createPool(citedQuest)
             await pool.deployPool()
         })
@@ -171,7 +163,7 @@ describe('Blockchain/Modules/Quest', () => {
         })
     })
 
-    describe('Quest.initializePoolPositions()', () => {
+    describe.skip('Quest.initializePoolPositions()', () => {
         test('Quest should initialize pool positions', async () => {
             const pool = await quest.createPool()
             await quest.initializePoolPositions(

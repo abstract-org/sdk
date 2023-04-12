@@ -59,7 +59,7 @@ export class Pool {
         thisPool.provider = apiConfig.provider
         // get it from react-web3 wallet or pre-instantiate from .env PrivateKey
         thisPool.signer = apiConfig.signer
-        // pre-defined UniswapV3Contracts
+        // pre-defined UniswapV3 contracts and SimpleTokenFactory contract
         thisPool.contracts = apiConfig.contracts
         const [left, right] = [token0, token1].sort(addressComparator)
 
@@ -68,8 +68,8 @@ export class Pool {
         thisPool.token0 = left
         thisPool.token1 = right
         thisPool.fee = fee
-        const token0Bytes = ethers.utils.arrayify(token0)
-        const token1Bytes = ethers.utils.arrayify(token1)
+        const token0Bytes = ethers.utils.arrayify(left)
+        const token1Bytes = ethers.utils.arrayify(right)
         const concatenatedBytes = ethers.utils.concat([
             token0Bytes,
             token1Bytes
@@ -267,8 +267,7 @@ export class Pool {
         const quotedAmountOut =
             await this.contracts.quoter.callStatic.quoteExactInput(
                 formattedPath,
-                amountIn,
-                0
+                amountIn
             )
 
         const swapParams = {

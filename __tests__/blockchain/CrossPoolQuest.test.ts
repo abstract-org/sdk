@@ -8,7 +8,7 @@ import {
 } from '@/blockchain/utils'
 import { Web3ApiConfig } from '@/api/web3/Web3API'
 import { Pool } from '@/blockchain/modules'
-import { FeeAmount } from '@uniswap/v3-sdk'
+import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk'
 import SimpleTokenABI from '@/blockchain/abi/SimpleToken.json'
 
 const wethAddress = String(process.env.WETH_ADDRESS)
@@ -23,6 +23,187 @@ const crossPoolABAddress = String(process.env.POOL_A_B_ADDRESS)
 const providerUrl = String(process.env.PROVIDER_URL)
 const privateKey = String(process.env.TEST_PRIVATE_KEY)
 const initialSupply = 100000
+
+describe('CrossPool', () => {
+    let apiConfig, provider, signer
+    let tokenA, tokenB, weth
+    let wethTokenAPool, wethTokenBPool, crossPoolAB
+
+    async function printBalances() {
+        const [tokenABalance, tokenBBalance, wethBalance] = await Promise.all([
+            tokenA.connect(signer).balanceOf(signer.address),
+            tokenB.connect(signer).balanceOf(signer.address),
+            weth.connect(signer).balanceOf(signer.address)
+        ])
+
+        console.table([
+            ['TokenA Balance', ethers.utils.formatEther(tokenABalance)],
+            ['TokenB Balance', ethers.utils.formatEther(tokenBBalance)],
+            ['Weth Balance', ethers.utils.formatEther(wethBalance)]
+        ])
+    }
+
+    async function printLiquidity() {
+        const [
+            wethTokenAPoolLiquidity,
+            wethTokenBPoolLiquidity,
+            ABPoolLiquidity
+        ] = await Promise.all([
+            await wethTokenAPool.poolContract.liquidity(),
+            await wethTokenBPool.poolContract.liquidity(),
+            await crossPoolAB.poolContract.liquidity()
+        ])
+
+        console.table([
+            [
+                'WETH-TokenA Liquidity',
+                ethers.utils.formatEther(wethTokenAPoolLiquidity)
+            ],
+            [
+                'WETH-TokenB Liquidity',
+                ethers.utils.formatEther(wethTokenBPoolLiquidity)
+            ],
+            [
+                'TokenA-TokenB Liquidity',
+                ethers.utils.formatEther(ABPoolLiquidity)
+            ]
+        ])
+    }
+
+    beforeAll(async () => {
+        provider = new ethers.providers.JsonRpcProvider(providerUrl)
+        const wallet = new ethers.Wallet(privateKey, provider)
+        signer = wallet.connect(provider)
+
+        apiConfig = {
+            provider,
+            signer,
+            contracts: {
+                ...initializeUniswapContracts(signer),
+                tokenFactory: initializeTokenFactory(signer)
+            },
+            defaultToken: initializeDefaultToken(signer)
+        }
+
+        tokenA = new ethers.Contract(tokenAAddress, SimpleTokenABI.abi, signer)
+
+        tokenB = new ethers.Contract(tokenBAddress, SimpleTokenABI.abi, signer)
+
+        weth = new ethers.Contract(wethAddress, SimpleTokenABI.abi, signer)
+
+        wethTokenAPool = await Pool.create(
+            wethAddress,
+            tokenAAddress,
+            500,
+            apiConfig
+        )
+        wethTokenAPool.initPoolContract(wethTokenAPoolAddress)
+
+        wethTokenBPool = await Pool.create(
+            wethAddress,
+            tokenBAddress,
+            500,
+            apiConfig
+        )
+        wethTokenBPool.initPoolContract(wethTokenBPoolAddress)
+
+        crossPoolAB = await Pool.create(
+            tokenAAddress,
+            tokenBAddress,
+            500,
+            apiConfig
+        )
+        crossPoolAB.initPoolContract(crossPoolABAddress)
+    })
+
+    beforeEach(async () => {
+        console.log('=========================== BEFORE TEST')
+        await printBalances()
+        await printLiquidity()
+        console.log('=========================== END BEFORE')
+    })
+
+    afterEach(async () => {
+        console.log('=========================== AFTER TEST')
+        await printBalances()
+        await printLiquidity()
+        console.log('=========================== END AFTER')
+    })
+
+    describe('Liquidity Adding', () => {
+        test('Adds liquidity to WETH-A', async () => {
+            const { tick, tickSpacing } =
+                await wethTokenAPool.getPoolStateData()
+
+            console.log('WethTokenAPool tick: ', [tick, tickSpacing])
+
+            await wethTokenAPool.openPosition(
+                '10',
+                nearestUsableTick(tick, tickSpacing)
+            )
+        })
+
+        test('Adds liquidity to WETH-B', async () => {
+            const { tick, tickSpacing } =
+                await wethTokenBPool.getPoolStateData()
+
+            console.log('WethTokenBPool tick: ', [tick, tickSpacing])
+
+            await wethTokenBPool.openPosition(
+                '10',
+                nearestUsableTick(tick, tickSpacing)
+            )
+        })
+
+        test('Adds liquidity to A-B', async () => {
+            const { tick, tickSpacing } = await crossPoolAB.getPoolStateData()
+
+            console.log('CrossPoolAB tick: ', [tick, tickSpacing])
+
+            await crossPoolAB.openPosition(
+                '1000',
+                nearestUsableTick(tick, tickSpacing)
+            )
+        })
+    })
+
+    describe('Swaps', () => {
+        test('Buy tokenA with WETH in WETH-A Pool', async () => {
+            const amount = '0.01'
+
+            await wethTokenAPool.swapExactInputSingle(
+                amount,
+                !wethTokenAPool.isReversed
+            )
+        })
+
+        test('Buy tokenB with WETH in WETH-B Pool', async () => {
+            const amount = '0.01'
+
+            await wethTokenBPool.swapExactInputSingle(
+                amount,
+                !wethTokenAPool.isReversed
+            )
+        })
+
+        test('Buy tokenB with tokenA in A-B Pool', async () => {
+            const amount = '1'
+
+            await crossPoolAB.swapExactInputSingle(
+                amount,
+                !wethTokenAPool.isReversed
+            )
+        })
+
+        test('Should swap exactInput by path', async () => {
+            const amount = '0.1'
+            const path = [wethAddress, tokenAAddress, tokenBAddress]
+            const fees = [500, 500]
+
+            await wethTokenAPool.swapExactInputPath(amount, path, fees)
+        })
+    })
+})
 
 describe.skip('CrossPool with Quest', () => {
     const poolParams = {
@@ -170,137 +351,5 @@ describe.skip('CrossPool with Quest', () => {
         console.log(
             `token0-token1 CrossPool deployed to address: ${token0token1CrossPool.poolContract.address}`
         )
-    })
-})
-
-describe('CrossPool Swap', () => {
-    let apiConfig, provider, signer
-    let tokenA, tokenB
-    let wethTokenAPool, wethTokenBPool, crossPoolAB
-
-    async function printBalances() {
-        const [tokenABalance, tokenBBalance] = await Promise.all([
-            tokenA.connect(signer).balanceOf(signer.address),
-            tokenB.connect(signer).balanceOf(signer.address)
-        ])
-
-        console.table([
-            ['TokenA Balance', ethers.utils.formatEther(tokenABalance)],
-            ['TokenB Balance', ethers.utils.formatEther(tokenBBalance)]
-        ])
-    }
-
-    async function printLiquidity() {
-        const [
-            wethTokenAPoolLiquidity,
-            wethTokenBPoolLiquidity,
-            ABPoolLiquidity
-        ] = await Promise.all([
-            await wethTokenAPool.poolContract.liquidity(),
-            await wethTokenBPool.poolContract.liquidity(),
-            await crossPoolAB.poolContract.liquidity()
-        ])
-
-        console.table([
-            [
-                'WETH-TokenA Liquidity',
-                ethers.utils.formatEther(wethTokenAPoolLiquidity)
-            ],
-            [
-                'WETH-TokenB Liquidity',
-                ethers.utils.formatEther(wethTokenBPoolLiquidity)
-            ],
-            [
-                'TokenA-TokenB Liquidity',
-                ethers.utils.formatEther(ABPoolLiquidity)
-            ]
-        ])
-    }
-
-    beforeAll(async () => {
-        provider = new ethers.providers.JsonRpcProvider(providerUrl)
-        const wallet = new ethers.Wallet(privateKey, provider)
-        signer = wallet.connect(provider)
-
-        apiConfig = {
-            provider,
-            signer,
-            contracts: {
-                ...initializeUniswapContracts(signer),
-                tokenFactory: initializeTokenFactory(signer)
-            },
-            defaultToken: initializeDefaultToken(signer)
-        }
-
-        tokenA = new ethers.Contract(tokenAAddress, SimpleTokenABI.abi, signer)
-
-        tokenB = new ethers.Contract(tokenBAddress, SimpleTokenABI.abi, signer)
-
-        wethTokenAPool = await Pool.create(
-            wethAddress,
-            tokenAAddress,
-            500,
-            apiConfig
-        )
-        wethTokenAPool.initPoolContract(wethTokenAPoolAddress)
-
-        wethTokenBPool = await Pool.create(
-            wethAddress,
-            tokenBAddress,
-            500,
-            apiConfig
-        )
-        wethTokenBPool.initPoolContract(wethTokenBPoolAddress)
-
-        crossPoolAB = await Pool.create(
-            tokenAAddress,
-            tokenBAddress,
-            500,
-            apiConfig
-        )
-        crossPoolAB.initPoolContract(crossPoolABAddress)
-    })
-
-    beforeEach(async () => {
-        await printBalances()
-        await printLiquidity()
-    })
-
-    test('Adds liquidity to WETH-A', async () => {
-        const { tick } = await wethTokenAPool.getPoolStateData()
-
-        await wethTokenAPool.openPosition('1', tick)
-    })
-
-    test('Adds liquidity to WETH-B', async () => {
-        const { tick } = await wethTokenBPool.getPoolStateData()
-
-        await wethTokenBPool.openPosition('1', tick)
-    })
-
-    test('Buy tokenA with WETH in WETH-A Pool', async () => {
-        const amount = '0.1'
-
-        await wethTokenAPool.swapExactInputSingle(amount)
-    })
-
-    test('Buy tokenB with WETH in WETH-B Pool', async () => {
-        const amount = '0.1'
-
-        await wethTokenBPool.swapExactInputSingle(amount)
-    })
-
-    test('Buy tokenB with tokenA in A-B Pool', async () => {
-        const amount = '1'
-
-        await crossPoolAB.swapExactInputSingle(amount)
-    })
-
-    test('Should swap exactInput by path', async () => {
-        const amount = '0.1'
-        const path = [wethAddress, tokenAAddress, tokenBAddress]
-        const fees = [500, 500]
-
-        await wethTokenAPool.swapExactInputPath(amount, path, fees)
     })
 })
