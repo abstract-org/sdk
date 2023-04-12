@@ -79,8 +79,13 @@ describe('Blockchain/Modules/Pool A-B', () => {
         })
 
         test('should have tokens addresses', () => {
-            expect(pool.token0).toBe(tokenA)
-            expect(pool.token1).toBe(tokenB)
+            if (pool.tokensSwapped) {
+                expect(pool.token0).toBe(tokenB)
+                expect(pool.token1).toBe(tokenA)
+            } else {
+                expect(pool.token0).toBe(tokenA)
+                expect(pool.token1).toBe(tokenB)
+            }
         })
 
         test('should have a hash', () => {

@@ -15,6 +15,7 @@ import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/UniswapV3Poo
 import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
 import { Web3ApiConfig } from '@/api/web3/Web3API'
 import { estimateGasAmount } from '@/blockchain/utils/estimateGasAmount'
+import { addressComparator } from '@/blockchain/utils/addressComparator'
 
 export const DEFAULT_TX_GAS_LIMIT = 10000000
 export const DEFAULT_POOL_FEE = FeeAmount.LOW
@@ -27,6 +28,7 @@ export type TDeployParams = {
 export class Pool {
     token0: string
     token1: string
+    tokensSwapped: boolean = false
     fee: number
     hash: string
     poolContract: ethers.Contract = null
@@ -57,14 +59,18 @@ export class Pool {
         thisPool.provider = apiConfig.provider
         // get it from react-web3 wallet or pre-instantiate from .env PrivateKey
         thisPool.signer = apiConfig.signer
-        // pre-defined UniswapV3Contracts
+        // pre-defined UniswapV3 contracts and SimpleTokenFactory contract
         thisPool.contracts = apiConfig.contracts
-
-        thisPool.token0 = token0
-        thisPool.token1 = token1
+        // @deprecated the way it was before ordering tokens by their addresses
+        // const left = (thisPool.token0 = token0)
+        // const right = (thisPool.token1 = token1)
+        const [left, right] = [token0, token1].sort(addressComparator)
+        thisPool.token0 = left
+        thisPool.token1 = right
+        thisPool.tokensSwapped = left === token1
         thisPool.fee = fee
-        const token0Bytes = ethers.utils.arrayify(token0)
-        const token1Bytes = ethers.utils.arrayify(token1)
+        const token0Bytes = ethers.utils.arrayify(left)
+        const token1Bytes = ethers.utils.arrayify(right)
         const concatenatedBytes = ethers.utils.concat([
             token0Bytes,
             token1Bytes
