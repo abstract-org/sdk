@@ -31,6 +31,7 @@ const DEFAULT_CONFIG: Web3ApiConfig = {
     },
     defaultToken: initializeDefaultToken(signer)
 }
+export const DEFAULT_TOKEN_SUPPLY = 20000
 
 // export default class Web3API implements IAPI {
 export default class Web3API {
@@ -39,22 +40,24 @@ export default class Web3API {
     async createQuest(
         name: string,
         kind: string,
-        content: string
+        content: string,
+        options: { supply?: number } = {}
     ): Promise<Quest> {
-        return Quest.create(name, kind, content, this.config)
+        const supply = options.supply || DEFAULT_TOKEN_SUPPLY
+        return Quest.create(supply, this.config, { name, kind, content })
     }
 
     // deploys UniswapV3 pool and returns Pool entity
     async createPool(
         token0: string,
         token1: string,
-        opts: TDeployParams
+        options: TDeployParams
     ): Promise<Pool> {
-        const pool = await Pool.create(token0, token1, this.config)
+        const pool = await Pool.create(token0, token1, options.fee, this.config)
         const deployParams = {
-            fee: opts.fee,
-            sqrtPrice: opts.sqrtPrice,
-            deployGasLimit: opts.deployGasLimit
+            fee: options.fee,
+            sqrtPrice: options.sqrtPrice,
+            deployGasLimit: options.deployGasLimit
         }
         await pool.deployPool(deployParams)
 
@@ -67,8 +70,8 @@ export default class Web3API {
         return pool.openPosition(positionParams)
     }
 
-    async swap(pool: Pool, amount: number, zeroForOne: boolean) {
-        return pool.swap(amount, zeroForOne)
+    async swap(pool: Pool, amount: number | string, zeroForOne: boolean) {
+        return pool.swapExactInputSingle(String(amount), zeroForOne)
     }
 
     citeQuest(questId: number, userId: string): boolean {

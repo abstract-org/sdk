@@ -1,5 +1,8 @@
 import { BigNumber, ethers } from 'ethers'
-import Web3API, { Web3ApiConfig } from '@/api/web3/Web3API'
+import Web3API, {
+    DEFAULT_TOKEN_SUPPLY,
+    Web3ApiConfig
+} from '@/api/web3/Web3API'
 import { Pool } from '@/blockchain/modules/Pool'
 import { Quest } from '@/blockchain/modules'
 import { initializeUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
@@ -13,7 +16,7 @@ jest.mock('@/blockchain/modules/Pool', () => {
             return {
                 deployPool: jest.fn().mockResolvedValue(undefined),
                 openPosition: jest.fn().mockResolvedValue(undefined),
-                swap: jest.fn().mockResolvedValue(undefined)
+                swapExactInputSingle: jest.fn().mockResolvedValue(undefined)
             }
         }),
         create: jest.fn()
@@ -58,19 +61,33 @@ describe('Web3API', () => {
     })
 
     describe('createQuest', () => {
-        it('should create a new Quest instance', async () => {
+        it('should invoke Quest.create() with default supply', async () => {
             const name = 'Test Quest'
             const kind = 'test'
             const content = 'This is a test quest.'
-
+            const supply = DEFAULT_TOKEN_SUPPLY
             await web3API.createQuest(name, kind, content)
 
-            expect(Quest.create).toHaveBeenCalledWith(
+            expect(Quest.create).toHaveBeenCalledWith(supply, config, {
                 name,
                 kind,
-                content,
-                config
-            )
+                content
+            })
+        })
+
+        it('should invoke Quest.create() with certain supply', async () => {
+            const name = 'Test Quest'
+            const kind = 'test'
+            const content = 'This is a test quest.'
+            const options = { supply: 50000 }
+
+            await web3API.createQuest(name, kind, content, options)
+
+            expect(Quest.create).toHaveBeenCalledWith(50000, config, {
+                name,
+                kind,
+                content
+            })
         })
     })
 
@@ -87,7 +104,12 @@ describe('Web3API', () => {
 
             const result = await web3API.createPool(token0, token1, opts)
 
-            expect(Pool.create).toHaveBeenCalledWith(token0, token1, config)
+            expect(Pool.create).toHaveBeenCalledWith(
+                token0,
+                token1,
+                opts.fee,
+                config
+            )
             expect(mockPool.deployPool).toHaveBeenCalledWith(opts)
             expect(result).toBe(mockPool)
         })
@@ -115,12 +137,28 @@ describe('Web3API', () => {
     describe('swap', () => {
         it('should call the Pool instance method swap', async () => {
             const mockPool = new Pool()
+            const amount = '100'
+            const zeroForOne = true
+
+            await web3API.swap(mockPool, amount, zeroForOne)
+
+            expect(mockPool.swapExactInputSingle).toHaveBeenCalledWith(
+                amount,
+                zeroForOne
+            )
+        })
+
+        it('should call the Pool instance method swap with amount number', async () => {
+            const mockPool = new Pool()
             const amount = 100
             const zeroForOne = true
 
             await web3API.swap(mockPool, amount, zeroForOne)
 
-            expect(mockPool.swap).toHaveBeenCalledWith(amount, zeroForOne)
+            expect(mockPool.swapExactInputSingle).toHaveBeenCalledWith(
+                String(amount),
+                zeroForOne
+            )
         })
     })
 
