@@ -21,10 +21,14 @@ const tokenB = String(process.env.TOKEN_B_ADDRESS)
 const providerUrl = String(process.env.PROVIDER_URL)
 const privateKey = String(process.env.TEST_PRIVATE_KEY)
 
+class ExtendedPool extends Pool {
+    tokensSwapped?: number
+}
+
 describe('Blockchain/Modules/Pool A-B', () => {
     let provider: any
     let signer: any
-    let pool: Pool
+    let pool: ExtendedPool
     let tokenAContract: ethers.Contract
     let tokenBContract: ethers.Contract
     let apiConfig: Web3ApiConfig
