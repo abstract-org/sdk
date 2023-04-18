@@ -1,4 +1,4 @@
-import { convertFloat8ToNum } from '../../../utils/logicUtils'
+import { convertFloat8ToNum } from '../../../common/utils/logicUtils'
 
 export class PositionDto {
     id: number

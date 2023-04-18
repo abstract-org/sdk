@@ -1,4 +1,4 @@
-import { convertNumToFloat8 } from '../../../utils/logicUtils'
+import { convertNumToFloat8 } from '../../../common/utils/logicUtils'
 
 export class PoolDataUploadDto {
     swap_id: number

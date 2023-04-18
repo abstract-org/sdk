@@ -1,18 +1,18 @@
 import 'reflect-metadata'
 import { ConstructorSimConfig } from './api/sim/SimAPI'
-import { ConstructorWeb3Config } from './api/web3/Web3API'
+import { Web3ApiConfig } from './api/web3/Web3API'
 import {
     PoolPersistenceService,
     QuestPersistenceService,
     WalletPersistenceService,
     SupabaseRepository
-} from './services'
+} from './common/services'
 import {
     IDataStoreRepository,
     IPoolPersistence,
     IQuestPersistence,
     IWalletPersistance
-} from './interfaces'
+} from './common/interfaces'
 
 const getPersistenceLayer = (
     repository
@@ -40,7 +40,7 @@ const getPersistenceLayer = (
 export class SimSdk {
     static init(
         adapter: string = 'supabase',
-        config: ConstructorSimConfig | ConstructorWeb3Config
+        config: ConstructorSimConfig | Web3ApiConfig
     ): {
         PoolPersistence: IPoolPersistence
         QuestPersistence: IQuestPersistence
@@ -73,9 +73,8 @@ export class SimSdk {
     }
 }
 
-export * as LogicUtils from './utils/logicUtils'
-export * as MathUtils from './utils/mathUtils'
-export * as Modules from './modules'
-export * from './types'
-export * from './interfaces'
-export { WrapperService } from './services/WrapperService'
+export * as LogicUtils from './common/utils/logicUtils'
+export * as MathUtils from './common/utils/mathUtils'
+export * as Modules from './common/modules'
+export * from './common/types'
+export * from './common/interfaces'

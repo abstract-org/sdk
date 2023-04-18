@@ -1,0 +1,1 @@
+# SDK is responsible for simulating Uniswap V3 like behaviour as well as managing communication with blockchain - eventually unifying user experience in one place if decided to use it without Quest Core

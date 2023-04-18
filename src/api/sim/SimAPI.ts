@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import HashMap from 'hashmap'
 
-import { IAPI, IState, ITotalsList } from '../../interfaces'
-import { Wallet, Pool, Quest } from '../../modules'
-import { createHashMappings } from '../../utils/logicUtils'
+import { IAPI, IState, ITotalsList } from '../../common/interfaces'
+import { Wallet, Pool, Quest } from '../../common/modules'
+import { createHashMappings } from '../../common/utils/logicUtils'
 import { getQuerySnapshotById, RELATION_TYPE, TABLE } from './constants'
 import {
     WalletUploadDto,

@@ -1,4 +1,4 @@
-import { Wallet } from '../../../modules'
+import { Wallet } from '../../../common/modules'
 
 export type TWalletBalance = {
     id?: number

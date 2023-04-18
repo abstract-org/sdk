@@ -1,7 +1,16 @@
 {
     "compilerOptions": {
-        "rootDir": "src",
+        "rootDirs": ["src"],
+        "baseUrl": "./src",
         "outDir": "./dist",
+        "paths": {
+            "@/*": ["*"]
+        },
+        "plugins": [
+            {
+                "name": "tsconfig-paths-webpack-plugin"
+            }
+        ],
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "moduleResolution": "node",
@@ -9,7 +18,7 @@
         "declarationMap": true,
         "sourceMap": true,
         "importHelpers": true,
-        "composite": true,
+        "composite": false,
         "allowJs": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
@@ -21,6 +30,9 @@
         "module": "ES2022",
         "target": "ES2022"
     },
-    "include": ["src", "src/index.ts", "src/__tests__"],
+    "include": [
+        "src/**/*",
+        "__tests__/**/*"
+    ],
     "exclude": ["dist", "**/node_modules"]
 }

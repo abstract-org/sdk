@@ -1,6 +1,6 @@
 import HashMap from 'hashmap'
 import setInto from 'lodash/set'
-import { IState, TWalletHash, TPoolName } from '../../interfaces'
+import { IState, TWalletHash, TPoolName } from '../../common/interfaces'
 import {
     ScenarioWalletConfigDto,
     ScenarioQuestConfigDto,
@@ -14,9 +14,9 @@ import {
     addStringToArrayUniq,
     convertArrayToHashMapByKey,
     createHashMappings
-} from '../../utils/logicUtils'
+} from '../../common/utils/logicUtils'
 
-import { Wallet, Pool } from '../../modules'
+import { Wallet, Pool } from '../../common/modules'
 
 export function gatherStateFromSnapshot(data): IState {
     let newState = makeEmptyState()
