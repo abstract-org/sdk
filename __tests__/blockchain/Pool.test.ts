@@ -78,8 +78,8 @@ describe('Blockchain/Modules/Pool WETH-TEST', () => {
         })
 
         test('should have tokens addresses', () => {
-            expect(pool.token0).toBe(pool.isReversed ? token1 : token0)
-            expect(pool.token1).toBe(pool.isReversed ? token0 : token1)
+            expect(pool.token0).toBe(pool.isInverted ? token1 : token0)
+            expect(pool.token1).toBe(pool.isInverted ? token0 : token1)
         })
 
         test('should have a hash', () => {

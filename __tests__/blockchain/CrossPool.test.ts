@@ -83,7 +83,7 @@ describe('Blockchain/Modules/Pool A-B', () => {
         })
 
         test('should have tokens addresses', () => {
-            if (pool.tokensSwapped) {
+            if (pool.isInverted) {
                 expect(pool.token0).toBe(tokenB)
                 expect(pool.token1).toBe(tokenA)
             } else {

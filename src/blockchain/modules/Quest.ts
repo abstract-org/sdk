@@ -86,7 +86,7 @@ export class Quest {
     }
 
     async getBalanceOf(address: string) {
-        return await this.tokenContract.connect(this.signer).balanceOf(address);
+        return await this.tokenContract.connect(this.signer).balanceOf(address)
     }
 
     async createToken(
@@ -159,15 +159,14 @@ export class Quest {
     }
 
     async initializePoolPositions(pool: Pool, initialPositions) {
-        const initialPositionsList =
+        const initialPriceBandsList =
             initialPositions || TEMP_CONFIG.INITIAL_LIQUIDITY
-        for (const positionData of initialPositionsList) {
-            await pool.openPosition(
-                ''
-                // positionData.priceMin,
-                // positionData.priceMax,
-                // positionData.tokenA,
-                // positionData.tokenB
+        for (const priceBand of initialPriceBandsList) {
+            await pool.openPriceBandPosition(
+                priceBand.priceMin,
+                priceBand.priceMax,
+                priceBand.tokenA,
+                priceBand.tokenB
             )
         }
     }

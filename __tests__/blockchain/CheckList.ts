@@ -1,19 +1,27 @@
-import { BigNumber, ethers, Wallet } from 'ethers'
-import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk'
+import { BigNumber, ethers } from 'ethers'
+import { FeeAmount, Position } from '@uniswap/v3-sdk'
 import { Web3ApiConfig } from '@/api/web3/Web3API'
 import { Pool } from '@/blockchain/modules/Pool'
-import { encodePriceSqrt } from '@/blockchain/utils'
+import {
+    encodePriceSqrt,
+    findPositionsDiff,
+    getPositionsByIds,
+    priceToSqrtX96
+} from '@/blockchain/utils'
 import { initializeWeb3ApiConfig } from '../helpers/initializeWeb3ApiConfig'
 import { Quest } from '@/blockchain/modules'
 import { faker } from '@faker-js/faker'
-import { getTokenBalances } from '../helpers/blockchainHelpers'
+import {
+    getPriceBandLiquidity,
+    getTokenBalances,
+    sqrtPriceX96ToPrice
+} from '../helpers/blockchainHelpers'
+import JSBI from 'jsbi'
 
 describe('Blockchain/Checklist flow', () => {
     let wethTokenContract: ethers.Contract
-    let tokenAContract: ethers.Contract
-    let tokenBContract: ethers.Contract
     let apiConfig: Web3ApiConfig
-    const pools = {
+    const pools: Record<string, Pool> = {
         poolWethA: null,
         poolWethB: null,
         poolAB: null
@@ -30,10 +38,11 @@ describe('Blockchain/Checklist flow', () => {
         poolWethB: null,
         poolAB: null
     }
+    const defaultTokenSupply = 20000
 
-    async function printBalances(title: string) {
+    const printBalances = async (title: string) => {
         const balances = await getTokenBalances(
-            [...Object.values(addresses)],
+            [addresses.weth, addresses.tokenA, addresses.tokenB],
             apiConfig.signer
         )
         console.log(title)
@@ -46,20 +55,18 @@ describe('Blockchain/Checklist flow', () => {
         addresses.weth = apiConfig.defaultToken.address
     })
 
-    describe('Open positions (4 price bands single sided) on WETH pool', () => {
+    describe('Create token A and pool WETH-A', () => {
         const metadataQuestA = {
-            name: 'TESTA' + faker.random.alphaNumeric(5),
+            name: 'TEST_A_' + faker.random.alphaNumeric(5),
             kind: 'TITLE',
             content: 'Title content A_TEST'
         }
-
-        const metadataQuestB = {
-            name: 'TESTB' + faker.random.alphaNumeric(5),
-            kind: 'TITLE',
-            content: 'Title content B_TEST'
-        }
-
-        const defaultTokenSupply = 20000
+        //
+        // const metadataQuestB = {
+        //     name: 'TEST_B_' + faker.random.alphaNumeric(5),
+        //     kind: 'TITLE',
+        //     content: 'Title content B_TEST'
+        // }
 
         test('should create token A', async () => {
             const quest = await Quest.create(
@@ -84,6 +91,7 @@ describe('Blockchain/Checklist flow', () => {
             const walletAddress = await quest.getApiConfig().signer.getAddress()
             const balance = await quest.tokenContract.balanceOf(walletAddress)
             expect(balance).toEqual(defaultMintedAmount)
+            await printBalances('should create token A')
         })
 
         test('should create pool Weth-A', async () => {
@@ -101,7 +109,7 @@ describe('Blockchain/Checklist flow', () => {
             const pool = pools.poolWethA
             const poolParams = {
                 fee: FeeAmount.LOW,
-                sqrtPrice: encodePriceSqrt(100, 1)
+                sqrtPrice: encodePriceSqrt(1, 1)
             }
             await pool.deployPool(poolParams)
             addresses.poolWethA = pool.poolContract.address
@@ -113,49 +121,202 @@ describe('Blockchain/Checklist flow', () => {
             expect(poolImmutables.token1).toBe(pool.token1)
             expect(poolImmutables.fee).toBe(poolParams.fee)
         })
+    })
 
-        test("should open Weth-A pool's single-sided position 1", async () => {
-            const pool = pools.poolWethA
-            const { tick, tickSpacing } = await pool.getPoolStateData()
+    describe('Open positions (4 price bands single sided) on WETH-A pool', () => {
+        const poolName = 'poolWethA'
+        let pool
+        let signerAddress
+        let positionsBefore
 
-            const lowerTick =
-                nearestUsableTick(tick, tickSpacing) - tickSpacing * 4
-
-            console.log('Current Tick: ', [tick, tickSpacing])
-            console.log('Lower Tick: ', lowerTick)
-
-            // Should open position for range upper than current price
-            await pool.openSingleSidedPosition(String(1), lowerTick, 'token0')
-
-            expect('TODO').toBe('TODO')
+        beforeEach(async () => {
+            pool = pools[poolName]
+            signerAddress = await apiConfig.signer.getAddress()
+            positionsBefore = await getPositionsByIds(
+                apiConfig.contracts.positionManager,
+                signerAddress
+            )
         })
 
-        test.skip('should create token B', async () => {
+        test("should open Weth-A pool's single-sided position 1 - 100,000", async () => {
+            const priceBand = {
+                priceMin: 1,
+                priceMax: 100000,
+                amount0: 1,
+                amount1: 5000
+            }
+
+            await pool.openPriceBandPosition(
+                priceBand.priceMin,
+                priceBand.priceMax,
+                priceBand.amount0,
+                priceBand.amount1
+            )
+
+            const liquidityChange = await getPriceBandLiquidity(pool, priceBand)
+            expect(Number(liquidityChange)).toBeGreaterThan(0)
+
+            const positionsAfter = await getPositionsByIds(
+                apiConfig.contracts.positionManager,
+                signerAddress
+            )
+
+            const changedPositions = findPositionsDiff(
+                positionsAfter,
+                positionsBefore
+            )
+            expect(changedPositions).toHaveLength(1)
+            expect(changedPositions[0].tickLower).toBe(0)
+            expect(changedPositions[0].tickUpper).toBe(115140)
+            console.log(
+                `Pool ${poolName}'s position [1 - 100,000] liquidity:`,
+                ethers.utils.formatEther(
+                    changedPositions[0].liquidity.toString()
+                )
+            )
+        })
+
+        test("should open Weth-A pool's single-sided position 20 - 100,000", async () => {
+            const priceBand = {
+                priceMin: 20,
+                priceMax: 100000,
+                amount0: 1,
+                amount1: 5000
+            }
+
+            await pool.openPriceBandPosition(
+                priceBand.priceMin,
+                priceBand.priceMax,
+                priceBand.amount0,
+                priceBand.amount1
+            )
+
+            const positionsAfter = await getPositionsByIds(
+                apiConfig.contracts.positionManager,
+                signerAddress
+            )
+
+            const changedPositions = findPositionsDiff(
+                positionsAfter,
+                positionsBefore
+            )
+            expect(changedPositions).toHaveLength(1)
+            expect(changedPositions[0].tickLower).toBe(29950)
+            expect(changedPositions[0].tickUpper).toBe(115140)
+            console.log(
+                `Pool ${poolName}'s position [20 - 100,000] liquidity:`,
+                ethers.utils.formatEther(
+                    changedPositions[0].liquidity.toString()
+                )
+            )
+        })
+
+        test("should open Weth-A pool's single-sided position 50 - 100,000", async () => {
+            const priceBand = {
+                priceMin: 50,
+                priceMax: 100000,
+                amount0: 1,
+                amount1: 5000
+            }
+
+            await pool.openPriceBandPosition(
+                priceBand.priceMin,
+                priceBand.priceMax,
+                priceBand.amount0,
+                priceBand.amount1
+            )
+
+            const positionsAfter = await getPositionsByIds(
+                apiConfig.contracts.positionManager,
+                signerAddress
+            )
+
+            const changedPositions = findPositionsDiff(
+                positionsAfter,
+                positionsBefore
+            )
+            expect(changedPositions).toHaveLength(1)
+            expect(changedPositions[0].tickLower).toBe(39120)
+            expect(changedPositions[0].tickUpper).toBe(115140)
+            console.log(
+                `Pool ${poolName}'s position [50 - 100,000] liquidity:`,
+                ethers.utils.formatEther(
+                    changedPositions[0].liquidity.toString()
+                )
+            )
+        })
+
+        test("should open Weth-A pool's single-sided position 200 - 100,000", async () => {
+            const priceBand = {
+                priceMin: 200,
+                priceMax: 100000,
+                amount0: 1,
+                amount1: 5000
+            }
+
+            await pool.openPriceBandPosition(
+                priceBand.priceMin,
+                priceBand.priceMax,
+                priceBand.amount0,
+                priceBand.amount1
+            )
+
+            const positionsAfter = await getPositionsByIds(
+                apiConfig.contracts.positionManager,
+                signerAddress
+            )
+
+            const changedPositions = findPositionsDiff(
+                positionsAfter,
+                positionsBefore
+            )
+            expect(changedPositions).toHaveLength(1)
+            expect(changedPositions[0].tickLower).toBe(52980)
+            expect(changedPositions[0].tickUpper).toBe(115140)
+            console.log(
+                `Pool ${poolName}'s position [200 - 100,000] liquidity:`,
+                ethers.utils.formatEther(
+                    changedPositions[0].liquidity.toString()
+                )
+            )
+        })
+
+        test('pool data', async () => {
+            const pool = pools.poolWethA
+            const { tickSpacing, fee, liquidity, sqrtPriceX96, tick } =
+                await pool.getPoolStateData()
+            const slot0 = await pool.poolContract.slot0()
+
+            console.log({
+                tickSpacing,
+                fee,
+                liquidity: ethers.utils.formatEther(liquidity.toString()),
+                sqrtPriceX96: sqrtPriceX96ToPrice(sqrtPriceX96),
+                tick
+            })
+            console.log('slot0:', slot0)
+        })
+    })
+
+    describe('Create token B and pool WETH-B', () => {
+        const metadataQuestB = {
+            name: 'TEST_B_' + faker.random.alphaNumeric(5),
+            kind: 'TITLE',
+            content: 'Title content B_TEST'
+        }
+
+        test('should create token B', async () => {
             const quest = await Quest.create(
                 defaultTokenSupply,
                 apiConfig,
-                metadataQuestA
+                metadataQuestB
             )
-            quests.questB = quest // save in global dictionary
+            quests.questB = quest
             addresses.tokenB = quest.tokenContract.address
-
-            expect(quest).toBeDefined()
-            expect(quest).toBeInstanceOf(Quest)
-            expect(quest.name).toBe(metadataQuestA.name)
-            expect(quest.kind).toBe(metadataQuestA.kind)
-            expect(quest.content).toBe(metadataQuestA.content)
-            expect(quest.tokenContract).toBeTruthy()
-            expect(quest.tokenContract).toBeInstanceOf(ethers.Contract)
-            expect(quest.tokenContract.address).toBeTruthy()
-            const defaultMintedAmount = ethers.utils.parseEther(
-                String(defaultTokenSupply)
-            )
-            const walletAddress = await quest.getApiConfig().signer.getAddress()
-            const balance = await quest.tokenContract.balanceOf(walletAddress)
-            expect(balance).toEqual(defaultMintedAmount)
+            await printBalances('should create token B')
         })
 
-        test.skip('should create pool Weth-B', async () => {
+        test('should create pool Weth-B', async () => {
             const pool = await Pool.create(
                 addresses.weth,
                 addresses.tokenB,
@@ -166,11 +327,11 @@ describe('Blockchain/Checklist flow', () => {
             expect(pool).toBeInstanceOf(Pool)
         })
 
-        test.skip('should deploy pool Weth-B', async () => {
+        test('should deploy pool Weth-B', async () => {
             const pool = pools.poolWethB
             const poolParams = {
                 fee: FeeAmount.LOW,
-                sqrtPrice: encodePriceSqrt(100, 1)
+                sqrtPrice: encodePriceSqrt(1, 1)
             }
             await pool.deployPool(poolParams)
             addresses.poolWethB = pool.poolContract.address
@@ -182,28 +343,97 @@ describe('Blockchain/Checklist flow', () => {
             expect(poolImmutables.token1).toBe(pool.token1)
             expect(poolImmutables.fee).toBe(poolParams.fee)
         })
+    })
 
-        test.skip("should open Weth-B pool's single-sided position 1", async () => {
-            const pool = pools.poolWethB
-            const { tick, tickSpacing } = await pool.getPoolStateData()
+    describe('Open positions (4 price bands single sided) on WETH-B pool', () => {
+        const poolName = 'poolWethB'
+        let pool
+        let signerAddress
+        let positionsBefore
 
-            const lowerTick =
-                nearestUsableTick(tick, tickSpacing) - tickSpacing * 4
-
-            console.log('Current Tick: ', [tick, tickSpacing])
-            console.log('Lower Tick: ', lowerTick)
-
-            await pool.openSingleSidedPosition(
-                String(defaultTokenSupply),
-                lowerTick,
-                pool.tokensSwapped ? 'token1' : 'token0'
+        beforeEach(async () => {
+            pool = pools[poolName]
+            signerAddress = await apiConfig.signer.getAddress()
+            positionsBefore = await getPositionsByIds(
+                apiConfig.contracts.positionManager,
+                signerAddress
             )
+        })
 
-            expect('TODO').toBe('TODO')
+        test("should open Weth-B pool's single-sided position 1 - 100,000", async () => {
+            const priceBand = {
+                priceMin: 1,
+                priceMax: 100000,
+                amount0: 1,
+                amount1: 5000
+            }
+
+            await pool.openPriceBandPosition(
+                priceBand.priceMin,
+                priceBand.priceMax,
+                priceBand.amount0,
+                priceBand.amount1
+            )
+        })
+
+        test("should open Weth-B pool's single-sided position 20 - 100,000", async () => {
+            const priceBand = {
+                priceMin: 20,
+                priceMax: 100000,
+                amount0: 1,
+                amount1: 5000
+            }
+
+            await pool.openPriceBandPosition(
+                priceBand.priceMin,
+                priceBand.priceMax,
+                priceBand.amount0,
+                priceBand.amount1
+            )
+        })
+
+        test("should open Weth-B pool's single-sided position 50 - 100,000", async () => {
+            const priceBand = {
+                priceMin: 50,
+                priceMax: 100000,
+                amount0: 1,
+                amount1: 5000
+            }
+
+            await pool.openPriceBandPosition(
+                priceBand.priceMin,
+                priceBand.priceMax,
+                priceBand.amount0,
+                priceBand.amount1
+            )
+        })
+
+        test("should open Weth-B pool's single-sided position 200 - 100,000", async () => {
+            const priceBand = {
+                priceMin: 200,
+                priceMax: 100000,
+                amount0: 1,
+                amount1: 5000
+            }
+
+            await pool.openPriceBandPosition(
+                priceBand.priceMin,
+                priceBand.priceMax,
+                priceBand.amount0,
+                priceBand.amount1
+            )
+        })
+
+        test('pool WETH-B data', async () => {
+            const pool = pools.poolWethA
+            const { tickSpacing, fee, liquidity, sqrtPriceX96, tick } =
+                await pool.getPoolStateData()
+
+            console.log({ tickSpacing, fee, liquidity, sqrtPriceX96, tick })
         })
     })
 
-    describe('Buy some amount on WETH pool and store that amount in your wallet', () => {
+    describe('Buy some amount on WETH-A pool and store that amount in your wallet', () => {
         test('wallet should have at least 10 WETH', async () => {
             const walletAddress = await apiConfig.signer.getAddress()
             const wethBalance = await wethTokenContract.balanceOf(walletAddress)
@@ -211,16 +441,22 @@ describe('Blockchain/Checklist flow', () => {
             const wethBalanceFormatted = ethers.utils.formatEther(
                 wethBalance.sub(remainder)
             )
-            await printBalances('wallet should have at least 10 WETH')
-            expect(Number(wethBalanceFormatted)).toBeGreaterThan(10)
+            await printBalances('wallet should have at least 1000 WETH')
+            expect(Number(wethBalanceFormatted)).toBeGreaterThan(1000)
         })
 
-        test('buy tokens for 10 weth', async () => {
+        test('buy tokens A for 100 WETH', async () => {
             const pool = pools.poolWethA
-            if (addresses.weth === pool.token0) {
-                await pool.swapExactInputSingle('0.001')
-                await printBalances('buy tokens for 10 weth')
-            }
+            const isDirect = pool.isInverted
+            await pool.swapExactInputSingle('100', isDirect)
+            await printBalances('buy tokens A for 100 weth')
+        })
+
+        test('buy tokens B for 1 WETH', async () => {
+            const pool = pools.poolWethB
+            const isDirect = pool.isInverted
+            await pool.swapExactInputSingle('1', isDirect)
+            await printBalances('buy tokens B for 1 weth')
         })
     })
 
@@ -228,9 +464,58 @@ describe('Blockchain/Checklist flow', () => {
         //Define price for a new cross pool
         // by taking citingTokenPriceInWethPool / citedTokenPriceInWethPool
         // and setting that as current price of cross pool
-        test('', async () => {})
+        let aBPrice
+        let aBSqrtPriceX96
 
-        test('', async () => {})
+        beforeAll(async () => {
+            const uniswapPoolWethA =
+                await pools.poolWethA.constructUniswapV3Pool()
+            const uniswapPoolWethB =
+                await pools.poolWethB.constructUniswapV3Pool()
+            const wethAPrice = !pools.poolWethA.isInverted
+                ? uniswapPoolWethA.token0Price
+                : uniswapPoolWethA.token1Price
+            const wethBPrice = !pools.poolWethB.isInverted
+                ? uniswapPoolWethB.token1Price
+                : uniswapPoolWethB.token0Price
+
+            aBPrice = wethAPrice.divide(wethBPrice)
+            // Assuming `aBPrice` is a Fraction or Price instance from Uniswap SDK
+            const aBPriceDecimal = aBPrice.toFixed(18) // Convert the price to a decimal string with 18 decimals
+            aBSqrtPriceX96 = priceToSqrtX96(aBPriceDecimal)
+            console.log('aBPrice', aBPrice)
+            console.log('aBSqrtPriceX96', aBSqrtPriceX96)
+            console.log('aBSqrtPriceX96.toString()', aBSqrtPriceX96.toString())
+        })
+
+        test('should create pool A-B', async () => {
+            const pool = await Pool.create(
+                addresses.tokenA,
+                addresses.tokenB,
+                FeeAmount.LOW,
+                apiConfig
+            )
+            pools.poolAB = pool
+            expect(pool).toBeInstanceOf(Pool)
+        })
+
+        test('should deploy pool A-B', async () => {
+            const pool = pools.poolAB
+            const poolParams = {
+                fee: FeeAmount.LOW,
+                // sqrtPrice: encodePriceSqrt(1, 1)
+                sqrtPrice: aBSqrtPriceX96
+            }
+            await pool.deployPool(poolParams)
+            addresses.poolAB = pool.poolContract.address
+
+            const poolImmutables = await pool.getPoolImmutables()
+
+            expect(pool.poolContract.address).toBeDefined()
+            expect(poolImmutables.token0).toBe(pool.token0)
+            expect(poolImmutables.token1).toBe(pool.token1)
+            expect(poolImmutables.fee).toBe(poolParams.fee)
+        })
     })
 
     describe('Open position on cross pool', () => {
@@ -240,22 +525,22 @@ describe('Blockchain/Checklist flow', () => {
         test('', async () => {})
     })
 
-    describe('Swap (buy) some amount of WETH pool and cross pool', () => {
-        test('', async () => {})
-
-        test('', async () => {})
-    })
-
-    describe('Swap (sell) some amount of WETH pool and cross pool', () => {
-        test('', async () => {})
-
-        test('', async () => {})
-    })
-
-    describe('Smart swap in path WETH-A-B', () => {
-        // Smart swap in path WETH-A-B and make sure pool states change everywhere accordingly
-        test('', async () => {})
-
-        test('', async () => {})
-    })
+    // describe('Swap (buy) some amount of WETH pool and cross pool', () => {
+    //     test('', async () => {})
+    //
+    //     test('', async () => {})
+    // })
+    //
+    // describe('Swap (sell) some amount of WETH pool and cross pool', () => {
+    //     test('', async () => {})
+    //
+    //     test('', async () => {})
+    // })
+    //
+    // describe('Smart swap in path WETH-A-B', () => {
+    //     // Smart swap in path WETH-A-B and make sure pool states change everywhere accordingly
+    //     test('', async () => {})
+    //
+    //     test('', async () => {})
+    // })
 })

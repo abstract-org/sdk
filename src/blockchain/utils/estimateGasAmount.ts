@@ -14,9 +14,11 @@ export const estimateGasAmount = async (
             functionGasFees.mul(feeData.maxFeePerGas)
         )
 
-        console.log(
-            `Estimated spend on Gas for calling contract.${method}(args): ${txEthAmount} ETH`
-        )
+        if (String(process.env.DEBUG) === 'true') {
+            console.log(
+                `Estimated spend on Gas for calling contract.${method}(args): ${txEthAmount} ETH`
+            )
+        }
 
         return txEthAmount
     } catch (e) {
@@ -24,6 +26,6 @@ export const estimateGasAmount = async (
             `Unable to estimate gas for calling contract.${method}(args)`
         )
 
-        return 0;
+        return 0
     }
 }
