@@ -15,6 +15,7 @@
 **/dist
 **/build
 **/tsconfig.tsbuildinfo
+tsconfig.build.tsbuildinfo
 
 # Logs
 logs
