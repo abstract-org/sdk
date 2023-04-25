@@ -61,15 +61,36 @@ export class Quest {
         creatorHash?: string,
         createdAt?: string
     ): Quest {
+        const hash = Quest.makeHash({ name, kind, content })
         const thisToken = new Quest()
-        thisToken.name = name
-        thisToken.hash = Hex.stringify(sha256(name))
+        thisToken.hash = hash
+        thisToken.name = name || `_${kind.toUpperCase()}${hash.substring(0, 4)}`
         thisToken.kind = kind
         thisToken.content = content
         thisToken.creator_hash = creatorHash
         thisToken.created_at = createdAt
 
         return thisToken
+    }
+
+    static makeHash({
+        name,
+        kind,
+        content
+    }: {
+        name?: string
+        kind?: string
+        content?: string
+    }) {
+        if (kind && content) {
+            return Hex.stringify(sha256(`${kind}${content}`))
+        } else if (name) {
+            return Hex.stringify(sha256(name))
+        } else {
+            throw new Error(
+                `Couldn't generate hash. Provide kind and content, or name`
+            )
+        }
     }
 
     /**
