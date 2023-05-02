@@ -162,7 +162,7 @@ export class Wallet {
      * @returns {*[]}
      */
     citeQuest(
-        crossPool,
+        crossPool: Pool,
         priceMin = 1,
         priceMax = 10,
         token0Amt = 0,

@@ -1,4 +1,5 @@
 import { BigNumber, ethers } from 'ethers'
+import lodash from 'lodash'
 
 export interface PositionInfo {
     tickLower: number
@@ -10,10 +11,10 @@ export interface PositionInfo {
     tokensOwed1: BigNumber
 }
 
-export const getPositions = async (
+export async function getPositions(
     positionManagerContract: ethers.Contract,
     ownerAddress: string
-): Promise<PositionInfo[]> => {
+): Promise<PositionInfo[]> {
     const positionIds = await getPositionIds(
         positionManagerContract,
         ownerAddress
@@ -62,7 +63,7 @@ async function getPositionIds(
     return tokenIds
 }
 
-async function getPositionInfo(
+export async function getPositionInfo(
     tokenId: number,
     positionContract: ethers.Contract
 ): Promise<PositionInfo> {
@@ -81,4 +82,14 @@ async function getPositionInfo(
         tokensOwed0: position.tokensOwed0,
         tokensOwed1: position.tokensOwed1
     }
+}
+
+export function findPositionsDiff(after, before) {
+    const diffEntries = lodash.differenceWith(
+        lodash.toPairs(after),
+        lodash.toPairs(before),
+        ([key1], [key2]) => key1 === key2
+    )
+
+    return diffEntries.map(([id, posInfo]) => ({ ...posInfo, id }))
 }

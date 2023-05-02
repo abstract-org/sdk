@@ -17,3 +17,13 @@ export function encodePriceSqrt(
             .toString()
     )
 }
+
+export function priceToSqrtX96(price: number | string) {
+    const scale = new bn(2).pow(96)
+    const bnSqrtPriceX96 = new bn(String(price))
+        .sqrt()
+        .multipliedBy(scale)
+        .integerValue(bn.ROUND_FLOOR)
+
+    return BigNumber.from(bnSqrtPriceX96.toString())
+}
