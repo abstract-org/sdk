@@ -1,5 +1,5 @@
 import HashMap from 'hashmap'
-import { Wallet, UsdcToken, Router, Pool, Quest } from '../src/common/modules'
+import { Wallet, UsdcToken, Router, Pool, Quest } from '../common/modules'
 import {
     buySameLiqGiveT0GetT1,
     buySameLiqGiveT1GetT0,
@@ -8,7 +8,7 @@ import {
     oneShotGetSellCap,
     sellSameLiqGiveT0GetT1,
     sellSameLiqGiveT1GetT0
-} from '../src/common/utils/mathUtils'
+} from '../common/utils/mathUtils'
 import { getCP, getQP } from './helpers/getQuestPools'
 
 describe('Smart route math works', () => {

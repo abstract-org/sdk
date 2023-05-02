@@ -1,5 +1,5 @@
 import HashMap from 'hashmap'
-import { Wallet, UsdcToken, Router } from '../src/common/modules'
+import { Wallet, UsdcToken, Router } from '../common/modules'
 import { getCP, getQP } from './helpers/getQuestPools'
 import { preparePool } from './helpers/poolManager'
 

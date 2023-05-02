@@ -26,10 +26,10 @@ export interface IAPI {
 
     // Quests API
     createQuest(name: string, description: string): boolean
-    citeQuest(questId: number, userId: string): boolean
+    citeQuest(questHash: string, userId: string): boolean
     getQuestsBySnapshot?(snapshotId: number, day?: number): Array<IQuest>
-    getQuestDependants?(questId: number): Array<IQuest>
-    getQuestDependencies?(questId: number): Array<IQuest>
+    getQuestDependants?(questHash: string): Array<IQuest>
+    getQuestDependencies?(questHash: string): Array<IQuest>
     getQuestsByPath?(path: string): Array<IQuest>
     updateQuest?(): void
 
@@ -39,7 +39,7 @@ export interface IAPI {
 
     // Logs API
     getLogsBySnapshot?(snapshotId: number, day?: number): Array<ILog>
-    getLogsByQuest?(questId: number): Array<ILog>
+    getLogsByQuest?(questHash: string): Array<ILog>
     getLogsByPool?(poolId: number): Array<ILog>
     getLogsInDayRange?(dayFrom: number, dayTo: number): Array<ILog>
 

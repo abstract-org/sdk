@@ -1,4 +1,9 @@
+import { sha256 } from '../../utils/createHash'
 import HashMap from 'hashmap'
+
+export const generateHash = (kind: string, content: string) => {
+    return sha256(`${kind}${content}`)
+}
 
 export const findNearestKey = (map, target, tolerance = 1e-10) => {
     let nearestKey = null

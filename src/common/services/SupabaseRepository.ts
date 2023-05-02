@@ -33,12 +33,12 @@ export class SupabaseRepository implements IDataStoreRepository {
         return await this.create<PoolStatePopulated, any>('pool_states', data)
     }
 
-    async updatePool(id: number, data: IPoolQueryUpdate): Promise<IPool> {
+    async updatePool(hash: string, data: IPoolQueryUpdate): Promise<IPool> {
         return await this.update<IPool, IPoolQueryUpdate>('pools', data, [
             {
                 filterType: 'eq',
-                propertyName: 'id',
-                value: id
+                propertyName: 'hash',
+                value: hash
             }
         ])
     }
@@ -51,7 +51,7 @@ export class SupabaseRepository implements IDataStoreRepository {
         return this.create('quests', data)
     }
 
-    updateQuest(id: number, data: Partial<IQuestCreate>): Promise<IQuest> {
+    updateQuest(hash: string, data: Partial<IQuestCreate>): Promise<IQuest> {
         throw new Error('Not implemented')
     }
 
@@ -70,7 +70,7 @@ export class SupabaseRepository implements IDataStoreRepository {
         throw new Error('Not implemented')
     }
 
-    updateWallet(id: number, data: IWallet): Promise<IWallet> {
+    updateWallet(hash: string, data: IWallet): Promise<IWallet> {
         throw new Error('Not implemented')
     }
 

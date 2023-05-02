@@ -9,7 +9,7 @@ export interface IQuestCreate {
 }
 
 export interface IQuest extends IQuestCreate {
-    id: number
+    hash: string
     name: string
     created_at: string
     published_at?: string

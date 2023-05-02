@@ -8,14 +8,14 @@ import {
     FullMath
 } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
-import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
+import { encodePriceSqrt } from '../../blockchain/utils/encodedPriceSqrt'
 import { Percent, Token as UniswapV3Token } from '@uniswap/sdk-core'
-import TokenAbi from '@/blockchain/abi/SimpleToken.json'
+import TokenAbi from '../../blockchain/abi/SimpleToken.json'
 import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json'
-import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
-import { Web3ApiConfig } from '@/api/web3/Web3API'
-import { estimateGasAmount } from '@/blockchain/utils/estimateGasAmount'
-import { addressComparator } from '@/blockchain/utils/addressComparator'
+import { TUniswapContracts } from '../../blockchain/utils/initializeUniswapContracts'
+import { Web3ApiConfig } from '../../api/web3/Web3API'
+import { estimateGasAmount } from '../../blockchain/utils/estimateGasAmount'
+import { addressComparator } from '../../blockchain/utils/addressComparator'
 
 export const DEFAULT_TX_GAS_LIMIT = 10000000
 export const DEFAULT_POOL_FEE = FeeAmount.LOW
@@ -44,7 +44,7 @@ export class Pool {
 
     /**
      * @description builds instance of this class (Pool entity)
-     * @example import Pool from '@/blockchain/Pool;
+     * @example import Pool from '../../blockchain/Pool;
      *          const someNewPool = Pool.create(t0address,t1address,apiConfig)
      *          someNewPool.deployPool()
      */
@@ -251,7 +251,7 @@ export class Pool {
         )
 
         if (poolAddress === ethers.constants.AddressZero) {
-            throw new Error('Pool not found')
+            return null
         }
 
         return poolAddress

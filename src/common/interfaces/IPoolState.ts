@@ -11,8 +11,8 @@ export interface IPoolState {
 }
 
 export interface PoolStatePopulated {
-    pool_id: number
-    block_id?: number
+    hash: string
+    block_hash?: string
     cur_price: number
     cur_liq: number
     cur_right: number | string

@@ -51,7 +51,7 @@ export default class SimAPI implements IAPI {
         return true
     }
 
-    citeQuest(questId: number, userId: string): boolean {
+    citeQuest(questHash: string, userId: string): boolean {
         // implementation details
         return true
     }

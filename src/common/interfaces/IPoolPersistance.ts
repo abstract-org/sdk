@@ -22,7 +22,7 @@ export interface IPoolPersistence {
 
     savePool(data: IPoolCreate): Promise<IPool>
 
-    updatePool(questId: number, data: IPoolQueryUpdate): Promise<IPool>
+    updatePool(questHash: string, data: IPoolQueryUpdate): Promise<IPool>
 
     createPoolState(data: PoolStatePopulated): Promise<PoolStatePopulated>
 }

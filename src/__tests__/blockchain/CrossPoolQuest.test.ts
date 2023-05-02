@@ -10,14 +10,31 @@ import { Web3ApiConfig } from '@/api/web3/Web3API'
 import { Pool } from '@/blockchain/modules'
 import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk'
 import SimpleTokenABI from '@/blockchain/abi/SimpleToken.json'
+import QuestFactoryABI from '@/blockchain/abi/QuestFactory.json'
+import Weth9ABI from '@/blockchain/abi/WETH9Token.json'
 
+type ContractAddresses = Record<string, string>
+const questFactoryAddress = String(process.env.QUEST_FACTORY_ADDRESS)
 const wethAddress = String(process.env.WETH_ADDRESS)
+const contractAddresses: ContractAddresses = {
+    UNISWAP_FACTORY_ADDRESS: String(process.env.UNISWAP_FACTORY_ADDRESS),
+    UNISWAP_ROUTER_ADDRESS: String(process.env.UNISWAP_ROUTER_ADDRESS),
+    UNISWAP_QUOTER_ADDRESS: String(process.env.UNISWAP_QUOTER_ADDRESS),
+    UNISWAP_NFT_DESCRIPTOR_LIBRARY_ADDRESS: String(
+        process.env.UNISWAP_NFT_DESCRIPTOR_LIBRARY_ADDRESS
+    ),
+    UNISWAP_POSITION_DESCRIPTOR_ADDRESS: String(
+        process.env.UNISWAP_POSITION_DESCRIPTOR_ADDRESS
+    ),
+    UNISWAP_POSITION_MANAGER_ADDRESS: String(
+        process.env.UNISWAP_POSITION_MANAGER_ADDRESS
+    )
+}
+
 const tokenAAddress = String(process.env.TOKEN_A_ADDRESS)
 const tokenBAddress = String(process.env.TOKEN_B_ADDRESS)
-
 const wethTokenAPoolAddress = String(process.env.POOL_WETH_A_ADDRESS)
 const wethTokenBPoolAddress = String(process.env.POOL_WETH_B_ADDRESS)
-
 const crossPoolABAddress = String(process.env.POOL_A_B_ADDRESS)
 
 const providerUrl = String(process.env.PROVIDER_URL)
@@ -79,10 +96,18 @@ describe('CrossPool', () => {
             provider,
             signer,
             contracts: {
-                ...initializeUniswapContracts(signer),
-                tokenFactory: initializeTokenFactory(signer)
+                ...initializeUniswapContracts(signer, contractAddresses),
+                tokenFactory: initializeTokenFactory(
+                    signer,
+                    questFactoryAddress,
+                    QuestFactoryABI.abi
+                )
             },
-            defaultToken: initializeDefaultToken(signer)
+            defaultToken: initializeDefaultToken(
+                signer,
+                wethAddress,
+                Weth9ABI.abi
+            )
         }
 
         tokenA = new ethers.Contract(tokenAAddress, SimpleTokenABI.abi, signer)
@@ -231,10 +256,18 @@ describe.skip('CrossPool with Quest', () => {
             provider,
             signer,
             contracts: {
-                ...initializeUniswapContracts(signer),
-                tokenFactory: initializeTokenFactory(signer)
+                ...initializeUniswapContracts(signer, contractAddresses),
+                tokenFactory: initializeTokenFactory(
+                    signer,
+                    questFactoryAddress,
+                    QuestFactoryABI.abi
+                )
             },
-            defaultToken: initializeDefaultToken(signer)
+            defaultToken: initializeDefaultToken(
+                signer,
+                wethAddress,
+                Weth9ABI.abi
+            )
         }
 
         token0 = await Quest.create(initialSupply, apiConfig, {

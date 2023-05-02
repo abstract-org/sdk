@@ -67,9 +67,9 @@ export class QuestPersistenceService implements IQuestPersistence {
         return newQuestDto
     }
 
-    async updateQuest(questId: number, data: IQuestUpdate): Promise<IQuest> {
+    async updateQuest(questHash: string, data: IQuestUpdate): Promise<IQuest> {
         const updatedQuestDto = await this.dataStoreRepository.updateQuest(
-            questId,
+            questHash,
             data
         )
 

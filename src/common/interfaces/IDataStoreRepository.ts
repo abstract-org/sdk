@@ -24,7 +24,7 @@ export interface IDataStoreRepository {
 
     createPool(data: IPoolCreate): Promise<IPool>
 
-    updatePool(id: number, data: IPoolQueryUpdate): Promise<IPool>
+    updatePool(hash: string, data: IPoolQueryUpdate): Promise<IPool>
 
     findWalletByFilter(
         filter: QueryFilterType,
@@ -33,7 +33,7 @@ export interface IDataStoreRepository {
 
     createWallet(data: IWalletCreate): Promise<IWallet>
 
-    updateWallet(id: number, data: IWalletQueryUpdate): Promise<IWallet>
+    updateWallet(hash: string, data: IWalletQueryUpdate): Promise<IWallet>
 
     findQuestsByFilter(
         filter: QueryFilterType,
@@ -42,7 +42,7 @@ export interface IDataStoreRepository {
 
     createQuest(data: IQuestCreate): Promise<IQuest>
 
-    updateQuest(id: number, data: Partial<IQuestUpdate>): Promise<IQuest>
+    updateQuest(hash: string, data: Partial<IQuestUpdate>): Promise<IQuest>
 
     createPoolState(data: PoolStatePopulated): Promise<PoolStatePopulated>
 }

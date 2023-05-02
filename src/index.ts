@@ -1,6 +1,12 @@
 import 'reflect-metadata'
 import { ConstructorSimConfig } from './api/sim/SimAPI'
-import { Web3ApiConfig } from './api/web3/Web3API'
+import {
+    DEFAULT_TOKEN_SUPPLY,
+    Web3ApiConfig,
+    initializeDefaultToken,
+    initializeTokenFactory,
+    initializeUniswapContracts
+} from './api/web3/Web3API'
 import {
     PoolPersistenceService,
     QuestPersistenceService,
@@ -13,6 +19,10 @@ import {
     IQuestPersistence,
     IWalletPersistance
 } from './common/interfaces'
+import Web3API from './api/web3/Web3API'
+import { Pool } from './blockchain/modules'
+import { FeeAmount } from '@uniswap/v3-sdk'
+import { generateNameAndSymbol } from './utils/createNameAndSymbol'
 
 const getPersistenceLayer = (
     repository
@@ -78,3 +88,16 @@ export * as MathUtils from './common/utils/mathUtils'
 export * as Modules from './common/modules'
 export * from './common/types'
 export * from './common/interfaces'
+export { WrapperService } from './common/services/WrapperService'
+export { sha256, createBlockHash } from './utils/createHash'
+export {
+    Web3API,
+    initializeDefaultToken,
+    initializeTokenFactory,
+    initializeUniswapContracts
+}
+export type { Web3ApiConfig }
+export { Pool as Web3Pool }
+export { FeeAmount }
+export { DEFAULT_TOKEN_SUPPLY }
+export { generateNameAndSymbol }

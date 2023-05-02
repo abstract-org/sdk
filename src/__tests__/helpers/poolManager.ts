@@ -1,4 +1,4 @@
-import { Wallet, UsdcToken } from '../../src/common/modules'
+import { Wallet, UsdcToken } from '../../common/modules'
 import { faker } from '@faker-js/faker'
 
 const TEMP_CONFIG = {

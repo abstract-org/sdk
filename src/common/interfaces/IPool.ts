@@ -19,7 +19,6 @@ export interface IPoolCreate {
 }
 
 export interface IPool {
-    id?: number
     questLeftHash: string
     questRightHash: string
     type: PoolType

@@ -8,7 +8,6 @@ export class WrapperService {
         type: string,
         kind: string,
         hash?: string,
-        id?: number,
         existingPositions?: IPositionLiquidity[],
         startingPrice?: number,
         initialPositions?: DefaultLiquidityPosition[]
@@ -38,10 +37,6 @@ export class WrapperService {
             pool.hash = hash
         }
 
-        if (id) {
-            pool.id = id
-        }
-
         if (existingPositions) {
             pool.hydratePositions(existingPositions)
         }
@@ -53,7 +48,6 @@ export class WrapperService {
         kind,
         content,
         creatorHash,
-        id?: number,
         forcedName?: string,
         hash?: string
     ): Quest {
@@ -66,10 +60,6 @@ export class WrapperService {
         // Set additional properties on the quest instance.
         if (hash) {
             quest.hash = hash
-        }
-
-        if (id) {
-            quest.id = id
         }
 
         return quest

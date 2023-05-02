@@ -15,7 +15,6 @@ export interface IWalletCreate {
 }
 
 export interface IWallet {
-    id?: number
     name: string
     hash: string
     balances: IWalletBalance

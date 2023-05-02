@@ -1,5 +1,5 @@
-import { Wallet, UsdcToken } from '../../src/common/modules'
-import { p2pp } from '../../src/common/utils/logicUtils'
+import { Wallet, UsdcToken } from '../../common/modules'
+import { p2pp } from '../../common/utils/logicUtils'
 import { getQP } from '../helpers/getQuestPools'
 import { preparePool } from '../helpers/poolManager'
 import { SNAPSHOT_TRADED_CROSSPOOL } from '../resources/tradedCrossPoolSnapshot'

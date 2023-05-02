@@ -10,7 +10,6 @@ export class QuestDto {
     created_at: Date
 
     constructor(data, pools) {
-        this.id = data.id
         this.author_id = data.author_id
         this.name = data.name
         this.hash = data.hash
@@ -41,7 +40,6 @@ export class QuestDto {
         const token = new Quest()
         token.name = this.name
         token.pools = this.pools
-        token.id = this.id
         token.hash = this.hash
 
         return token

@@ -1,15 +1,21 @@
 import { ethers } from 'ethers'
-import dotenv from 'dotenv'
-dotenv.config()
+
+import Quoter from '@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json'
+import UniswapV3Factory from '@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json'
+import SwapRouter from '@uniswap/v3-periphery/artifacts/contracts/SwapRouter.sol/SwapRouter.json'
+import NFTDescriptor from '@uniswap/v3-periphery/artifacts/contracts/libraries/NFTDescriptor.sol/NFTDescriptor.json'
+import NonfungibleTokenPositionDescriptor from '@uniswap/v3-periphery/artifacts/contracts/NonfungibleTokenPositionDescriptor.sol/NonfungibleTokenPositionDescriptor.json'
+import NonfungiblePositionManager from '@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json'
 
 type ContractJson = { abi: Object[]; bytecode: string }
-const UniswapContractArtifacts: { [name: string]: ContractJson } = {
-    Quoter: require('@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json'),
-    UniswapV3Factory: require('@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json'),
-    SwapRouter: require('@uniswap/v3-periphery/artifacts/contracts/SwapRouter.sol/SwapRouter.json'),
-    NFTDescriptor: require('@uniswap/v3-periphery/artifacts/contracts/libraries/NFTDescriptor.sol/NFTDescriptor.json'),
-    NonfungibleTokenPositionDescriptor: require('@uniswap/v3-periphery/artifacts/contracts/NonfungibleTokenPositionDescriptor.sol/NonfungibleTokenPositionDescriptor.json'),
-    NonfungiblePositionManager: require('@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json')
+type ContractAddresses = Record<string, string>
+export const UniswapContractArtifacts: { [name: string]: ContractJson } = {
+    Quoter,
+    UniswapV3Factory,
+    SwapRouter,
+    NFTDescriptor,
+    NonfungibleTokenPositionDescriptor,
+    NonfungiblePositionManager
 }
 
 export type TUniswapContracts = {
@@ -22,35 +28,36 @@ export type TUniswapContracts = {
 }
 
 export const initializeUniswapContracts = (
-    deployer: ethers.Signer
+    deployer: ethers.Signer,
+    contractAddresses?: ContractAddresses
 ): TUniswapContracts => ({
     factory: new ethers.Contract(
-        String(process.env.UNISWAP_FACTORY_ADDRESS),
+        String(contractAddresses['UNISWAP_FACTORY_ADDRESS']),
         UniswapContractArtifacts.UniswapV3Factory.abi,
         deployer
     ),
     router: new ethers.Contract(
-        String(process.env.UNISWAP_ROUTER_ADDRESS),
+        String(contractAddresses['UNISWAP_ROUTER_ADDRESS']),
         UniswapContractArtifacts.SwapRouter.abi,
         deployer
     ),
     quoter: new ethers.Contract(
-        String(process.env.UNISWAP_QUOTER_ADDRESS),
+        String(contractAddresses['UNISWAP_QUOTER_ADDRESS']),
         UniswapContractArtifacts.Quoter.abi,
         deployer
     ),
     nftDescriptorLibrary: new ethers.Contract(
-        String(process.env.UNISWAP_NFT_DESCRIPTOR_LIBRARY_ADDRESS),
+        String(contractAddresses['UNISWAP_NFT_DESCRIPTOR_LIBRARY_ADDRESS']),
         UniswapContractArtifacts.NFTDescriptor.abi,
         deployer
     ),
     positionDescriptor: new ethers.Contract(
-        String(process.env.UNISWAP_POSITION_DESCRIPTOR_ADDRESS),
+        String(contractAddresses['UNISWAP_POSITION_DESCRIPTOR_ADDRESS']),
         UniswapContractArtifacts.NonfungibleTokenPositionDescriptor.abi,
         deployer
     ),
     positionManager: new ethers.Contract(
-        String(process.env.UNISWAP_POSITION_MANAGER_ADDRESS),
+        String(contractAddresses['UNISWAP_POSITION_MANAGER_ADDRESS']),
         UniswapContractArtifacts.NonfungiblePositionManager.abi,
         deployer
     )

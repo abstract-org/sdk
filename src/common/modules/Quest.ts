@@ -36,7 +36,6 @@ export const TEMP_CONFIG = {
 }
 
 export class Quest {
-    id
     hash
     name
     pools = []
@@ -77,7 +76,6 @@ export class Quest {
      */
     static instantiate(questDto: IQuest): Quest {
         const quest = new Quest()
-        quest.id = questDto.id
         quest.hash = questDto.hash
         quest.kind = questDto.kind
         quest.content = questDto.content

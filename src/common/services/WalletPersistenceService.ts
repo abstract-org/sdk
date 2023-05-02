@@ -30,9 +30,9 @@ export class WalletPersistenceService implements IWalletPersistance {
     }
 
     async updateWallet(
-        questId: number,
+        questHash: string,
         data: IWalletQueryUpdate
     ): Promise<IWallet> {
-        return await this.dataStoreRepository.updateWallet(questId, data)
+        return await this.dataStoreRepository.updateWallet(questHash, data)
     }
 }

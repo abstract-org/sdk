@@ -9,5 +9,5 @@ export interface IQuestPersistence {
 
     saveQuest(data: IQuestCreate): Promise<IQuest>
 
-    updateQuest(questId: number, data: IQuestUpdate): Promise<IQuest>
+    updateQuest(hash: string, data: IQuestUpdate): Promise<IQuest>
 }

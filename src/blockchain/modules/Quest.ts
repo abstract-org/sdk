@@ -1,14 +1,14 @@
 import { ethers, Contract, BigNumber } from 'ethers'
-import { TUniswapContracts } from '@/blockchain/utils/initializeUniswapContracts'
+import { TUniswapContracts } from '../../blockchain/utils/initializeUniswapContracts'
 import Hex from 'crypto-js/enc-hex'
 import sha256 from 'crypto-js/sha256'
-import { SimpleToken, SimpleFactory } from '@/blockchain/typechain-types'
-import ERC20_ABI from '@/blockchain/abi/ERC20ABI.json'
-import SimpleTokenABI from '@/blockchain/abi/SimpleToken.json'
-import { Pool } from '@/blockchain/modules/Pool'
-import { Web3ApiConfig } from '@/api/web3/Web3API'
+import { SimpleToken, SimpleFactory } from '../../blockchain/typechain-types'
+import ERC20_ABI from '../../blockchain/abi/ERC20ABI.json'
+import SimpleTokenABI from '../../blockchain/abi/SimpleToken.json'
+import { Pool } from '../../blockchain/modules/Pool'
+import { Web3ApiConfig } from '../../api/web3/Web3API'
 import { FeeAmount } from '@uniswap/v3-sdk'
-import { encodePriceSqrt } from '@/blockchain/utils/encodedPriceSqrt'
+import { encodePriceSqrt } from '../../blockchain/utils/encodedPriceSqrt'
 
 export const TEMP_CONFIG = {
     INITIAL_LIQUIDITY: [
@@ -86,7 +86,7 @@ export class Quest {
     }
 
     async getBalanceOf(address: string) {
-        return await this.tokenContract.connect(this.signer).balanceOf(address);
+        return await this.tokenContract.connect(this.signer).balanceOf(address)
     }
 
     async createToken(

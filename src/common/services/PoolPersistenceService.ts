@@ -56,8 +56,8 @@ export class PoolPersistenceService implements IPoolPersistence {
         return await this.dataStoreRepository.createPool(data)
     }
 
-    async updatePool(poolId: number, data: IPool): Promise<IPool> {
-        return await this.dataStoreRepository.updatePool(poolId, data)
+    async updatePool(poolHash: string, data: IPool): Promise<IPool> {
+        return await this.dataStoreRepository.updatePool(poolHash, data)
     }
 
     async createPoolState(

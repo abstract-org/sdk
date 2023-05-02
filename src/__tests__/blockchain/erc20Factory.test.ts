@@ -1,4 +1,4 @@
-import FactoryABI from '../../src/blockchain/abi/FactoryABI.json'
+import FactoryABI from '../../blockchain/abi/FactoryABI.json'
 import { AbiItem, AbiType } from 'web3-utils'
 import { web3, provider } from '@/blockchain/utils/web3'
 // Currently hardcoded, replace with your own addresses, will be configured via client/env later
